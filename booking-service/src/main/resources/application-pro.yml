@@ -1,0 +1,13 @@
+server:
+  port: 8090
+spring:
+  datasource:
+    url: jdbc:postgresql://${BOOKING_POSTGRES_URL}:5433/${BOOKING_POSTGRES_DB}
+    driver-class-name: org.postgresql.Driver
+    username: ${BOOKING_POSTGRES_USER}
+    password: ${BOOKING_POSTGRES_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
