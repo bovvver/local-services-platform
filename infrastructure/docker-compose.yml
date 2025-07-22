@@ -1,26 +1,56 @@
 name: local-services-platform
 services:
-  postgres:
-    image: postgres:16
-    container_name: postgres
+
+  user-postgres:
+    image: postgres:16-alpine
+    container_name: user-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${USER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${USER_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${USER_POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - ../volumes/postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - backend
 
-  mongo:
+  booking-postgres:
+    image: postgres:16-alpine
+    container_name: booking-postgres
+    environment:
+      POSTGRES_USER: ${BOOKING_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${BOOKING_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${BOOKING_POSTGRES_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - ../volumes/postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  offer-mongo:
     image: mongo:7
-    container_name: mongo
+    container_name: offer-mongo
     ports:
       - "27017:27017"
     volumes:
       - ../volumes/mongo:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${OFFER_MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${OFFER_MONGO_INITDB_ROOT_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - backend
 
