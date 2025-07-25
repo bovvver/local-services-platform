@@ -1,4 +1,4 @@
-package com.github.bovvver.offer_service;
+package com.github.bovvver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
