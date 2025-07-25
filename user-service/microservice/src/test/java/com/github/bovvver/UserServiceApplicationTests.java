@@ -1,4 +1,4 @@
-package com.github.bovvver.user_service;
+package com.github.bovvver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
