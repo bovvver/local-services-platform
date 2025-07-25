@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ../volumes/postgres:/var/lib/postgresql/data
+      - ../volumes/user-postgres:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -29,7 +29,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ../volumes/postgres:/var/lib/postgresql/data
+      - ../volumes/booking-postgres:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -43,7 +43,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ../volumes/mongo:/data/db
+      - ../volumes/offer-mongo:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${OFFER_MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${OFFER_MONGO_INITDB_ROOT_PASSWORD}
@@ -71,7 +71,7 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     ports:
-      - "8080:8080"
+      - "7080:8080"
     networks:
       - backend
 
