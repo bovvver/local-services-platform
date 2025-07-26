@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.github.bovvver</groupId>
-    <artifactId>adapters</artifactId>
+    <artifactId>booking-adapters</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>adapters</name>
+    <name>booking-adapters</name>
     <description>Booking Service for Local Services Platform - adapters</description>
     <url/>
     <licenses>
@@ -32,12 +32,12 @@
     <dependencies>
         <dependency>
             <groupId>com.github.bovvver</groupId>
-            <artifactId>application</artifactId>
+            <artifactId>booking-application</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.bovvver</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>booking-domain</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -77,8 +77,7 @@
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-maven-plugin</artifactId>
-            <version>11.10.3</version>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
     </dependencies>
 

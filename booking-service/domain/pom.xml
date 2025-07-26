@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.bovvver</groupId>
-	<artifactId>domain</artifactId>
+	<artifactId>booking-domain</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>domain</name>
+	<name>booking-domain</name>
 	<description>Booking Service for Local Services Platform - domain</description>
 	<url/>
 	<licenses>

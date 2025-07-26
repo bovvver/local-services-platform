@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.bovvver</groupId>
-	<artifactId>domain</artifactId>
+	<artifactId>user-domain</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>domain</name>
+	<name>user-domain</name>
 	<description>User Service for Local Services Platform - domain</description>
 	<url/>
 	<licenses>
