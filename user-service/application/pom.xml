@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.bovvver</groupId>
-	<artifactId>application</artifactId>
+	<artifactId>user-application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>application</name>
+	<name>user-application</name>
 	<description>User Service for Local Services Platform - application</description>
 	<url/>
 	<licenses>
@@ -32,7 +32,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.github.bovvver</groupId>
-			<artifactId>domain</artifactId>
+			<artifactId>user-domain</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

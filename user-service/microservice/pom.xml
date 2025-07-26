@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.bovvver</groupId>
-	<artifactId>microservice</artifactId>
+	<artifactId>user-microservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>microservice</name>
+	<name>user-microservice</name>
 	<description>Microservice Spring App for a Local Services Platform</description>
 	<url/>
 	<licenses>
@@ -32,12 +32,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.github.bovvver</groupId>
-			<artifactId>adapters</artifactId>
+			<artifactId>user-adapters</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.bovvver</groupId>
-			<artifactId>interfaces</artifactId>
+			<artifactId>user-interfaces</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
