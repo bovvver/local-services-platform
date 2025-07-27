@@ -26,3 +26,9 @@ management:
     health:
       probes:
         enabled: true
+
+logging:
+  level:
+    ROOT: INFO
+  pattern:
+    console: "EUREKA-SERVER >> %msg%n"
