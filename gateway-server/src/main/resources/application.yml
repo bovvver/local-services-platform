@@ -11,7 +11,7 @@ spring:
               enabled: false
 
 server:
-  port: 8071
+  port: 8072
 
 management:
   endpoints:
@@ -32,3 +32,12 @@ logging:
     ROOT: INFO
   pattern:
     console: "GATEWAY-SERVER >> %msg%n"
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${EUREKA_SERVER}:8761/eureka/
