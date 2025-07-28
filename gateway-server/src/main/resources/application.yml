@@ -8,7 +8,7 @@ spring:
           discovery:
             locator:
               lower-case-service-id: true
-              enabled: false
+              enabled: true
 
 server:
   port: 8072
@@ -17,21 +17,21 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: health,info
   info:
     env:
       enabled: true
 
 info:
   app:
-    name: "gateway-server"
-    description: "Gateway Server for Local Services Platform"
+    name: gateway-server
+    description: Gateway Server for Local Services Platform
 
 logging:
   level:
     ROOT: INFO
   pattern:
-    console: "GATEWAY-SERVER >> %msg%n"
+    console: GATEWAY-SERVER >> %msg%n
 
 eureka:
   instance:

@@ -13,12 +13,12 @@ eureka:
       defaultZone: http://${EUREKA_SERVER}:8761/eureka/
 
 management:
-  server:
-    base-path: /actuator
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: health,info
+  server:
+    base-path: /actuator
   health:
     readiness-state:
       enabled: true
@@ -33,4 +33,4 @@ logging:
   level:
     ROOT: INFO
   pattern:
-    console: "EUREKA-SERVER >> %msg%n"
+    console: EUREKA-SERVER >> %msg%n

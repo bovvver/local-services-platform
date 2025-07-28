@@ -16,4 +16,4 @@ logging:
   level:
     ROOT: INFO
   pattern:
-    console: "BOOKING-SERVICE >> %msg%n"
+    console: BOOKING-SERVICE >> %msg%n

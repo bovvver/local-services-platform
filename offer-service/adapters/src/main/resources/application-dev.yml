@@ -6,4 +6,4 @@ logging:
   level:
     ROOT: INFO
   pattern:
-    console: "OFFER-SERVICE >> %msg%n"
+    console: OFFER-SERVICE >> %msg%n

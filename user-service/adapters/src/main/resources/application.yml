@@ -3,12 +3,14 @@ server:
 spring:
   profiles:
     default: dev
+  application:
+    name: user-service
 
 management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: health,info
   info:
     env:
       enabled: true
@@ -24,5 +26,5 @@ eureka:
 
 info:
   app:
-    name: "user-service"
-    description: "User Service for Local Services Platform"
+    name: user-service
+    description: User Service for Local Services Platform
