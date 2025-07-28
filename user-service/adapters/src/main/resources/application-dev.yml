@@ -16,4 +16,4 @@ logging:
   level:
     ROOT: INFO
   pattern:
-    console: "USER-SERVICE >> %msg%n"
+    console: USER-SERVICE >> %msg%n

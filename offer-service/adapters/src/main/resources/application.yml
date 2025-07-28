@@ -3,3 +3,28 @@ server:
 spring:
   profiles:
     default: dev
+  application:
+    name: offer-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  info:
+    env:
+      enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://${EUREKA_SERVER}:8761/eureka/
+
+info:
+  app:
+    name: offer-service
+    description: Offer Service for Local Services Platform

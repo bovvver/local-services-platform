@@ -1,5 +1,30 @@
 server:
   port: 8090
+
 spring:
   profiles:
     default: dev
+  application:
+    name: booking-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  info:
+    env:
+      enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://${EUREKA_SERVER}:8761/eureka/
+
+info:
+  app:
+    name: booking-service
+    description: Booking Service for Local Services Platform
