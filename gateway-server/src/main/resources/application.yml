@@ -9,6 +9,12 @@ spring:
             locator:
               lower-case-service-id: true
               enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/master/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/local-services-platform
 
 server:
   port: 8072
@@ -30,6 +36,8 @@ info:
 logging:
   level:
     ROOT: INFO
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
   pattern:
     console: GATEWAY-SERVER >> %msg%n
 
