@@ -75,6 +75,7 @@ services:
     volumes:
       - ../volumes/keycloak_data:/opt/keycloak/data
       - ../volumes/keycloak_themes:/opt/keycloak/themes
+      - ../volumes/keycloak_providers:/opt/keycloak/providers
     networks:
       - backend
 
