@@ -48,9 +48,8 @@ class UserRegistrationService {
         String applicationUrl = System.getenv("GATEWAY_URL");
 
         String jsonPayload = String.format(
-                "{\"keycloakUserId\":\"%s\",\"username\":\"%s\",\"email\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\"}",
+                "{\"keycloakUserId\":\"%s\",\"email\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\"}",
                 user.getId(),
-                escapeJson(user.getUsername()),
                 escapeJson(user.getEmail()),
                 escapeJson(user.getFirstName()),
                 escapeJson(user.getLastName())
@@ -58,7 +57,7 @@ class UserRegistrationService {
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(applicationUrl + "/user-service/register"))
+                    .uri(URI.create(applicationUrl + "/user-service/auth/create"))
                     .timeout(Duration.ofSeconds(30))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
