@@ -1,8 +1,8 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
-record Location(double latitude, double longitude) {
+public record Location(double latitude, double longitude) {
 
-    Location {
+    public Location {
         if(latitude < -90 || latitude > 90) {
             throw new IllegalArgumentException("Latitude must be between -90 and 90 degrees.");
         }
@@ -11,7 +11,7 @@ record Location(double latitude, double longitude) {
         }
     }
 
-    static Location of(double latitude, double longitude) {
+    public static Location of(double latitude, double longitude) {
         return new Location(latitude, longitude);
     }
 }

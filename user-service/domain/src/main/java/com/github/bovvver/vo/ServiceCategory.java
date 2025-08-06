@@ -1,6 +1,6 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
-enum ServiceCategory {
+public enum ServiceCategory {
     HOME_SERVICES,
     AUTOMOTIVE,
     BEAUTY_WELLNESS,

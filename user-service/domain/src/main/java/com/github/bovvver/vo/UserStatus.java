@@ -1,6 +1,6 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
-enum UserStatus {
+public enum UserStatus {
     UNVERIFIED,
     VERIFIED,
     IDENTITY_VERIFIED,

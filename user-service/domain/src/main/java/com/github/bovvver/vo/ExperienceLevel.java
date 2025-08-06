@@ -1,6 +1,6 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
-enum ExperienceLevel {
+public enum ExperienceLevel {
     BEGINNER,
     EXPERIENCED,
     EXPERT,

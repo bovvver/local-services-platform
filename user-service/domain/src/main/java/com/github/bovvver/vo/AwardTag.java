@@ -1,6 +1,6 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
-enum AwardTag {
+public enum AwardTag {
     TOP_RATED,
     HIGHLY_RECOMMENDED,
     FAST_RESPONDER,

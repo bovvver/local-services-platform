@@ -1,16 +1,16 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
 import java.util.UUID;
 
-record UserId(UUID value) {
+public record UserId(UUID value) {
 
-    UserId {
+    public UserId {
         if (value == null) {
             throw new IllegalArgumentException("UserId cannot be null");
         }
     }
 
-    static UserId of(UUID value) {
+    public static UserId of(UUID value) {
         return new UserId(value);
     }
 }

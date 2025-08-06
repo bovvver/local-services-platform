@@ -1,10 +1,10 @@
-package com.github.bovvver;
+package com.github.bovvver.vo;
 
 import java.util.UUID;
 
-record OfferId(UUID value) {
+public record OfferId(UUID value) {
 
-    OfferId {
+    public OfferId {
         if (value == null) {
             throw new IllegalArgumentException("OfferId cannot be null");
         }
