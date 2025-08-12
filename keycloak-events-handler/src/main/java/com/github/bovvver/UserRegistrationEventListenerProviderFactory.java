@@ -8,9 +8,6 @@ import org.keycloak.models.KeycloakSessionFactory;
 
 public class UserRegistrationEventListenerProviderFactory implements EventListenerProviderFactory {
 
-    public UserRegistrationEventListenerProviderFactory() {
-    }
-
     @Override
     public EventListenerProvider create(KeycloakSession session) {
         return new UserRegistrationEventListenerProvider(session);

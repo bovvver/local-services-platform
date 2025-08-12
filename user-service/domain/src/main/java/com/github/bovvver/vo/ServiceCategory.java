@@ -10,5 +10,5 @@ public enum ServiceCategory {
     CLEANING,
     REPAIR,
     GARDENING,
-    PET_SERVICES,
+    PET_SERVICES
 }
