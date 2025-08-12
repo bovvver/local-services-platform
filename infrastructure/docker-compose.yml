@@ -70,6 +70,8 @@ services:
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_API_KEY: ${KEYCLOAK_API_KEY}
+      GATEWAY_URL: ${GATEWAY_URL}
     ports:
       - "${KEYCLOAK_PORT_HOST:-7080}:8080"
     volumes:

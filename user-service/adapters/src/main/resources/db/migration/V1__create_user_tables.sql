@@ -4,8 +4,8 @@ CREATE TABLE users
     email            VARCHAR(255)     NOT NULL UNIQUE,
     first_name       VARCHAR(100)     NOT NULL,
     last_name        VARCHAR(100)     NOT NULL,
-    latitude         DOUBLE PRECISION NOT NULL,
-    longitude        DOUBLE PRECISION NOT NULL,
+    latitude         DOUBLE PRECISION,
+    longitude        DOUBLE PRECISION,
     experience_level VARCHAR(20)      NOT NULL,
     status           VARCHAR(20)      NOT NULL
 );

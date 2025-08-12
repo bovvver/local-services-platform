@@ -73,13 +73,12 @@ class UserEntity {
     UserEntity(UUID id,
                String email,
                String firstName,
-               String lastName,
-               LocationEmbeddable location) {
+               String lastName) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.location = location;
+        this.location = null;
 
         this.experienceLevel = ExperienceLevel.BEGINNER;
         this.serviceCategories = new HashSet<>();

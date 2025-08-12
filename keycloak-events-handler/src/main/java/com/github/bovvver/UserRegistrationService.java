@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 class UserRegistrationService {
 
+    private static final String API_KEY = System.getenv("KEYCLOAK_API_KEY");
     private static final Logger logger = LoggerFactory.getLogger(UserRegistrationService.class);
     private final KeycloakSession session;
     private final HttpClient httpClient;
@@ -55,11 +56,14 @@ class UserRegistrationService {
                 escapeJson(user.getLastName())
         );
 
+        logger.info("Preparing to send request to: {}", applicationUrl);
+
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(applicationUrl + "/user-service/auth/create"))
-                    .timeout(Duration.ofSeconds(30))
+                    .uri(URI.create(applicationUrl + "/user-service/keycloak/auth/create"))
+                    .header("X-Keycloak-API-Key", API_KEY)
                     .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(30))
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
 

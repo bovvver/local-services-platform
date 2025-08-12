@@ -1,6 +1,6 @@
-package com.github.bovvver.dto;
+package com.github.bovvver.requests;
 
-public record KeycloakUserDTO (
+public record KeycloakUserRequest(
         String keycloakUserId,
         String email,
         String firstName,

@@ -27,13 +27,12 @@ class User {
     User(UserId id,
          Email email,
          String firstName,
-         String lastName,
-         Location location) {
+         String lastName) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.location = location;
+        this.location = null;
 
         this.experienceLevel = ExperienceLevel.BEGINNER;
         this.serviceCategories = new HashSet<>();
@@ -50,10 +49,9 @@ class User {
             UserId id,
             Email email,
             String firstName,
-            String lastName,
-            Location location
+            String lastName
     ) {
-        return new User(id, email, firstName, lastName, location);
+        return new User(id, email, firstName, lastName);
     }
 
     UserId getId() {
