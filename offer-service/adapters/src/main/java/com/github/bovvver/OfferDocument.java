@@ -30,7 +30,6 @@ class OfferDocument {
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate
-
     private LocalDateTime updatedAt;
 
     OfferDocument(UUID id,
