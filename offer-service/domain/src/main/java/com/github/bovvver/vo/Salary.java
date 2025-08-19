@@ -4,7 +4,7 @@ public record Salary(double value) {
 
     public Salary {
         if (value < 0) {
-            throw new IllegalArgumentException("Price cannot be negative");
+            throw new IllegalArgumentException("Salary cannot be negative");
         }
     }
 }
