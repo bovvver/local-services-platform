@@ -22,7 +22,6 @@ class User {
     private final List<OfferId> myOfferIds;
     private final List<OfferId> assignedOfferIds;
     private final List<BookingId> sentBookingIds;
-    private final List<BookingId> receivedBookingIds;
 
     User(UserId id,
          Email email,
@@ -42,7 +41,6 @@ class User {
         this.myOfferIds = new ArrayList<>();
         this.assignedOfferIds = new ArrayList<>();
         this.sentBookingIds = new ArrayList<>();
-        this.receivedBookingIds = new ArrayList<>();
     }
 
     static User create(
@@ -68,9 +66,5 @@ class User {
 
     String getLastName() {
         return lastName;
-    }
-
-    Location getLocation() {
-        return location;
     }
 }

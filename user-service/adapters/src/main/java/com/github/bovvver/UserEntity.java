@@ -65,11 +65,6 @@ class UserEntity {
     @Column(name = "booking_id")
     private List<UUID> sentBookingIds = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_received_bookings", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "booking_id")
-    private List<UUID> receivedBookingIds = new ArrayList<>();
-
     UserEntity(UUID id,
                String email,
                String firstName,
@@ -88,7 +83,5 @@ class UserEntity {
         this.myOfferIds = new ArrayList<>();
         this.assignedOfferIds = new ArrayList<>();
         this.sentBookingIds = new ArrayList<>();
-        this.receivedBookingIds = new ArrayList<>();
     }
-
 }

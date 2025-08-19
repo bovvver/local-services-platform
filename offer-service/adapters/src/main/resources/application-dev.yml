@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://${OFFER_MONGO_INITDB_ROOT_USERNAME}:${OFFER_MONGO_INITDB_ROOT_PASSWORD}@offer-mongo:27017/${OFFER_MONGO_INITDB_DATABASE}?authSource=admin
+      uri: mongodb://${OFFER_MONGO_INITDB_ROOT_USERNAME}:${OFFER_MONGO_INITDB_ROOT_PASSWORD}@${OFFER_MONGO_INITDB_HOST:localhost}:27017/${OFFER_MONGO_INITDB_DATABASE}?authSource=admin
 logging:
   level:
     ROOT: INFO

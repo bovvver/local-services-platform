@@ -49,11 +49,3 @@ CREATE TABLE user_sent_bookings
     PRIMARY KEY (user_id, booking_id),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
-
-CREATE TABLE user_received_bookings
-(
-    user_id    UUID NOT NULL,
-    booking_id UUID NOT NULL,
-    PRIMARY KEY (user_id, booking_id),
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-);
