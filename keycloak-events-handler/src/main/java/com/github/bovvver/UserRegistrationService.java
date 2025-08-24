@@ -14,6 +14,24 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Service responsible for handling user registration events from Keycloak
+ * and synchronizing new users with the application via HTTP requests.
+ * <p>
+ * Workflow:
+ * <ol>
+ *     <li>Keycloak emits a {@link org.keycloak.events.Event} when a user registers.</li>
+ *     <li>{@link #handleUserRegistration(Event)} asynchronously retrieves the user model.</li>
+ *     <li>User data is transformed into JSON and sent to the application gateway.</li>
+ * </ol>
+ * </p>
+ *
+ * <p>Environment variables used:</p>
+ * <ul>
+ *     <li>{@code KEYCLOAK_API_KEY} – API key required for authenticating requests to the gateway</li>
+ *     <li>{@code GATEWAY_URL} – base URL of the application gateway</li>
+ * </ul>
+ */
 class UserRegistrationService {
 
     private static final String API_KEY = System.getenv("KEYCLOAK_API_KEY");
@@ -28,6 +46,12 @@ class UserRegistrationService {
                 .build();
     }
 
+    /**
+     * Handles a user registration event by asynchronously retrieving user data
+     * and sending it to the application gateway.
+     *
+     * @param event Keycloak event containing user registration details
+     */
     void handleUserRegistration(final Event event) {
         CompletableFuture.runAsync(() -> {
             try {
@@ -45,6 +69,25 @@ class UserRegistrationService {
         });
     }
 
+    /**
+     * Sends user details from Keycloak to the application gateway.
+     * <p>
+     * Request details:
+     * <ul>
+     *     <li>Method: {@code POST}</li>
+     *     <li>URL: {@code {GATEWAY_URL}/user-service/keycloak/auth/create}</li>
+     *     <li>Headers:
+     *         <ul>
+     *             <li>{@code X-Keycloak-API-Key} – API key</li>
+     *             <li>{@code Content-Type} – application/json</li>
+     *         </ul>
+     *     </li>
+     *     <li>Body: JSON with {@code keycloakUserId}, {@code email}, {@code firstName}, {@code lastName}</li>
+     * </ul>
+     * </p>
+     *
+     * @param user the {@link UserModel} from Keycloak to be synchronized
+     */
     private void sendUserToApplication(final UserModel user) {
         String applicationUrl = System.getenv("GATEWAY_URL");
 
@@ -79,6 +122,12 @@ class UserRegistrationService {
         }
     }
 
+    /**
+     * Escapes special characters in a string to make it JSON-safe.
+     *
+     * @param value original string
+     * @return escaped string or empty string if input was {@code null}
+     */
     private String escapeJson(String value) {
         if (value == null) return "";
         return value.replace("\"", "\\\"").replace("\\", "\\\\");

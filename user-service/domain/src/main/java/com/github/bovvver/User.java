@@ -7,6 +7,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents a user in the system.
+ * A user is identified by a unique {@link UserId} and has an associated {@link Email},
+ * personal details (first name, last name), location, experience level,
+ * service categories, award tags, and user status.
+ *
+ * <p>Each user can own offers, be assigned to offers,
+ * and send booking requests.</p>
+ */
 class User {
 
     private final UserId id;
@@ -23,6 +32,22 @@ class User {
     private final List<OfferId> assignedOfferIds;
     private final List<BookingId> sentBookingIds;
 
+    /**
+     * Creates a new user with minimal required information.
+     * <p>Default values:</p>
+     * <ul>
+     *     <li>{@link Location} = {@code null}</li>
+     *     <li>{@link ExperienceLevel} = {@link ExperienceLevel#BEGINNER}</li>
+     *     <li>{@link UserStatus} = {@link UserStatus#UNVERIFIED}</li>
+     *     <li>{@link #serviceCategories}, {@link #awardTags}, {@link #myOfferIds},
+     *         {@link #assignedOfferIds}, {@link #sentBookingIds} are initialized as empty collections</li>
+     * </ul>
+     *
+     * @param id        unique user identifier
+     * @param email     email address
+     * @param firstName first name
+     * @param lastName  last name
+     */
     User(UserId id,
          Email email,
          String firstName,
@@ -43,6 +68,15 @@ class User {
         this.sentBookingIds = new ArrayList<>();
     }
 
+    /**
+     * Factory method for creating a new {@code User} instance.
+     *
+     * @param id        unique user identifier
+     * @param email     email address
+     * @param firstName first name
+     * @param lastName  last name
+     * @return newly created {@code User}
+     */
     static User create(
             UserId id,
             Email email,

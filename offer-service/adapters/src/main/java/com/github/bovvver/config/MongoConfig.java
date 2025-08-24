@@ -6,6 +6,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+/**
+ * Spring configuration class for MongoDB connection.
+ * <p>
+ * Reads connection parameters from environment variables and exposes
+ * a {@link MongoTemplate} bean for database operations.
+ * </p>
+ *
+ * <p>Environment variables used:</p>
+ * <ul>
+ *     <li>{@code OFFER_MONGO_INITDB_ROOT_USERNAME} - MongoDB root username</li>
+ *     <li>{@code OFFER_MONGO_INITDB_ROOT_PASSWORD} - MongoDB root password</li>
+ *     <li>{@code OFFER_MONGO_INITDB_HOST} - hostname or IP address of MongoDB server</li>
+ *     <li>{@code OFFER_MONGO_INITDB_DATABASE} - database name</li>
+ * </ul>
+ *
+ * <p>Connection string format:</p>
+ * <pre>
+ * mongodb://username:password@host:27017/database?authSource=admin
+ * </pre>
+ */
 @Configuration
 class MongoConfig {
 

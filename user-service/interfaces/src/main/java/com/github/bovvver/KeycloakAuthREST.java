@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for handling Keycloak authentication-related operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/keycloak/auth")
@@ -18,6 +21,12 @@ class KeycloakAuthREST {
     private static final String CREATE_USER_ENDPOINT = "/create";
     private final UserFacade userFacade;
 
+    /**
+     * Creates a new user based on the data provided by Keycloak SPI.
+     *
+     * @param keycloakUserRequest the request body containing user details from Keycloak
+     * @return a ResponseEntity containing the created user details and HTTP status 201 (Created)
+     */
     @PostMapping(path = CREATE_USER_ENDPOINT)
     ResponseEntity<UserCreatedResponse> createUserFromKeycloakSPI(@RequestBody KeycloakUserRequest keycloakUserRequest) {
         User savedUser = userFacade.createUserFromKeycloak(UserTransportationMapper.toCreateUserCommand(keycloakUserRequest));
