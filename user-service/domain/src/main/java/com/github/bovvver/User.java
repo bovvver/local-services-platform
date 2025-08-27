@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Represents a user in the system.
  * A user is identified by a unique {@link UserId} and has an associated {@link Email},
- * personal details (first name, last name), location, experience level,
+ * personal details (first name, last name), city, country, experience level,
  * service categories, award tags, and user status.
  *
  * <p>Each user can own offers, be assigned to offers,
@@ -22,7 +22,8 @@ class User {
     private final Email email;
     private final String firstName;
     private final String lastName;
-    private final Location location;
+    private final City city;
+    private final Country country;
     private final ExperienceLevel experienceLevel;
     private final Set<ServiceCategory> serviceCategories;
     private final Set<AwardTag> awardTags;
@@ -36,7 +37,8 @@ class User {
      * Creates a new user with minimal required information.
      * <p>Default values:</p>
      * <ul>
-     *     <li>{@link Location} = {@code null}</li>
+     *     <li>{@link City} = {@code null}</li>
+     *     <li>{@link Country} = {@code null}</li>
      *     <li>{@link ExperienceLevel} = {@link ExperienceLevel#BEGINNER}</li>
      *     <li>{@link UserStatus} = {@link UserStatus#UNVERIFIED}</li>
      *     <li>{@link #serviceCategories}, {@link #awardTags}, {@link #myOfferIds},
@@ -56,7 +58,8 @@ class User {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.location = null;
+        this.city = null;
+        this.country = null;
 
         this.experienceLevel = ExperienceLevel.BEGINNER;
         this.serviceCategories = new HashSet<>();

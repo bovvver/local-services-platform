@@ -39,9 +39,9 @@ class UserEntity {
     @Column(nullable = false)
     private String lastName;
 
-    @Getter
-    @Embedded
-    private LocationEmbeddable location;
+    private String city;
+
+    private String country;
 
     @Enumerated(EnumType.STRING)
     private ExperienceLevel experienceLevel;
@@ -80,7 +80,8 @@ class UserEntity {
      * Creates a new {@code UserEntity} with basic required fields.
      * <p>Default values:</p>
      * <ul>
-     *     <li>{@link LocationEmbeddable} = {@code null}</li>
+     *     <li>city = {@code null}</li>
+     *     <li>country = {@code null}</li>
      *     <li>{@link ExperienceLevel} = {@link ExperienceLevel#BEGINNER}</li>
      *     <li>{@link UserStatus} = {@link UserStatus#UNVERIFIED}</li>
      *     <li>All collections initialized as empty</li>
@@ -99,7 +100,8 @@ class UserEntity {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.location = null;
+        this.city = null;
+        this.country = null;
 
         this.experienceLevel = ExperienceLevel.BEGINNER;
         this.serviceCategories = new HashSet<>();
