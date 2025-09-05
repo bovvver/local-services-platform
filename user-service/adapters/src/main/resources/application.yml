@@ -10,6 +10,12 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/master/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/local-services-platform
 
 management:
   endpoints:
