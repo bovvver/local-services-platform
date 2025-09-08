@@ -32,7 +32,7 @@ class KeycloakAuthRESTIT extends BaseIntegrationTest {
         UserCreatedResponse user = response.getBody();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isNotNull();
+        assertThat(user).isNotNull();
         assertThat(user.userId()).isEqualTo(TEST_USER_ID);
         assertThat(user.email()).isEqualTo(TEST_EMAIL);
         assertThat(user.firstName()).isEqualTo(TEST_FIRST_NAME);

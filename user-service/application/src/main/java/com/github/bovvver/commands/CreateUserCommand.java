@@ -1,4 +1,4 @@
-package com.github.bovvver.public_commands;
+package com.github.bovvver.commands;
 
 public record CreateUserCommand(String userId,
                          String email,

@@ -1,6 +1,6 @@
 package com.github.bovvver;
 
-import com.github.bovvver.public_commands.CreateUserCommand;
+import com.github.bovvver.commands.CreateUserCommand;
 import com.github.bovvver.vo.Email;
 import com.github.bovvver.vo.UserId;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserFacadeTest {
+class UserManagementFacadeTest {
 
     private static final String TEST_UUID = "c74819ac-5f74-45e5-9b18-7849d3e0512a";
 
@@ -25,7 +25,7 @@ class UserFacadeTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserFacade userFacade;
+    private UserManagementFacade userManagementFacade;
 
     @Test
     void shouldCreateAndSaveUserSuccessfully() {
@@ -39,7 +39,7 @@ class UserFacadeTest {
 
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        User result = userFacade.createUserFromKeycloak(command);
+        User result = userManagementFacade.createUserFromKeycloak(command);
 
         assertThat(result).isNotNull();
         assertThat(result.getId().value()).isEqualTo(UUID.fromString(TEST_UUID));
@@ -58,7 +58,7 @@ class UserFacadeTest {
                 "Doe"
         );
 
-        assertThrows(IllegalArgumentException.class, () -> userFacade.createUserFromKeycloak(command));
+        assertThrows(IllegalArgumentException.class, () -> userManagementFacade.createUserFromKeycloak(command));
         verifyNoInteractions(userRepository);
     }
 
@@ -71,7 +71,7 @@ class UserFacadeTest {
                 "Doe"
         );
 
-        assertThrows(IllegalArgumentException.class, () -> userFacade.createUserFromKeycloak(command));
+        assertThrows(IllegalArgumentException.class, () -> userManagementFacade.createUserFromKeycloak(command));
         verifyNoInteractions(userRepository);
     }
 }

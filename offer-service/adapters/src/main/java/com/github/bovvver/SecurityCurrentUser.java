@@ -12,19 +12,23 @@ import java.util.UUID;
 @Component
 class SecurityCurrentUser implements CurrentUser {
 
+    final static String SUB_CLAIM = "sub";
+    final static String NO_VALID_JWT_MESSAGE = "No valid JWT found.";
+    final static String NO_SUB_CLAIM_MESSAGE = "No 'sub' claim found in JWT";
+
     @Override
     public UserId getId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(!(authentication instanceof final JwtAuthenticationToken tokenAuth)) {
-            throw new SecurityException("No valid JWT found.");
+            throw new SecurityException(NO_VALID_JWT_MESSAGE);
         }
 
         Jwt jwt = tokenAuth.getToken();
-        String userId = jwt.getClaimAsString("sub");
+        String userId = jwt.getClaimAsString(SUB_CLAIM);
 
         if (userId == null) {
-            throw new SecurityException("No 'sub' claim found in JWT");
+            throw new SecurityException(NO_SUB_CLAIM_MESSAGE);
         }
 
         return new UserId(UUID.fromString(userId));

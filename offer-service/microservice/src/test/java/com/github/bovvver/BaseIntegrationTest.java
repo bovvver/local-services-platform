@@ -2,14 +2,13 @@ package com.github.bovvver;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -17,22 +16,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-@TestPropertySource(locations = "classpath:application-test.yml")
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, TestMongoConfig.class})
 abstract class BaseIntegrationTest {
 
     @Container
-    @ServiceConnection
-    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0");
 
     @Autowired
     protected TestRestTemplate restTemplate;
 
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        String connectionString = String.format(
+                "mongodb://%s:%d/testdb",
+                mongoDBContainer.getHost(),
+                mongoDBContainer.getFirstMappedPort()
+        );
+        registry.add("spring.data.mongodb.uri", () -> connectionString);
+    }
+
     @Test
     void connectionEstablished() {
-        assertTrue(postgreSQLContainer.isRunning());
-        assertTrue(postgreSQLContainer.isCreated());
+        assertTrue(mongoDBContainer.isRunning());
+        assertTrue(mongoDBContainer.isCreated());
     }
 }

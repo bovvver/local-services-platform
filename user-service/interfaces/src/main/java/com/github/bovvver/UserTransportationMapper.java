@@ -1,7 +1,7 @@
 package com.github.bovvver;
 
 import com.github.bovvver.requests.KeycloakUserRequest;
-import com.github.bovvver.public_commands.CreateUserCommand;
+import com.github.bovvver.commands.CreateUserCommand;
 import com.github.bovvver.responses.UserCreatedResponse;
 
 class UserTransportationMapper {

@@ -5,6 +5,7 @@ import com.github.bovvver.vo.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents an offer in the system.
@@ -71,7 +72,6 @@ class Offer {
     /**
      * Factory method for creating a new {@code Offer} instance.
      *
-     * @param id                unique identifier of the offer
      * @param title             title of the offer
      * @param description       detailed description
      * @param authorId          identifier of the user who created the offer
@@ -81,7 +81,6 @@ class Offer {
      * @return newly created {@code Offer}
      */
     static Offer create(
-            OfferId id,
             Title title,
             Description description,
             UserId authorId,
@@ -89,6 +88,42 @@ class Offer {
             Set<ServiceCategory> serviceCategories,
             Salary salary
     ) {
-        return new Offer(id, title, description, authorId, location, serviceCategories, salary);
+        return new Offer(new OfferId(UUID.randomUUID()), title, description, authorId, location, serviceCategories, salary);
+    }
+
+    OfferId getId() {
+        return id;
+    }
+
+    Title getTitle() {
+        return title;
+    }
+
+    Description getDescription() {
+        return description;
+    }
+
+    UserId getAuthorId() {
+        return authorId;
+    }
+
+    Location getLocation() {
+        return location;
+    }
+
+    Set<ServiceCategory> getServiceCategories() {
+        return serviceCategories;
+    }
+
+    Salary getSalary() {
+        return salary;
+    }
+
+    OfferStatus getStatus() {
+        return status;
+    }
+
+    LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

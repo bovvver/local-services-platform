@@ -1,6 +1,6 @@
 package com.github.bovvver;
 
-import com.github.bovvver.public_commands.CreateUserCommand;
+import com.github.bovvver.commands.CreateUserCommand;
 import com.github.bovvver.vo.Email;
 import com.github.bovvver.vo.UserId;
 import jakarta.transaction.Transactional;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class UserFacade {
+public class UserManagementFacade {
 
     private final UserRepository userRepository;
 
