@@ -7,4 +7,8 @@ public record Salary(double value) {
             throw new IllegalArgumentException("Salary cannot be negative");
         }
     }
+
+    public static Salary of(double value) {
+        return new Salary(value);
+    }
 }

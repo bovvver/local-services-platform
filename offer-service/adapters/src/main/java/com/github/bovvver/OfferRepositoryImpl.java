@@ -8,4 +8,9 @@ import org.springframework.stereotype.Repository;
 class OfferRepositoryImpl implements OfferRepository {
     private final MongoOfferRepository repository;
 
+    @Override
+    public Offer save(final Offer offer) {
+        OfferDocument offerDocument = repository.save(OfferMapper.toDocument(offer));
+        return OfferMapper.toDomain(offerDocument);
+    }
 }

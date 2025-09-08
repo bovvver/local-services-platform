@@ -11,6 +11,10 @@ public record Description(String value) {
         }
     }
 
+    public static Description of(String value) {
+        return new Description(value);
+    }
+
     @Override
     public String toString() {
         return value;

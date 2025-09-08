@@ -41,7 +41,7 @@ services:
     image: mongo:7
     container_name: offer-mongo
     ports:
-      - "27017:27017"
+      - "${OFFER_MONGO_INITDB_PORT:-7080}:27017"
     volumes:
       - ../volumes/offer-mongo:/data/db
     environment:

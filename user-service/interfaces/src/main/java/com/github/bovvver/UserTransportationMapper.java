@@ -1,11 +1,17 @@
 package com.github.bovvver;
 
 import com.github.bovvver.requests.KeycloakUserRequest;
-import com.github.bovvver.public_commands.CreateUserCommand;
+import com.github.bovvver.commands.CreateUserCommand;
 import com.github.bovvver.responses.UserCreatedResponse;
 
 class UserTransportationMapper {
 
+    /**
+     * Maps a KeycloakUserRequest object to a CreateUserCommand object.
+     *
+     * @param keycloakUserRequest the request object containing user details from Keycloak
+     * @return a CreateUserCommand object containing the mapped user details
+     */
     static CreateUserCommand toCreateUserCommand(KeycloakUserRequest keycloakUserRequest) {
         return new CreateUserCommand(
                 keycloakUserRequest.keycloakUserId(),
@@ -15,6 +21,12 @@ class UserTransportationMapper {
         );
     }
 
+    /**
+     * Maps a User object to a UserCreatedResponse object.
+     *
+     * @param user the User object containing the user details
+     * @return a UserCreatedResponse object containing the mapped user details
+     */
     static UserCreatedResponse toUserCreatedResponse(User user) {
         return new UserCreatedResponse(
                 user.getId().toString(),

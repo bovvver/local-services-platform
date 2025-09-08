@@ -1,13 +1,13 @@
 CREATE TABLE users
 (
     id               UUID PRIMARY KEY,
-    email            VARCHAR(255)     NOT NULL UNIQUE,
-    first_name       VARCHAR(100)     NOT NULL,
-    last_name        VARCHAR(100)     NOT NULL,
-    latitude         DOUBLE PRECISION,
-    longitude        DOUBLE PRECISION,
-    experience_level VARCHAR(20)      NOT NULL,
-    status           VARCHAR(20)      NOT NULL
+    email            VARCHAR(255) NOT NULL UNIQUE,
+    first_name       VARCHAR(100) NOT NULL,
+    last_name        VARCHAR(100) NOT NULL,
+    city             VARCHAR(100),
+    country          CHAR(2),
+    experience_level VARCHAR(20) NOT NULL,
+    status           VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE user_service_categories

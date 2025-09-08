@@ -7,6 +7,17 @@ import lombok.NoArgsConstructor;
 
 import java.util.*;
 
+/**
+ * JPA entity representing a user stored in the database.
+ * <p>
+ * Mapped to the {@code users} table and contains basic user information,
+ * embedded location, service categories, award tags, status, and relations
+ * to offers and bookings (represented as UUID collections).
+ * </p>
+ *
+ * <p>Collections are mapped using {@link ElementCollection} to store simple values
+ * such as enums and identifiers in dedicated tables.</p>
+ */
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
@@ -28,9 +39,9 @@ class UserEntity {
     @Column(nullable = false)
     private String lastName;
 
-    @Getter
-    @Embedded
-    private LocationEmbeddable location;
+    private String city;
+
+    private String country;
 
     @Enumerated(EnumType.STRING)
     private ExperienceLevel experienceLevel;
@@ -65,6 +76,22 @@ class UserEntity {
     @Column(name = "booking_id")
     private List<UUID> sentBookingIds = new ArrayList<>();
 
+    /**
+     * Creates a new {@code UserEntity} with basic required fields.
+     * <p>Default values:</p>
+     * <ul>
+     *     <li>city = {@code null}</li>
+     *     <li>country = {@code null}</li>
+     *     <li>{@link ExperienceLevel} = {@link ExperienceLevel#BEGINNER}</li>
+     *     <li>{@link UserStatus} = {@link UserStatus#UNVERIFIED}</li>
+     *     <li>All collections initialized as empty</li>
+     * </ul>
+     *
+     * @param id        unique identifier of the user
+     * @param email     email address of the user
+     * @param firstName first name
+     * @param lastName  last name
+     */
     UserEntity(UUID id,
                String email,
                String firstName,
@@ -73,7 +100,8 @@ class UserEntity {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.location = null;
+        this.city = null;
+        this.country = null;
 
         this.experienceLevel = ExperienceLevel.BEGINNER;
         this.serviceCategories = new HashSet<>();
