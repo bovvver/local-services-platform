@@ -1,9 +1,9 @@
 package com.github.bovvver;
 
-import com.github.bovvver.vo.BookingId;
-import com.github.bovvver.vo.BookingStatus;
-import com.github.bovvver.vo.OfferId;
-import com.github.bovvver.vo.UserId;
+import com.github.bovvver.offermanagment.vo.BookingId;
+import com.github.bovvver.offermanagment.vo.BookingStatus;
+import com.github.bovvver.offermanagment.vo.OfferId;
+import com.github.bovvver.offermanagment.vo.UserId;
 
 import java.time.LocalDateTime;
 

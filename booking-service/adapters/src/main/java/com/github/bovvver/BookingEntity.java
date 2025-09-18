@@ -1,6 +1,6 @@
 package com.github.bovvver;
 
-import com.github.bovvver.vo.BookingStatus;
+import com.github.bovvver.offermanagment.vo.BookingStatus;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
