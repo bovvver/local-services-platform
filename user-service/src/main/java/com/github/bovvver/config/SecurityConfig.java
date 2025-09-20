@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -20,14 +21,16 @@ class SecurityConfig {
     private String issuerUri;
 
     private static final String ACTUATOR_PATH = "/actuator/health";
+    static final String KEYCLOAK_AUTH_PATH = "/user-service/keycloak/auth/";
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, KeycloakApiKeyFilter keycloakApiKeyFilter) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ACTUATOR_PATH).permitAll()
+                        .requestMatchers(ACTUATOR_PATH, KEYCLOAK_AUTH_PATH + "**").permitAll()
                         .anyRequest().authenticated()
-                ).oauth2ResourceServer(oauth2 -> oauth2
+                ).addFilterBefore(keycloakApiKeyFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtDecoder()))
                 ).csrf(AbstractHttpConfigurer::disable);
         return http.build();
