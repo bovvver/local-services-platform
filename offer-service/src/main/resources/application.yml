@@ -11,6 +11,17 @@ spring:
         jwt:
           jwk-set-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/master/protocol/openid-connect/certs
           issuer-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/local-services-platform
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_EXTERNAL_PORT}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: ${spring.application.name}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.github.bovvver.contracts
 
 management:
   endpoints:
