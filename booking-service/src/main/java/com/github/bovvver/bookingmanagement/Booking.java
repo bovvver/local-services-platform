@@ -73,14 +73,6 @@ public class Booking {
         return new Booking(id, userId, offerId, proposedSalary);
     }
 
-    static Booking create(
-            BookingId id,
-            UserId userId,
-            OfferId offerId
-    ) {
-        return new Booking(id, userId, offerId, null);
-    }
-
     BookingId getId() {
         return id;
     }
