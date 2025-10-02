@@ -9,11 +9,11 @@ import java.time.Instant;
 
 class BookingDraft {
 
-    private BookingId bookingId;
-    private OfferId offerId;
-    private UserId userId;
-    private Salary salary;
-    private Instant createdAt;
+    private final BookingId bookingId;
+    private final OfferId offerId;
+    private final UserId userId;
+    private final Salary salary;
+    private final Instant createdAt;
 
     BookingDraft(final BookingId bookingId,
                  final OfferId offerId,
