@@ -9,4 +9,8 @@ public record BookingId(UUID value) {
             throw new IllegalArgumentException("BookingId cannot be null");
         }
     }
+
+    public static BookingId of(UUID value) {
+        return new BookingId(value);
+    }
 }

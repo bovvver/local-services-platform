@@ -1,9 +1,11 @@
 package com.github.bovvver.offermanagment;
 
+import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.offermanagment.vo.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -89,6 +91,17 @@ public class Offer {
             Salary salary
     ) {
         return new Offer(new OfferId(UUID.randomUUID()), title, description, authorId, location, serviceCategories, salary);
+    }
+
+    public DomainEvent book(
+            UserId userId,
+            BookingId bookingId
+    ) {
+        if (!List.of(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(this.status)) {
+            return new BookingRejected(this.id, userId, bookingId);
+        }
+        this.bookingIds.add(bookingId);
+        return new BookingAccepted(this.id, userId, bookingId);
     }
 
     public OfferId getId() {

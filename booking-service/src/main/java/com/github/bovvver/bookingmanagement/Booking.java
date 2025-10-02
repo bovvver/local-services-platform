@@ -1,9 +1,6 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.BookingId;
-import com.github.bovvver.bookingmanagement.vo.BookingStatus;
-import com.github.bovvver.bookingmanagement.vo.OfferId;
-import com.github.bovvver.bookingmanagement.vo.UserId;
+import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
 
@@ -21,12 +18,13 @@ import java.time.LocalDateTime;
  *     <li>Status and timestamps may change later in the booking flow.</li>
  * </ul>
  */
-class Booking {
+public class Booking {
 
     private final BookingId id;
     private final UserId userId;
     private final OfferId offerId;
     private final BookingStatus status;
+    private final Salary proposedSalary;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -39,18 +37,21 @@ class Booking {
      *     <li>{@link #updatedAt} = same as {@link #createdAt}</li>
      * </ul>
      *
-     * @param id     unique identifier of the booking
-     * @param userId identifier of the user making the booking
+     * @param id      unique identifier of the booking
+     * @param userId  identifier of the user making the booking
      * @param offerId identifier of the offer being booked
+     * @param proposedSalary proposed salary for the booking, if any
      */
     Booking(BookingId id,
             UserId userId,
-            OfferId offerId
+            OfferId offerId,
+            Salary proposedSalary
     ) {
         this.id = id;
         this.userId = userId;
         this.offerId = offerId;
         this.status = BookingStatus.PENDING;
+        this.proposedSalary = proposedSalary;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
     }
@@ -58,16 +59,41 @@ class Booking {
     /**
      * Factory method for creating a new {@code Booking}.
      *
-     * @param id     unique identifier of the booking
-     * @param userId identifier of the user making the booking
+     * @param id      unique identifier of the booking
+     * @param userId  identifier of the user making the booking
      * @param offerId identifier of the offer being booked
      * @return newly created {@code Booking} with default state
      */
+    public static Booking create(
+            BookingId id,
+            UserId userId,
+            OfferId offerId,
+            Salary proposedSalary
+    ) {
+        return new Booking(id, userId, offerId, proposedSalary);
+    }
+
     static Booking create(
             BookingId id,
             UserId userId,
             OfferId offerId
     ) {
-        return new Booking(id, userId, offerId);
+        return new Booking(id, userId, offerId, null);
+    }
+
+    BookingId getId() {
+        return id;
+    }
+
+    UserId getUserId() {
+        return userId;
+    }
+
+    OfferId getOfferId() {
+        return offerId;
+    }
+
+    Salary getProposedSalary() {
+        return proposedSalary;
     }
 }

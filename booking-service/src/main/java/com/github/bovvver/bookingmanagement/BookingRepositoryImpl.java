@@ -7,4 +7,9 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 class BookingRepositoryImpl implements BookingRepository {
     private final SqlBookingRepository repository;
+
+    @Override
+    public void save(final Booking booking) {
+        repository.save(BookingMapper.toEntity(booking));
+    }
 }
