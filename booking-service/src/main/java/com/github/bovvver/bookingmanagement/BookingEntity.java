@@ -2,6 +2,7 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.vo.BookingStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,6 +24,7 @@ import java.util.UUID;
  *     <li>{@link #userId} – identifier of the booking user</li>
  *     <li>{@link #offerId} – identifier of the booked offer</li>
  *     <li>{@link #status} – current booking state</li>
+ *     <li>{@link #proposedSalary} – proposed salary</li>
  *     <li>{@link #createdAt}, {@link #updatedAt} – managed automatically via auditing</li>
  * </ul>
  *
@@ -43,20 +45,27 @@ import java.util.UUID;
         }
 )
 @NoArgsConstructor
-class BookingEntity {
+public class BookingEntity {
 
     @Id
+    @Getter
     private UUID id;
 
+    @Getter
     @Column(nullable = false)
     private UUID userId;
 
+    @Getter
     @Column(nullable = false)
     private UUID offerId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
+
+    @Getter
+    @Column(precision = 10, scale = 2)
+    private Double proposedSalary;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -75,10 +84,12 @@ class BookingEntity {
      */
     BookingEntity(UUID id,
                   UUID userId,
-                  UUID offerId) {
+                  UUID offerId,
+                  Double proposedSalary) {
         this.id = id;
         this.userId = userId;
         this.offerId = offerId;
+        this.proposedSalary = proposedSalary;
         this.status = BookingStatus.PENDING;
     }
 }

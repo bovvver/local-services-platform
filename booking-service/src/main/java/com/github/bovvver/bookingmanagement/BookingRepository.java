@@ -1,4 +1,6 @@
 package com.github.bovvver.bookingmanagement;
 
-interface BookingRepository {
+public interface BookingRepository {
+
+    void save(Booking booking);
 }
