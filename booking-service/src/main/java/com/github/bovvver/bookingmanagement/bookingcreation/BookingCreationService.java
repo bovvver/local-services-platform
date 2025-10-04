@@ -7,7 +7,7 @@ import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
 import com.github.bovvver.contracts.BookOfferCommand;
-import com.github.bovvver.contracts.BookingAcceptedEvent;
+import com.github.bovvver.contracts.BookingDraftAcceptedEvent;
 import com.github.bovvver.shared.CurrentUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ class BookingCreationService {
     }
 
     @Transactional
-    void createBooking(final BookingAcceptedEvent event) {
+    void createBooking(final BookingDraftAcceptedEvent event) {
         Salary salary = bookingDraftRepository.findSalaryByBookingId(BookingId.of(event.bookingId()));
         bookingDraftRepository.delete(BookingId.of(event.bookingId()));
 

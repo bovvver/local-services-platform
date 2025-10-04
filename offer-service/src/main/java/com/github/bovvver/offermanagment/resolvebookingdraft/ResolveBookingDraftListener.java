@@ -1,7 +1,7 @@
-package com.github.bovvver.offermanagment.resolveofferbooking;
+package com.github.bovvver.offermanagment.resolvebookingdraft;
 
 import com.github.bovvver.contracts.BookOfferCommand;
-import com.github.bovvver.contracts.BookingRejectedEvent;
+import com.github.bovvver.contracts.BookingDraftRejectedEvent;
 import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.event.DomainEventPublisher;
 import com.github.bovvver.offermanagment.Offer;
@@ -18,11 +18,11 @@ import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
-class ResolveBookingListener {
+class ResolveBookingDraftListener {
 
     private static final String CREATE_BOOKING_TOPIC = "booking.commands";
 
-    private final KafkaTemplate<String, BookingRejectedEvent> kafka;
+    private final KafkaTemplate<String, BookingDraftRejectedEvent> kafka;
     private final OfferRepository offerRepository;
     private final DomainEventPublisher domainEventPublisher;
 
@@ -34,7 +34,7 @@ class ResolveBookingListener {
 
         if (offer == null) {
             kafka.send("booking.events", cmd.bookingId().toString(),
-                    new BookingRejectedEvent("NOT_FOUND",
+                    new BookingDraftRejectedEvent("NOT_FOUND",
                             "Offer with id %s not found".formatted(offerId.value()),
                             cmd.bookingId(),
                             offerId.value(),

@@ -3,7 +3,7 @@ package com.github.bovvver.contracts;
 import java.time.Instant;
 import java.util.UUID;
 
-public record BookingRejectedEvent(
+public record BookingDraftRejectedEvent(
         String error,
         String reason,
         UUID offerId,
