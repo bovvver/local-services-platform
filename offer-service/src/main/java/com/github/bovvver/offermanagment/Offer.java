@@ -98,10 +98,10 @@ public class Offer {
             BookingId bookingId
     ) {
         if (!List.of(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(this.status)) {
-            return new BookingRejected(this.id, userId, bookingId);
+            return new BookingDraftRejected(this.id, userId, bookingId);
         }
         this.bookingIds.add(bookingId);
-        return new BookingAccepted(this.id, userId, bookingId);
+        return new BookingDraftAccepted(this.id, userId, bookingId);
     }
 
     public OfferId getId() {

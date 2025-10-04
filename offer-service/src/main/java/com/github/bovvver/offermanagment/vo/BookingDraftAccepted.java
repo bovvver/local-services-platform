@@ -4,9 +4,9 @@ import com.github.bovvver.event.DomainEvent;
 
 import java.time.Instant;
 
-public class BookingRejected implements DomainEvent {
+public class BookingDraftAccepted implements DomainEvent {
 
-    private static final String EVENT_MESSAGE = "Booking request rejected. Offer cannot accept more bookings.";
+    private static final String EVENT_MESSAGE = "Booking request accepted.";
 
     private final BookingRequestStatus status;
     private final String message;
@@ -15,8 +15,8 @@ public class BookingRejected implements DomainEvent {
     private final BookingId bookingId;
     private final Instant timestamp;
 
-    public BookingRejected(final OfferId offerId, final UserId userId, final BookingId bookingId) {
-        this.status = BookingRequestStatus.REJECTED;
+    public BookingDraftAccepted(final OfferId offerId, final UserId userId, final BookingId bookingId) {
+        this.status = BookingRequestStatus.ACCEPTED;
         this.message = EVENT_MESSAGE;
         this.offerId = offerId;
         this.userId = userId;

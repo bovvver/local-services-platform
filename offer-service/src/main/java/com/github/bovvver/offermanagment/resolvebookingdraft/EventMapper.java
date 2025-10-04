@@ -1,15 +1,16 @@
-package com.github.bovvver.offermanagment.resolveofferbooking;
+package com.github.bovvver.offermanagment.resolvebookingdraft;
 
-import com.github.bovvver.contracts.BookingAcceptedEvent;
-import com.github.bovvver.contracts.BookingRejectedEvent;
-import com.github.bovvver.offermanagment.vo.BookingAccepted;
+import com.github.bovvver.contracts.BookingDraftAcceptedEvent;
+import com.github.bovvver.contracts.BookingDraftRejectedEvent;
+import com.github.bovvver.offermanagment.vo.BookingDraftAccepted;
+import com.github.bovvver.offermanagment.vo.BookingDraftRejected;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 class EventMapper {
 
-    static BookingAcceptedEvent toBookingAcceptedEvent(final BookingAccepted event) {
-        return new BookingAcceptedEvent(
+    static BookingDraftAcceptedEvent toBookingAcceptedEvent(final BookingDraftAccepted event) {
+        return new BookingDraftAcceptedEvent(
                 event.getStatus().name(),
                 event.getMessage(),
                 event.getOfferId().value(),
@@ -19,8 +20,8 @@ class EventMapper {
         );
     }
 
-    static BookingRejectedEvent toBookingRejectedEvent(final com.github.bovvver.offermanagment.vo.BookingRejected event) {
-        return new BookingRejectedEvent(
+    static BookingDraftRejectedEvent toBookingRejectedEvent(final BookingDraftRejected event) {
+        return new BookingDraftRejectedEvent(
                 event.getStatus().name(),
                 event.getMessage(),
                 event.getOfferId().value(),
