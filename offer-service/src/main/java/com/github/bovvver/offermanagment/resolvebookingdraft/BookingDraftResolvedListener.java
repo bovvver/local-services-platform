@@ -11,18 +11,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class BookingDraftResolvedListener {
 
+    private static final String BOOKING_EVENTS_TOPIC = "booking.events";
+
     private final KafkaTemplate<String, Object> kafka;
 
     @EventListener
     public void on(BookingDraftAccepted event) {
-        kafka.send("booking.events", event.getBookingId().value().toString(),
+        kafka.send(BOOKING_EVENTS_TOPIC, event.getBookingId().value().toString(),
                 EventMapper.toBookingAcceptedEvent(event)
         );
     }
 
     @EventListener
     public void on(BookingDraftRejected event) {
-        kafka.send("booking.events", event.getBookingId().value().toString(),
+        kafka.send(BOOKING_EVENTS_TOPIC, event.getBookingId().value().toString(),
                 EventMapper.toBookingRejectedEvent(event));
     }
 }
