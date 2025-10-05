@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingcreation;
+package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import com.github.bovvver.contracts.BookingDraftAcceptedEvent;
 import com.github.bovvver.contracts.BookingDraftRejectedEvent;
@@ -8,19 +8,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-class ResolveBookingListener {
+class ResolveBookingDraftListener {
 
     private static final String BOOKING_COMMANDS_TOPIC = "booking.commands";
 
-    private final BookingCreationService bookingCreationService;
+    private final BookingDraftCreationService bookingDraftCreationService;
 
     @KafkaListener(topics = BOOKING_COMMANDS_TOPIC, groupId = "booking-service")
     void onBookingAcceptedEventReceived(BookingDraftAcceptedEvent event) {
-        bookingCreationService.createBooking(event);
+        bookingDraftCreationService.createBooking(event);
     }
 
     @KafkaListener(topics = BOOKING_COMMANDS_TOPIC, groupId = "booking-service")
     void onBookingRejectedEventReceived(BookingDraftRejectedEvent event) {
-        bookingCreationService.deleteDraftBooking(event.bookingId());
+        bookingDraftCreationService.deleteDraftBooking(event.bookingId());
     }
 }

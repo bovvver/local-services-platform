@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingcreation;
+package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-class BookingCreationREST {
+class BookingDraftCreationREST {
 
     private static final String CREATE_BOOKING_ENDPOINT = "/bookings/create";
 
-    private final BookingCreationService bookingCreationService;
+    private final BookingDraftCreationService bookingDraftCreationService;
 
     @PostMapping(path = CREATE_BOOKING_ENDPOINT)
     void createBooking(@Valid @RequestBody BookOfferRequest request) {
-        bookingCreationService.processBookingCreation(request);
+        bookingDraftCreationService.processBookingCreation(request);
     }
 }
