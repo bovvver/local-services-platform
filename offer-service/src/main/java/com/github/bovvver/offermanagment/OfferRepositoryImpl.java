@@ -1,6 +1,7 @@
 package com.github.bovvver.offermanagment;
 
 import com.github.bovvver.offermanagment.vo.OfferId;
+import com.github.bovvver.offermanagment.vo.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,8 +20,15 @@ class OfferRepositoryImpl implements OfferRepository {
 
     @Override
     public Optional<Offer> findById(final OfferId id) {
-
         Optional<OfferDocument> offerDocument = repository.findById(id.value());
         return offerDocument.map(OfferMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsByIdAndOwnerId(OfferId offerId, UserId userId) {
+        return repository.existsByIdAndAuthorId(
+                offerId.value(),
+                userId.value()
+        );
     }
 }

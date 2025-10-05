@@ -10,7 +10,9 @@ import com.github.bovvver.contracts.BookOfferCommand;
 import com.github.bovvver.contracts.BookingDraftAcceptedEvent;
 import com.github.bovvver.shared.CurrentUser;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -19,32 +21,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class BookingCreationService {
 
+    private static final String BOOKING_COMMANDS_TOPIC = "booking.commands";
+
     private final CurrentUser currentUser;
     private final BookingDraftRepository bookingDraftRepository;
     private final BookingRepository bookingRepository;
+    private final KafkaTemplate<String, BookOfferCommand> kafka;
 
-    BookOfferCommand createBookingCommand(final BookOfferRequest request) {
+    public void processBookingCreation(@Valid BookOfferRequest request) {
 
-        UUID currentUserId = currentUser.getId().value();
-        UUID bookingId = UUID.randomUUID();
-
-        return new BookOfferCommand(
-                request.offerId(),
-                currentUserId,
-                bookingId
-        );
-    }
-
-    @Transactional
-    void createDraftBooking(final BookOfferCommand cmd, final Double salary) {
-
-        BookingDraft bookingDraft = BookingDraft.create(
-                BookingId.of(cmd.bookingId()),
-                OfferId.of(cmd.offerId()),
-                UserId.of(cmd.userId()),
-                Salary.of(salary)
-        );
-        bookingDraftRepository.save(bookingDraft);
+        BookOfferCommand cmd = createBookingCommand(request);
+        createDraftBooking(cmd, request.salary());
+        kafka.send(BOOKING_COMMANDS_TOPIC, cmd.offerId().toString(), cmd);
     }
 
     @Transactional
@@ -65,5 +53,28 @@ class BookingCreationService {
         );
 
         bookingRepository.save(booking);
+    }
+
+    private BookOfferCommand createBookingCommand(final BookOfferRequest request) {
+
+        UUID currentUserId = currentUser.getId().value();
+        UUID bookingId = UUID.randomUUID();
+
+        return new BookOfferCommand(
+                request.offerId(),
+                currentUserId,
+                bookingId
+        );
+    }
+
+    private void createDraftBooking(final BookOfferCommand cmd, final Double salary) {
+
+        BookingDraft bookingDraft = BookingDraft.create(
+                BookingId.of(cmd.bookingId()),
+                OfferId.of(cmd.offerId()),
+                UserId.of(cmd.userId()),
+                Salary.of(salary)
+        );
+        bookingDraftRepository.save(bookingDraft);
     }
 }
