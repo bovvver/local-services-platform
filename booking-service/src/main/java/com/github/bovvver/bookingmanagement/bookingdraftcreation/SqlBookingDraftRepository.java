@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingcreation;
+package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;

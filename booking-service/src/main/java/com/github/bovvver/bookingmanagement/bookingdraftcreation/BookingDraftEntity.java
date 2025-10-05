@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingcreation;
+package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

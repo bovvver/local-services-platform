@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingcreation;
+package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import com.github.bovvver.bookingmanagement.Booking;
 import com.github.bovvver.bookingmanagement.BookingRepository;
@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-class BookingCreationService {
+class BookingDraftCreationService {
 
     private static final String BOOKING_COMMANDS_TOPIC = "booking.commands";
 

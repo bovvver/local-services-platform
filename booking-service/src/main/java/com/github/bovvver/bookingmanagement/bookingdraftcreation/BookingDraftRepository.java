@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingcreation;
+package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import com.github.bovvver.bookingmanagement.vo.BookingId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
