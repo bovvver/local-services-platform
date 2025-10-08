@@ -23,10 +23,10 @@ public class Booking {
     private final BookingId id;
     private final UserId userId;
     private final OfferId offerId;
-    private final BookingStatus status;
+    private BookingStatus status;
     private final Salary proposedSalary;
     private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     /**
      * Constructs a new booking with default values.
@@ -71,6 +71,19 @@ public class Booking {
             Salary proposedSalary
     ) {
         return new Booking(id, userId, offerId, proposedSalary);
+    }
+
+    public void accept() {
+        updateStatus(BookingStatus.ACCEPTED);
+    }
+
+    public void reject() {
+        updateStatus(BookingStatus.REJECTED);
+    }
+
+    private void updateStatus(BookingStatus status) {
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
 
     BookingId getId() {
