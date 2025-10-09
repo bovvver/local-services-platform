@@ -10,16 +10,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class ResolveBookingDraftListener {
 
-    private static final String BOOKING_COMMANDS_TOPIC = "booking.commands";
+    private static final String BOOKING_OFFER_AVAILABILITY_ACCEPTED = "booking.offer.availability.accepted";
+    private static final String BOOKING_OFFER_AVAILABILITY_REJECTED = "booking.offer.availability.rejected";
 
     private final BookingDraftCreationService bookingDraftCreationService;
 
-    @KafkaListener(topics = BOOKING_COMMANDS_TOPIC, groupId = "booking-service")
+    @KafkaListener(topics = BOOKING_OFFER_AVAILABILITY_ACCEPTED, groupId = "booking-service")
     void onBookingAcceptedEventReceived(BookingDraftAcceptedEvent event) {
         bookingDraftCreationService.createBooking(event);
     }
 
-    @KafkaListener(topics = BOOKING_COMMANDS_TOPIC, groupId = "booking-service")
+    @KafkaListener(topics = BOOKING_OFFER_AVAILABILITY_REJECTED, groupId = "booking-service")
     void onBookingRejectedEventReceived(BookingDraftRejectedEvent event) {
         bookingDraftCreationService.deleteDraftBooking(event.bookingId());
     }
