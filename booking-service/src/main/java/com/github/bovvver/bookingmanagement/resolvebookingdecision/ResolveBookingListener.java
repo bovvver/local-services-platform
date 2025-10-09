@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class ResolveBookingListener {
 
-    private static final String OFFER_COMMANDS_TOPIC = "offer.commands";
+    private static final String OFFER_BOOKING_DECISION = "offer.booking.decision";
 
     private final ResolveBookingService resolveBookingService;
 
-    @KafkaListener(topics = OFFER_COMMANDS_TOPIC, groupId = "booking-service")
+    @KafkaListener(topics = OFFER_BOOKING_DECISION, groupId = "booking-service")
     void onBookingDecisionCommandReceived(BookingDecisionCommand cmd) {
         resolveBookingService.resolveBooking(cmd);
     }

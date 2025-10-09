@@ -20,21 +20,21 @@ import java.time.Instant;
 @RequiredArgsConstructor
 class ResolveBookingDraftListener {
 
-    private static final String BOOKING_COMMANDS_TOPIC = "booking.commands";
-    private static final String BOOKING_EVENTS_TOPIC = "booking.events";
+    private static final String BOOKING_OFFER_AVAILABILITY_REQUEST = "booking.offer.availability.request";
+    private static final String BOOKING_OFFER_AVAILABILITY_REJECTED = "booking.offer.availability.rejected";
 
     private final KafkaTemplate<String, BookingDraftRejectedEvent> kafka;
     private final OfferRepository offerRepository;
     private final DomainEventPublisher domainEventPublisher;
 
-    @KafkaListener(topics = BOOKING_COMMANDS_TOPIC, groupId = "offer-service")
+    @KafkaListener(topics = BOOKING_OFFER_AVAILABILITY_REQUEST, groupId = "offer-service")
     void onBookingRequestReceived(BookOfferCommand cmd) {
 
         OfferId offerId = OfferId.of(cmd.offerId());
         Offer offer = offerRepository.findById(offerId).orElse(null);
 
         if (offer == null) {
-            kafka.send(BOOKING_EVENTS_TOPIC, cmd.bookingId().toString(),
+            kafka.send(BOOKING_OFFER_AVAILABILITY_REJECTED, cmd.bookingId().toString(),
                     new BookingDraftRejectedEvent("NOT_FOUND",
                             "Offer with id %s not found".formatted(offerId.value()),
                             cmd.bookingId(),
