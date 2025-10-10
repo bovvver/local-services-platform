@@ -5,7 +5,8 @@ import com.github.bovvver.contracts.BookingDraftRejectedEvent;
 import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.event.DomainEventPublisher;
 import com.github.bovvver.offermanagment.Offer;
-import com.github.bovvver.offermanagment.OfferRepository;
+import com.github.bovvver.offermanagment.OfferMapper;
+import com.github.bovvver.offermanagment.OfferReadRepository;
 import com.github.bovvver.offermanagment.vo.BookingId;
 import com.github.bovvver.offermanagment.vo.OfferId;
 import com.github.bovvver.offermanagment.vo.UserId;
@@ -24,14 +25,14 @@ class ResolveBookingDraftListener {
     private static final String BOOKING_OFFER_AVAILABILITY_REJECTED = "booking.offer.availability.rejected";
 
     private final KafkaTemplate<String, BookingDraftRejectedEvent> kafka;
-    private final OfferRepository offerRepository;
+    private final OfferReadRepository offerReadRepository;
     private final DomainEventPublisher domainEventPublisher;
 
     @KafkaListener(topics = BOOKING_OFFER_AVAILABILITY_REQUEST, groupId = "offer-service")
     void onBookingRequestReceived(BookOfferCommand cmd) {
 
         OfferId offerId = OfferId.of(cmd.offerId());
-        Offer offer = offerRepository.findById(offerId).orElse(null);
+        Offer offer = OfferMapper.toDomain(offerReadRepository.findById(offerId.value()).orElse(null));
 
         if (offer == null) {
             kafka.send(BOOKING_OFFER_AVAILABILITY_REJECTED, cmd.bookingId().toString(),

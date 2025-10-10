@@ -1,13 +1,12 @@
 package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
 import com.github.bovvver.bookingmanagement.vo.BookingId;
-import com.github.bovvver.bookingmanagement.vo.Salary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-class BookingDraftRepositoryImpl implements BookingDraftRepository {
+class BookingDraftWriteRepositoryImpl implements BookingDraftWriteRepository {
     private final SqlBookingDraftRepository repository;
 
     @Override
@@ -18,11 +17,5 @@ class BookingDraftRepositoryImpl implements BookingDraftRepository {
     @Override
     public void delete(final BookingId bookingId) {
         repository.deleteByBookingId(bookingId.value());
-    }
-
-    @Override
-    public Salary findSalaryByBookingId(final BookingId bookingId) {
-        Double salaryValue = repository.findSalaryByBookingId(bookingId.value());
-        return Salary.of(salaryValue);
     }
 }

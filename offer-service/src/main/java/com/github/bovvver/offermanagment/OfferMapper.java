@@ -2,9 +2,14 @@ package com.github.bovvver.offermanagment;
 
 import com.github.bovvver.offermanagment.vo.*;
 
-class OfferMapper {
+public class OfferMapper {
 
-    static Offer toDomain(OfferDocument entity) {
+    public static Offer toDomain(OfferDocument entity) {
+
+        if (entity == null) {
+            return null;
+        }
+
         return Offer.create(
                 Title.of(entity.getTitle()),
                 Description.of(entity.getDescription()),
@@ -18,7 +23,7 @@ class OfferMapper {
         );
     }
 
-    static OfferDocument toDocument(Offer offer) {
+    public static OfferDocument toDocument(Offer offer) {
         return new OfferDocument(
                 offer.getTitle().value(),
                 offer.getDescription().value(),
