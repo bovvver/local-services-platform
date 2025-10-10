@@ -28,7 +28,7 @@ import java.util.UUID;
  */
 @NoArgsConstructor
 @Document(collection = "offers")
-class OfferDocument {
+public class OfferDocument {
 
     @Id
     @Getter

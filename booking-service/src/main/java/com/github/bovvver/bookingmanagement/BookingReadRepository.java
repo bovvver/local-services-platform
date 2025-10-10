@@ -4,7 +4,7 @@ import org.springframework.data.repository.Repository;
 
 import java.util.UUID;
 
-interface SqlBookingRepository extends Repository<BookingEntity, UUID> {
+public interface BookingReadRepository extends Repository<BookingEntity, UUID> {
 
-    void save(BookingEntity bookingEntity);
+    BookingEntity findById(UUID id);
 }

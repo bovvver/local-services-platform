@@ -21,8 +21,8 @@ class OfferManipulationFacadeTest {
     @Test
     void createsOfferSuccessfully() {
         CurrentUser currentUser = mock(CurrentUser.class);
-        OfferRepository offerRepository = mock(OfferRepository.class);
-        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerRepository);
+        OfferWriteRepository offerWriteRepository = mock(OfferWriteRepository.class);
+        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerWriteRepository);
 
         UUID userId = UUID.randomUUID();
         when(currentUser.getId()).thenReturn(UserId.of(userId));
@@ -36,12 +36,12 @@ class OfferManipulationFacadeTest {
         );
 
         Offer savedOffer = mock(Offer.class);
-        when(offerRepository.save(any(Offer.class))).thenReturn(savedOffer);
+        when(offerWriteRepository.save(any(Offer.class))).thenReturn(savedOffer);
 
         Offer result = facade.createOffer(command);
 
         ArgumentCaptor<Offer> offerCaptor = ArgumentCaptor.forClass(Offer.class);
-        verify(offerRepository).save(offerCaptor.capture());
+        verify(offerWriteRepository).save(offerCaptor.capture());
 
         Offer capturedOffer = offerCaptor.getValue();
         assertThat(capturedOffer.getTitle().value()).isEqualTo(command.title());
@@ -57,8 +57,8 @@ class OfferManipulationFacadeTest {
     @Test
     void throwsExceptionWhenServiceCategoryIsInvalid() {
         CurrentUser currentUser = mock(CurrentUser.class);
-        OfferRepository offerRepository = mock(OfferRepository.class);
-        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerRepository);
+        OfferWriteRepository offerWriteRepository = mock(OfferWriteRepository.class);
+        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerWriteRepository);
 
         CreateOfferCommand command = new CreateOfferCommand(
                 "Sample Title",
@@ -76,8 +76,8 @@ class OfferManipulationFacadeTest {
     @Test
     void throwsExceptionWhenTitleIsNull() {
         CurrentUser currentUser = mock(CurrentUser.class);
-        OfferRepository offerRepository = mock(OfferRepository.class);
-        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerRepository);
+        OfferWriteRepository offerWriteRepository = mock(OfferWriteRepository.class);
+        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerWriteRepository);
 
         CreateOfferCommand command = new CreateOfferCommand(
                 null,
@@ -95,8 +95,8 @@ class OfferManipulationFacadeTest {
     @Test
     void throwsExceptionWhenSalaryIsNegative() {
         CurrentUser currentUser = mock(CurrentUser.class);
-        OfferRepository offerRepository = mock(OfferRepository.class);
-        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerRepository);
+        OfferWriteRepository offerWriteRepository = mock(OfferWriteRepository.class);
+        OfferManipulationFacade facade = new OfferManipulationFacade(currentUser, offerWriteRepository);
 
         CreateOfferCommand command = new CreateOfferCommand(
                 "Sample Title",

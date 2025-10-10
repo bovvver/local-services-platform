@@ -24,7 +24,8 @@ class BookingDraftCreationService {
     private static final String BOOKING_COMMANDS_TOPIC = "booking.commands";
 
     private final CurrentUser currentUser;
-    private final BookingDraftRepository bookingDraftRepository;
+    private final BookingDraftWriteRepository bookingDraftWriteRepository;
+    private final BookingDraftReadRepository bookingDraftReadRepository;
     private final BookingRepository bookingRepository;
     private final KafkaTemplate<String, BookOfferCommand> kafka;
 
@@ -37,13 +38,13 @@ class BookingDraftCreationService {
 
     @Transactional
     void deleteDraftBooking(final UUID bookingId) {
-        bookingDraftRepository.delete(BookingId.of(bookingId));
+        bookingDraftWriteRepository.delete(BookingId.of(bookingId));
     }
 
     @Transactional
     void createBooking(final BookingDraftAcceptedEvent event) {
-        Salary salary = bookingDraftRepository.findSalaryByBookingId(BookingId.of(event.bookingId()));
-        bookingDraftRepository.delete(BookingId.of(event.bookingId()));
+        Salary salary = Salary.of(bookingDraftReadRepository.findSalaryByBookingId(event.bookingId()));
+        bookingDraftWriteRepository.delete(BookingId.of(event.bookingId()));
 
         Booking booking = Booking.create(
                 BookingId.of(event.bookingId()),
@@ -75,6 +76,6 @@ class BookingDraftCreationService {
                 UserId.of(cmd.userId()),
                 Salary.of(salary)
         );
-        bookingDraftRepository.save(bookingDraft);
+        bookingDraftWriteRepository.save(bookingDraft);
     }
 }

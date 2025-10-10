@@ -2,8 +2,7 @@ package com.github.bovvver.offermanagment.resolvebooking;
 
 import com.github.bovvver.contracts.BookingDecisionCommand;
 import com.github.bovvver.contracts.BookingDecisionStatus;
-import com.github.bovvver.offermanagment.OfferRepository;
-import com.github.bovvver.offermanagment.vo.OfferId;
+import com.github.bovvver.offermanagment.OfferReadRepository;
 import com.github.bovvver.shared.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +15,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class ResolveBookingService {
 
-    private static final String OFFER_COMMANDS_TOPIC = "offer.commands";
+    private static final String OFFER_BOOKING_DECISION = "offer.booking.decision";
+    private static final String OFFER_BOOKING_NEGOTIATE = "offer.booking.negotiate";
 
     private final KafkaTemplate<String, BookingDecisionCommand> kafka;
-    private final OfferRepository offerRepository;
+    private final OfferReadRepository offerReadRepository;
     private final CurrentUser currentUser;
 
     void processBookingDecision(
@@ -33,19 +33,32 @@ class ResolveBookingService {
             );
         }
         validateRequest(request);
+        sendBookingDecisionCommand(createBookingDecisionCommand(
+                bookingId,
+                offerId,
+                request
+        ));
+    }
 
-        kafka.send(OFFER_COMMANDS_TOPIC, bookingId.toString(),
-                createBookingDecisionCommand(
-                        bookingId,
-                        offerId,
-                        request
-                ));
+    private void sendBookingDecisionCommand(BookingDecisionCommand cmd) {
+
+        if (cmd.status() == BookingDecisionStatus.NEGOTIATE) {
+            kafka.send(OFFER_BOOKING_NEGOTIATE, cmd.bookingId().toString(), cmd);
+            return;
+        }
+        kafka.send(OFFER_BOOKING_DECISION, cmd.bookingId().toString(), cmd);
     }
 
     private boolean checkOwnership(final UUID offerId) {
-        return offerRepository.existsByIdAndOwnerId(
-                OfferId.of(offerId),
-                currentUser.getId()
+
+        UUID currentUserId = currentUser.getId().value();
+        if (currentUserId == null) {
+            throw new IllegalStateException("No user logged in.");
+        }
+
+        return offerReadRepository.existsByIdAndAuthorId(
+                offerId,
+                currentUserId
         );
     }
 

@@ -1,7 +1,7 @@
 package com.github.bovvver.offermanagment.offercreation;
 
 import com.github.bovvver.offermanagment.Offer;
-import com.github.bovvver.offermanagment.OfferRepository;
+import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.Description;
 import com.github.bovvver.offermanagment.vo.Salary;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class OfferManipulationFacade {
 
     private final CurrentUser currentUser;
-    private final OfferRepository offerRepository;
+    private final OfferWriteRepository offerWriteRepository;
 
     public Offer createOffer(CreateOfferCommand createOfferCommand) {
         Offer createdOffer = Offer.create(
@@ -28,6 +28,6 @@ public class OfferManipulationFacade {
                 createOfferCommand.serviceCategories().stream().map(ServiceCategory::fromString).collect(Collectors.toSet()),
                 Salary.of(createOfferCommand.salary())
         );
-        return offerRepository.save(createdOffer);
+        return offerWriteRepository.save(createdOffer);
     }
 }
