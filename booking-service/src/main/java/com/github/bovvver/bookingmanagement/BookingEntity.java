@@ -2,6 +2,7 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.vo.BookingStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -44,18 +45,17 @@ import java.util.UUID;
                 )
         }
 )
+@Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class BookingEntity {
 
     @Id
-    @Getter
     private UUID id;
 
-    @Getter
     @Column(nullable = false)
     private UUID userId;
 
-    @Getter
     @Column(nullable = false)
     private UUID offerId;
 
@@ -63,7 +63,6 @@ public class BookingEntity {
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
-    @Getter
     @Column(precision = 10, scale = 2)
     private Double proposedSalary;
 
@@ -86,10 +85,6 @@ public class BookingEntity {
                   UUID userId,
                   UUID offerId,
                   Double proposedSalary) {
-        this.id = id;
-        this.userId = userId;
-        this.offerId = offerId;
-        this.proposedSalary = proposedSalary;
-        this.status = BookingStatus.PENDING;
+        this(id, userId, offerId, BookingStatus.PENDING, proposedSalary, null, null);
     }
 }

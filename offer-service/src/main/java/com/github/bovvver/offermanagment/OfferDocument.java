@@ -3,6 +3,7 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -26,34 +27,29 @@ import java.util.UUID;
  * <p>Collections such as {@link #bookingIds} and {@link #serviceCategories} are
  * stored as embedded arrays in the document.</p>
  */
+@AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Document(collection = "offers")
 public class OfferDocument {
 
     @Id
-    @Getter
     private UUID id;
 
-    @Getter
     private String title;
 
-    @Getter
     private String description;
 
-    @Getter
     private UUID authorId;
 
     private UUID executorId;
 
     private Set<UUID> bookingIds;
 
-    @Getter
     private Location location;
 
-    @Getter
     private Set<ServiceCategory> serviceCategories;
 
-    @Getter
     private double salary;
 
     private OfferStatus status;
@@ -86,15 +82,8 @@ public class OfferDocument {
                   Location location,
                   Set<ServiceCategory> serviceCategories,
                   double salary) {
-        this.id = UUID.randomUUID();
-        this.title = title;
-        this.description = description;
-        this.authorId = authorId;
-        this.executorId = null;
-        this.bookingIds = new HashSet<>();
-        this.location = location;
-        this.serviceCategories = serviceCategories;
-        this.salary = salary;
-        this.status = OfferStatus.OPEN;
+        this(UUID.randomUUID(), title, description, authorId, null,
+                new HashSet<>(), location, serviceCategories, salary,
+                OfferStatus.OPEN, null, null);
     }
 }

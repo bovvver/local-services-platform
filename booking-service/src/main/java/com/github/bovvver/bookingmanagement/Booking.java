@@ -28,6 +28,22 @@ public class Booking {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    Booking(final BookingId id,
+            final UserId userId,
+            final OfferId offerId,
+            final BookingStatus status,
+            final Salary proposedSalary,
+            final LocalDateTime createdAt,
+            final LocalDateTime updatedAt) {
+        this.id = id;
+        this.userId = userId;
+        this.offerId = offerId;
+        this.status = status;
+        this.proposedSalary = proposedSalary;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     /**
      * Constructs a new booking with default values.
      * <p>Default values:</p>
@@ -37,9 +53,9 @@ public class Booking {
      *     <li>{@link #updatedAt} = same as {@link #createdAt}</li>
      * </ul>
      *
-     * @param id      unique identifier of the booking
-     * @param userId  identifier of the user making the booking
-     * @param offerId identifier of the offer being booked
+     * @param id             unique identifier of the booking
+     * @param userId         identifier of the user making the booking
+     * @param offerId        identifier of the offer being booked
      * @param proposedSalary proposed salary for the booking, if any
      */
     Booking(BookingId id,
@@ -47,13 +63,7 @@ public class Booking {
             OfferId offerId,
             Salary proposedSalary
     ) {
-        this.id = id;
-        this.userId = userId;
-        this.offerId = offerId;
-        this.status = BookingStatus.PENDING;
-        this.proposedSalary = proposedSalary;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
+        this(id, userId, offerId, BookingStatus.PENDING, proposedSalary, LocalDateTime.now(), LocalDateTime.now());
     }
 
     /**
@@ -98,7 +108,19 @@ public class Booking {
         return offerId;
     }
 
+    BookingStatus getStatus() {
+        return status;
+    }
+
     Salary getProposedSalary() {
         return proposedSalary;
+    }
+
+    LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

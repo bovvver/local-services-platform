@@ -1,7 +1,6 @@
 package com.github.bovvver.usermanagement;
 
-import com.github.bovvver.usermanagement.vo.Email;
-import com.github.bovvver.usermanagement.vo.UserId;
+import com.github.bovvver.usermanagement.vo.*;
 
 class UserMapper {
 
@@ -12,11 +11,20 @@ class UserMapper {
      * @return a User domain object containing the mapped data
      */
     static User toDomain(UserEntity entity) {
-        return User.create(
+        return new User(
                 UserId.of(entity.getId()),
-                new Email(entity.getEmail()),
+                Email.of(entity.getEmail()),
                 entity.getFirstName(),
-                entity.getLastName()
+                entity.getLastName(),
+                City.of(entity.getCity()),
+                Country.of(entity.getCountry()),
+                entity.getExperienceLevel(),
+                entity.getServiceCategories(),
+                entity.getAwardTags(),
+                entity.getStatus(),
+                OfferId.fromAll(entity.getMyOfferIds()),
+                OfferId.fromAll(entity.getAssignedOfferIds()),
+                BookingId.fromAll(entity.getSentBookingIds())
         );
     }
 
@@ -31,7 +39,16 @@ class UserMapper {
                 user.getId().value(),
                 user.getEmail().value(),
                 user.getFirstName(),
-                user.getLastName()
+                user.getLastName(),
+                user.getCity().value(),
+                user.getCountry().code(),
+                user.getExperienceLevel(),
+                user.getServiceCategories(),
+                user.getAwardTags(),
+                user.getStatus(),
+                user.getMyOfferIds().stream().map(OfferId::value).toList(),
+                user.getAssignedOfferIds().stream().map(OfferId::value).toList(),
+                user.getSentBookingIds().stream().map(BookingId::value).toList()
         );
     }
 }

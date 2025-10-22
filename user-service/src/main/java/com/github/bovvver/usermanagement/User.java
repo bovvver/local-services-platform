@@ -33,6 +33,34 @@ public class User {
     private final List<OfferId> assignedOfferIds;
     private final List<BookingId> sentBookingIds;
 
+    User(final UserId id,
+         final Email email,
+         final String firstName,
+         final String lastName,
+         final City city,
+         final Country country,
+         final ExperienceLevel experienceLevel,
+         final Set<ServiceCategory> serviceCategories,
+         final Set<AwardTag> awardTags,
+         final UserStatus status,
+         final List<OfferId> myOfferIds,
+         final List<OfferId> assignedOfferIds,
+         final List<BookingId> sentBookingIds) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.city = city;
+        this.country = country;
+        this.experienceLevel = experienceLevel;
+        this.serviceCategories = serviceCategories;
+        this.awardTags = awardTags;
+        this.status = status;
+        this.myOfferIds = myOfferIds;
+        this.assignedOfferIds = assignedOfferIds;
+        this.sentBookingIds = sentBookingIds;
+    }
+
     /**
      * Creates a new user with minimal required information.
      * <p>Default values:</p>
@@ -54,21 +82,9 @@ public class User {
          Email email,
          String firstName,
          String lastName) {
-        this.id = id;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.city = null;
-        this.country = null;
-
-        this.experienceLevel = ExperienceLevel.BEGINNER;
-        this.serviceCategories = new HashSet<>();
-        this.awardTags = new HashSet<>();
-        this.status = UserStatus.UNVERIFIED;
-
-        this.myOfferIds = new ArrayList<>();
-        this.assignedOfferIds = new ArrayList<>();
-        this.sentBookingIds = new ArrayList<>();
+        this(id, email, firstName, lastName, null, null,
+                ExperienceLevel.BEGINNER, new HashSet<>(), new HashSet<>(),
+                UserStatus.UNVERIFIED, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     /**
@@ -89,19 +105,55 @@ public class User {
         return new User(id, email, firstName, lastName);
     }
 
-    public UserId getId() {
+    UserId getId() {
         return id;
     }
 
-    public Email getEmail() {
+    Email getEmail() {
         return email;
     }
 
-    public String getFirstName() {
+    String getFirstName() {
         return firstName;
     }
 
-    public String getLastName() {
+    String getLastName() {
         return lastName;
+    }
+
+    City getCity() {
+        return city;
+    }
+
+    Country getCountry() {
+        return country;
+    }
+
+    ExperienceLevel getExperienceLevel() {
+        return experienceLevel;
+    }
+
+    Set<ServiceCategory> getServiceCategories() {
+        return serviceCategories;
+    }
+
+    Set<AwardTag> getAwardTags() {
+        return awardTags;
+    }
+
+    UserStatus getStatus() {
+        return status;
+    }
+
+    List<OfferId> getMyOfferIds() {
+        return myOfferIds;
+    }
+
+    List<OfferId> getAssignedOfferIds() {
+        return assignedOfferIds;
+    }
+
+    List<BookingId> getSentBookingIds() {
+        return sentBookingIds;
     }
 }

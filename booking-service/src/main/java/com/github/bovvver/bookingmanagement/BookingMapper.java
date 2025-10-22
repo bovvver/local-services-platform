@@ -12,16 +12,22 @@ public class BookingMapper {
                 booking.getId().value(),
                 booking.getUserId().value(),
                 booking.getOfferId().value(),
-                booking.getProposedSalary().value()
+                booking.getStatus(),
+                booking.getProposedSalary().value(),
+                booking.getCreatedAt(),
+                booking.getUpdatedAt()
         );
     }
 
     public static Booking toDomain(BookingEntity bookingEntity) {
-        return Booking.create(
-                BookingId.of(bookingEntity.getId()),
-                UserId.of(bookingEntity.getUserId()),
-                OfferId.of(bookingEntity.getOfferId()),
-                Salary.of(bookingEntity.getProposedSalary())
+        return new Booking(
+                new BookingId(bookingEntity.getId()),
+                new UserId(bookingEntity.getUserId()),
+                new OfferId(bookingEntity.getOfferId()),
+                bookingEntity.getStatus(),
+                new Salary(bookingEntity.getProposedSalary()),
+                bookingEntity.getCreatedAt(),
+                bookingEntity.getUpdatedAt()
         );
     }
 }

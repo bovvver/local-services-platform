@@ -2,38 +2,52 @@ package com.github.bovvver.offermanagment;
 
 import com.github.bovvver.offermanagment.vo.*;
 
+import java.util.stream.Collectors;
+
 public class OfferMapper {
 
-    public static Offer toDomain(OfferDocument entity) {
+    public static Offer toDomain(OfferDocument document) {
 
-        if (entity == null) {
+        if (document == null) {
             return null;
         }
 
-        return Offer.create(
-                Title.of(entity.getTitle()),
-                Description.of(entity.getDescription()),
-                UserId.of(entity.getAuthorId()),
+        return new Offer(
+                OfferId.of(document.getId()),
+                Title.of(document.getTitle()),
+                Description.of(document.getDescription()),
+                UserId.of(document.getAuthorId()),
+                UserId.of(document.getExecutorId()),
+                BookingId.fromAll(document.getBookingIds()),
                 Location.of(
-                        entity.getLocation().latitude(),
-                        entity.getLocation().longitude()
+                        document.getLocation().latitude(),
+                        document.getLocation().longitude()
                 ),
-                entity.getServiceCategories(),
-                Salary.of(entity.getSalary())
+                document.getServiceCategories(),
+                Salary.of(document.getSalary()),
+                document.getStatus(),
+                document.getCreatedAt(),
+                document.getUpdatedAt()
         );
     }
 
     public static OfferDocument toDocument(Offer offer) {
         return new OfferDocument(
+                offer.getId().value(),
                 offer.getTitle().value(),
                 offer.getDescription().value(),
                 offer.getAuthorId().value(),
+                offer.getExecutorId() != null ? offer.getExecutorId().value() : null,
+                offer.getBookingIds().stream().map(BookingId::value).collect(Collectors.toSet()),
                 Location.of(
                         offer.getLocation().latitude(),
                         offer.getLocation().longitude()
                 ),
                 offer.getServiceCategories(),
-                offer.getSalary().value()
+                offer.getSalary().value(),
+                offer.getStatus(),
+                offer.getCreatedAt(),
+                offer.getUpdatedAt()
         );
     }
 }
