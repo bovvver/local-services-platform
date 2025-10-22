@@ -7,7 +7,8 @@ class BookingDraftMapper {
                 draft.getBookingId().value(),
                 draft.getOfferId().value(),
                 draft.getUserId().value(),
-                draft.getSalary().value()
+                draft.getSalary().value(),
+                draft.getCreatedAt()
         );
     }
 }

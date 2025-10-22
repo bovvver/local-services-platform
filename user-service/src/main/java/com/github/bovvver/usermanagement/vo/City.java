@@ -10,4 +10,8 @@ public record City(String value) {
             throw new IllegalArgumentException("Invalid city name: " + value);
         }
     }
+
+    public static City of(String value) {
+        return new City(value);
+    }
 }

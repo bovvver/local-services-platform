@@ -15,15 +15,19 @@ class BookingDraft {
     private final Salary salary;
     private final Instant createdAt;
 
-    BookingDraft(final BookingId bookingId,
-                 final OfferId offerId,
-                 final UserId userId,
-                 final Salary salary) {
+    BookingDraft(final BookingId bookingId, final OfferId offerId, final UserId userId, final Salary salary, final Instant createdAt) {
         this.bookingId = bookingId;
         this.offerId = offerId;
         this.userId = userId;
         this.salary = salary;
-        this.createdAt = Instant.now();
+        this.createdAt = createdAt;
+    }
+
+    BookingDraft(final BookingId bookingId,
+                 final OfferId offerId,
+                 final UserId userId,
+                 final Salary salary) {
+        this(bookingId, offerId, userId, salary, Instant.now());
     }
 
     static BookingDraft create(
@@ -40,19 +44,23 @@ class BookingDraft {
         );
     }
 
-    Salary getSalary() {
-        return salary;
-    }
-
-    UserId getUserId() {
-        return userId;
+    BookingId getBookingId() {
+        return bookingId;
     }
 
     OfferId getOfferId() {
         return offerId;
     }
 
-    BookingId getBookingId() {
-        return bookingId;
+    UserId getUserId() {
+        return userId;
+    }
+
+    Salary getSalary() {
+        return salary;
+    }
+
+    Instant getCreatedAt() {
+        return createdAt;
     }
 }

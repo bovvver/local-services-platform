@@ -5,6 +5,7 @@ import com.github.bovvver.usermanagement.vo.ExperienceLevel;
 import com.github.bovvver.usermanagement.vo.ServiceCategory;
 import com.github.bovvver.usermanagement.vo.UserStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,22 +24,20 @@ import java.util.*;
  */
 @Entity
 @Table(name = "users")
+@Getter
+@AllArgsConstructor
 @NoArgsConstructor
 class UserEntity {
 
-    @Getter
     @Id
     private UUID id;
 
-    @Getter
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Getter
     @Column(nullable = false)
     private String firstName;
 
-    @Getter
     @Column(nullable = false)
     private String lastName;
 
@@ -99,20 +98,8 @@ class UserEntity {
                String email,
                String firstName,
                String lastName) {
-        this.id = id;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.city = null;
-        this.country = null;
-
-        this.experienceLevel = ExperienceLevel.BEGINNER;
-        this.serviceCategories = new HashSet<>();
-        this.awardTags = new HashSet<>();
-        this.status = UserStatus.UNVERIFIED;
-
-        this.myOfferIds = new ArrayList<>();
-        this.assignedOfferIds = new ArrayList<>();
-        this.sentBookingIds = new ArrayList<>();
+        this(id, email, firstName, lastName, null, null,
+                ExperienceLevel.BEGINNER, new HashSet<>(), new HashSet<>(),
+                UserStatus.UNVERIFIED, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 }

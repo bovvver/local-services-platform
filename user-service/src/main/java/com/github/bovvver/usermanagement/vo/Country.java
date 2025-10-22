@@ -7,4 +7,8 @@ public record Country(String code) {
             throw new IllegalArgumentException("Invalid ISO alpha-2 country code: " + code);
         }
     }
+
+    public static Country of(String code) {
+        return new Country(code);
+    }
 }

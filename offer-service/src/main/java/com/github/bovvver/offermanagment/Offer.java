@@ -32,6 +32,32 @@ public class Offer {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
+    Offer(final OfferId id,
+          final Title title,
+          final Description description,
+          final UserId authorId,
+          final UserId executorId,
+          final Set<BookingId> bookingIds,
+          final Location location,
+          final Set<ServiceCategory> serviceCategories,
+          final Salary salary,
+          final OfferStatus status,
+          final LocalDateTime createdAt,
+          final LocalDateTime updatedAt) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.authorId = authorId;
+        this.executorId = executorId;
+        this.bookingIds = bookingIds;
+        this.location = location;
+        this.serviceCategories = serviceCategories;
+        this.salary = salary;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     /**
      * Constructs a new offer with the required fields.
      * <p>Default values:</p>
@@ -57,18 +83,10 @@ public class Offer {
           Location location,
           Set<ServiceCategory> serviceCategories,
           Salary salary) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.authorId = authorId;
-        this.executorId = null;
-        this.bookingIds = new HashSet<>();
-        this.location = location;
-        this.serviceCategories = serviceCategories;
-        this.salary = salary;
-        this.status = OfferStatus.OPEN;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
+
+        this(id, title, description, authorId, null,
+                new HashSet<>(), location, serviceCategories, salary,
+                OfferStatus.OPEN, LocalDateTime.now(), LocalDateTime.now());
     }
 
     /**
@@ -104,39 +122,51 @@ public class Offer {
         return new BookingDraftAccepted(this.id, userId, bookingId);
     }
 
-    public OfferId getId() {
+    OfferId getId() {
         return id;
     }
 
-    public Title getTitle() {
+    Title getTitle() {
         return title;
     }
 
-    public Description getDescription() {
+    Description getDescription() {
         return description;
     }
 
-    public UserId getAuthorId() {
+    UserId getAuthorId() {
         return authorId;
     }
 
-    public Location getLocation() {
+    UserId getExecutorId() {
+        return executorId;
+    }
+
+    Set<BookingId> getBookingIds() {
+        return bookingIds;
+    }
+
+    Location getLocation() {
         return location;
     }
 
-    public Set<ServiceCategory> getServiceCategories() {
+    Set<ServiceCategory> getServiceCategories() {
         return serviceCategories;
     }
 
-    public Salary getSalary() {
+    Salary getSalary() {
         return salary;
     }
 
-    public OfferStatus getStatus() {
+    OfferStatus getStatus() {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
