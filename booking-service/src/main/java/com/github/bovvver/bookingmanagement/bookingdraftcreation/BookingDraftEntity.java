@@ -33,11 +33,4 @@ class BookingDraftEntity {
 
     @CreatedDate
     private Instant createdAt;
-
-    BookingDraftEntity(final UUID bookingId,
-                       final UUID offerId,
-                       final UUID userId,
-                       final Double salary) {
-        this(bookingId, offerId, userId, salary, Instant.now());
-    }
 }
