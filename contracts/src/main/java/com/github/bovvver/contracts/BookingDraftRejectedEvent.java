@@ -1,6 +1,6 @@
 package com.github.bovvver.contracts;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record BookingDraftRejectedEvent(
@@ -9,6 +9,6 @@ public record BookingDraftRejectedEvent(
         UUID offerId,
         UUID userId,
         UUID bookingId,
-        Instant timestamp
+        LocalDateTime timestamp
 ) {
 }

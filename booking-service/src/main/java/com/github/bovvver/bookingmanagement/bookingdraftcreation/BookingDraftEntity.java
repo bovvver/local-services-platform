@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -32,5 +32,5 @@ class BookingDraftEntity {
     private Double salary;
 
     @CreatedDate
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 }

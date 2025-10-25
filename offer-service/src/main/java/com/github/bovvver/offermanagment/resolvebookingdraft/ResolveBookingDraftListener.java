@@ -15,7 +15,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ class ResolveBookingDraftListener {
                             cmd.bookingId(),
                             offerId.value(),
                             cmd.userId(),
-                            Instant.now()));
+                            LocalDateTime.now()));
             return;
         }
 
