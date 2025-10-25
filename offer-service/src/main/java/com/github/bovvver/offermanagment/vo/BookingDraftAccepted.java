@@ -2,7 +2,7 @@ package com.github.bovvver.offermanagment.vo;
 
 import com.github.bovvver.event.DomainEvent;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class BookingDraftAccepted implements DomainEvent {
 
@@ -13,7 +13,7 @@ public class BookingDraftAccepted implements DomainEvent {
     private final OfferId offerId;
     private final UserId userId;
     private final BookingId bookingId;
-    private final Instant timestamp;
+    private final LocalDateTime timestamp;
 
     public BookingDraftAccepted(final OfferId offerId, final UserId userId, final BookingId bookingId) {
         this.status = BookingRequestStatus.ACCEPTED;
@@ -21,11 +21,11 @@ public class BookingDraftAccepted implements DomainEvent {
         this.offerId = offerId;
         this.userId = userId;
         this.bookingId = bookingId;
-        this.timestamp = Instant.now();
+        this.timestamp = LocalDateTime.now();
     }
 
     @Override
-    public Instant getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 

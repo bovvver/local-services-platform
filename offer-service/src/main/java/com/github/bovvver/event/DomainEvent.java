@@ -1,7 +1,7 @@
 package com.github.bovvver.event;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public interface DomainEvent {
-    Instant getTimestamp();
+    LocalDateTime getTimestamp();
 }
