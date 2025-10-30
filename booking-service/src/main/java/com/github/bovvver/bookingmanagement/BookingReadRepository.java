@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface BookingReadRepository extends Repository<BookingEntity, UUID> {
 
     BookingEntity findById(UUID id);
+
+    boolean existsByOfferIdAndUserId(UUID offerId, UUID userId);
 }

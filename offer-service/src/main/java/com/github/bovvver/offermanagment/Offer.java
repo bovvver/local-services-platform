@@ -122,15 +122,15 @@ public class Offer {
         return new BookingDraftAccepted(this.id, userId, bookingId);
     }
 
-    OfferId getId() {
+    public OfferId getId() {
         return id;
     }
 
-    Title getTitle() {
+    public Title getTitle() {
         return title;
     }
 
-    Description getDescription() {
+    public Description getDescription() {
         return description;
     }
 
@@ -146,23 +146,23 @@ public class Offer {
         return bookingIds;
     }
 
-    Location getLocation() {
+    public Location getLocation() {
         return location;
     }
 
-    Set<ServiceCategory> getServiceCategories() {
+    public Set<ServiceCategory> getServiceCategories() {
         return serviceCategories;
     }
 
-    Salary getSalary() {
+    public Salary getSalary() {
         return salary;
     }
 
-    OfferStatus getStatus() {
+    public OfferStatus getStatus() {
         return status;
     }
 
-    LocalDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 

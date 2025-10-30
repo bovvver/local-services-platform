@@ -10,4 +10,6 @@ interface BookingDraftReadRepository extends Repository<BookingDraftEntity, UUID
 
     @Query("SELECT b.salary from BookingDraftEntity b WHERE b.bookingId = :bookingId")
     Double findSalaryByBookingId(@Param("bookingId") UUID bookingId);
+
+    boolean existsByOfferIdAndUserId(UUID offerId, UUID userId);
 }

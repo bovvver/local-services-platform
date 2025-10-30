@@ -1,8 +1,11 @@
 package com.github.bovvver.bookingmanagement;
 
+import com.github.bovvver.bookingmanagement.results.BeginNotificationResult;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Represents a booking made by a user for a specific offer.
@@ -23,23 +26,26 @@ public class Booking {
     private final BookingId id;
     private final UserId userId;
     private final OfferId offerId;
+    private NegotiationId negotiationId;
     private BookingStatus status;
-    private final Salary proposedSalary;
+    private final Salary finalSalary;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     Booking(final BookingId id,
             final UserId userId,
             final OfferId offerId,
+            final NegotiationId negotiationId,
             final BookingStatus status,
-            final Salary proposedSalary,
+            final Salary finalSalary,
             final LocalDateTime createdAt,
             final LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
         this.offerId = offerId;
+        this.negotiationId = negotiationId;
         this.status = status;
-        this.proposedSalary = proposedSalary;
+        this.finalSalary = finalSalary;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -53,17 +59,17 @@ public class Booking {
      *     <li>{@link #updatedAt} = same as {@link #createdAt}</li>
      * </ul>
      *
-     * @param id             unique identifier of the booking
-     * @param userId         identifier of the user making the booking
-     * @param offerId        identifier of the offer being booked
-     * @param proposedSalary proposed salary for the booking, if any
+     * @param id          unique identifier of the booking
+     * @param userId      identifier of the user making the booking
+     * @param offerId     identifier of the offer being booked
+     * @param finalSalary final salary for the booking, if any
      */
     Booking(BookingId id,
             UserId userId,
             OfferId offerId,
-            Salary proposedSalary
+            Salary finalSalary
     ) {
-        this(id, userId, offerId, BookingStatus.PENDING, proposedSalary, LocalDateTime.now(), LocalDateTime.now());
+        this(id, userId, offerId, null, BookingStatus.PENDING, finalSalary, LocalDateTime.now(), LocalDateTime.now());
     }
 
     /**
@@ -83,12 +89,46 @@ public class Booking {
         return new Booking(id, userId, offerId, proposedSalary);
     }
 
+    public BeginNotificationResult beginNegotiation(Salary proposedSalary) {
+        if (this.status != BookingStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Cannot begin negotiation for booking with status %s".formatted(this.status)
+            );
+        }
+        updateStatus(BookingStatus.IN_NEGOTIATION);
+        NegotiationId negotiationId = NegotiationId.generate();
+        NegotiationPosition initialPosition = NegotiationPosition.create(
+                NegotiationPositionId.generate(),
+                negotiationId,
+                proposedSalary,
+                NegotiationParty.AUTHOR
+        );
+        Negotiation negotiation = Negotiation.create(
+                negotiationId,
+                getId(),
+                List.of(initialPosition)
+        );
+        this.negotiationId = negotiation.getId();
+
+        return new BeginNotificationResult(this, negotiation, initialPosition);
+    }
+
     public void accept() {
+        validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.ACCEPTED);
     }
 
     public void reject() {
+        validateStatusForAction("reject", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.REJECTED);
+    }
+
+    private void validateStatusForAction(String action, BookingStatus... validStatuses) {
+        if (Stream.of(validStatuses).noneMatch(status -> status == this.status)) {
+            throw new IllegalStateException(
+                    "Cannot %s booking with status %s".formatted(action, this.status)
+            );
+        }
     }
 
     private void updateStatus(BookingStatus status) {
@@ -108,12 +148,16 @@ public class Booking {
         return offerId;
     }
 
+    NegotiationId getNegotiationId() {
+        return negotiationId;
+    }
+
     BookingStatus getStatus() {
         return status;
     }
 
-    Salary getProposedSalary() {
-        return proposedSalary;
+    Salary getFinalSalary() {
+        return finalSalary;
     }
 
     LocalDateTime getCreatedAt() {
