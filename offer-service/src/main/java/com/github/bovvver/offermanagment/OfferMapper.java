@@ -17,7 +17,7 @@ public class OfferMapper {
                 Title.of(document.getTitle()),
                 Description.of(document.getDescription()),
                 UserId.of(document.getAuthorId()),
-                UserId.of(document.getExecutorId()),
+                document.getExecutorId() == null ? null : UserId.of(document.getExecutorId()),
                 BookingId.fromAll(document.getBookingIds()),
                 Location.of(
                         document.getLocation().latitude(),

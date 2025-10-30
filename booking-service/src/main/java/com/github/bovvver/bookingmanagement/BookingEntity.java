@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ import java.util.UUID;
  *     <li>{@link #userId} – identifier of the booking user</li>
  *     <li>{@link #offerId} – identifier of the booked offer</li>
  *     <li>{@link #status} – current booking state</li>
- *     <li>{@link #proposedSalary} – proposed salary</li>
+ *     <li>{@link #finalSalary} – final salary</li>
  *     <li>{@link #createdAt}, {@link #updatedAt} – managed automatically via auditing</li>
  * </ul>
  *
@@ -59,12 +60,14 @@ public class BookingEntity {
     @Column(nullable = false)
     private UUID offerId;
 
+    private UUID negotiationId;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
     @Column(precision = 10, scale = 2)
-    private Double proposedSalary;
+    private BigDecimal finalSalary;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -73,18 +76,4 @@ public class BookingEntity {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    /**
-     * Creates a new booking entity with default {@link BookingStatus#PENDING} state.
-     *
-     * @param id      unique identifier for the booking
-     * @param userId  identifier of the user making the booking
-     * @param offerId identifier of the offer being booked
-     */
-    BookingEntity(UUID id,
-                  UUID userId,
-                  UUID offerId,
-                  Double proposedSalary) {
-        this(id, userId, offerId, BookingStatus.PENDING, proposedSalary, null, null);
-    }
 }

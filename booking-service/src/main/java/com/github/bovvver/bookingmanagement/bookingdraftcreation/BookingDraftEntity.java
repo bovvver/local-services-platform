@@ -1,14 +1,13 @@
 package com.github.bovvver.bookingmanagement.bookingdraftcreation;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,6 +15,14 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+        name = "booking_drafts",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "booking_drafts_booking_offer_unique",
+                        columnNames = {"booking_id", "offer_id"}
+                )
+        })
 class BookingDraftEntity {
 
     @Id
@@ -29,7 +36,7 @@ class BookingDraftEntity {
 
     @Min(value = 0)
     @Column(precision = 10, scale = 2)
-    private Double salary;
+    private BigDecimal salary;
 
     @CreatedDate
     private LocalDateTime createdAt;

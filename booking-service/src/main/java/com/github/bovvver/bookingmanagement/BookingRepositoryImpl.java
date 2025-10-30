@@ -6,10 +6,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 class BookingRepositoryImpl implements BookingRepository {
-    private final SqlBookingRepository repository;
+    private final SqlBookingRepository bookingRepository;
+    private final SqlNegotiationRepository negotiationRepository;
+    private final SqlNegotiationPositionRepository negotiationPositionRepository;
 
     @Override
     public void save(final Booking booking) {
-        repository.save(BookingMapper.toEntity(booking));
+        bookingRepository.save(BookingMapper.toEntity(booking));
+    }
+
+    @Override
+    public void saveNegotiation(final Booking booking, final Negotiation negotiation, final NegotiationPosition position) {
+        bookingRepository.save(BookingMapper.toEntity(booking));
+        negotiationRepository.save(NegotiationMapper.toEntity(negotiation));
+        negotiationPositionRepository.save(NegotiationPositionMapper.toEntity(position));
     }
 }

@@ -1,9 +1,6 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.BookingId;
-import com.github.bovvver.bookingmanagement.vo.OfferId;
-import com.github.bovvver.bookingmanagement.vo.Salary;
-import com.github.bovvver.bookingmanagement.vo.UserId;
+import com.github.bovvver.bookingmanagement.vo.*;
 
 public class BookingMapper {
 
@@ -12,8 +9,9 @@ public class BookingMapper {
                 booking.getId().value(),
                 booking.getUserId().value(),
                 booking.getOfferId().value(),
+                booking.getNegotiationId() == null ? null : booking.getNegotiationId().value(),
                 booking.getStatus(),
-                booking.getProposedSalary().value(),
+                booking.getFinalSalary().value(),
                 booking.getCreatedAt(),
                 booking.getUpdatedAt()
         );
@@ -24,8 +22,9 @@ public class BookingMapper {
                 new BookingId(bookingEntity.getId()),
                 new UserId(bookingEntity.getUserId()),
                 new OfferId(bookingEntity.getOfferId()),
+                bookingEntity.getNegotiationId() == null ? null : new NegotiationId(bookingEntity.getNegotiationId()),
                 bookingEntity.getStatus(),
-                new Salary(bookingEntity.getProposedSalary()),
+                new Salary(bookingEntity.getFinalSalary()),
                 bookingEntity.getCreatedAt(),
                 bookingEntity.getUpdatedAt()
         );

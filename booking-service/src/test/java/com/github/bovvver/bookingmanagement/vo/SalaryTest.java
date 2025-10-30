@@ -9,13 +9,13 @@ class SalaryTest {
 
     @Test
     void shouldCreateSalaryWhenValueIsPositive() {
-        Salary salary = new Salary(1000.0);
+        Salary salary = Salary.of(1000.00);
         assertThat(salary.value()).isEqualTo(1000.0);
     }
 
     @Test
     void shouldThrowExceptionWhenValueIsNegative() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new Salary(-500.0));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Salary.of(-500.0));
         assertEquals("Salary cannot be negative", exception.getMessage());
         assertThat(exception.getMessage()).isEqualTo("Salary cannot be negative");
     }

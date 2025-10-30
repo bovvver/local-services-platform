@@ -105,19 +105,19 @@ public class User {
         return new User(id, email, firstName, lastName);
     }
 
-    UserId getId() {
+    public UserId getId() {
         return id;
     }
 
-    Email getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    String getFirstName() {
+    public String getFirstName() {
         return firstName;
     }
 
-    String getLastName() {
+    public String getLastName() {
         return lastName;
     }
 
