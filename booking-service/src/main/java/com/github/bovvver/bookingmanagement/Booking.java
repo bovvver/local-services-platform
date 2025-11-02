@@ -114,12 +114,12 @@ public class Booking {
     }
 
     public void accept() {
-        validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+        validateStatusForAction("accept", BookingStatus.PENDING);
         updateStatus(BookingStatus.ACCEPTED);
     }
 
     public void reject() {
-        validateStatusForAction("reject", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+        validateStatusForAction("reject", BookingStatus.PENDING);
         updateStatus(BookingStatus.REJECTED);
     }
 
