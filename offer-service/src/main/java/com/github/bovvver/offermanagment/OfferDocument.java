@@ -76,7 +76,7 @@ public class OfferDocument {
      * @param location    location of the offer
      * @param salary      salary associated with the offer
      */
-    OfferDocument(String title,
+    public OfferDocument(String title,
                   String description,
                   UUID authorId,
                   Location location,

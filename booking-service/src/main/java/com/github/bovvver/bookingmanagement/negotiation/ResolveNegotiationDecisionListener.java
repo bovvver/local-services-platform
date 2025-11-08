@@ -1,6 +1,6 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
-import com.github.bovvver.contracts.BookingDecisionCommand;
+import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ class ResolveNegotiationDecisionListener {
     private final ResolveNegotiationDecisionService resolveNegotiationDecisionService;
 
     @KafkaListener(topics = OFFER_BOOKING_NEGOTIATE, groupId = "booking-service")
-    void onBookingDecisionCommandReceived(BookingDecisionCommand cmd) {
+    void onBookingDecisionMadeEventReceived(BookingDecisionMadeEvent cmd) {
         resolveNegotiationDecisionService.beginNegotiation(cmd);
     }
 }

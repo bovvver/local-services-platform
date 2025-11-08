@@ -1,9 +1,9 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
 import com.github.bovvver.bookingmanagement.*;
-import com.github.bovvver.bookingmanagement.results.BeginNotificationResult;
+import com.github.bovvver.bookingmanagement.results.BeginNegotiationResult;
 import com.github.bovvver.bookingmanagement.vo.Salary;
-import com.github.bovvver.contracts.BookingDecisionCommand;
+import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,12 +16,12 @@ class ResolveNegotiationDecisionService {
     private final BookingRepository bookingRepository;
 
     @Transactional
-    void beginNegotiation(BookingDecisionCommand cmd) {
+    void beginNegotiation(BookingDecisionMadeEvent cmd) {
 
         BookingEntity bookingEntity = bookingReadRepository.findById(cmd.bookingId());
         Booking booking = BookingMapper.toDomain(bookingEntity);
 
-        BeginNotificationResult negotiationData = booking.beginNegotiation(Salary.of(cmd.salary()));
+        BeginNegotiationResult negotiationData = booking.beginNegotiation(Salary.of(cmd.salary()));
 
         bookingRepository.saveNegotiation(
                 negotiationData.booking(),

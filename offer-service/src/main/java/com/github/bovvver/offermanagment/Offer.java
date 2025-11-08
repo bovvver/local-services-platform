@@ -4,10 +4,7 @@ import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.offermanagment.vo.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents an offer in the system.
@@ -23,14 +20,14 @@ public class Offer {
     private final Title title;
     private final Description description;
     private final UserId authorId;
-    private final UserId executorId;
+    private UserId executorId;
     private final Set<BookingId> bookingIds;
     private final Location location;
     private final Set<ServiceCategory> serviceCategories;
     private final Salary salary;
-    private final OfferStatus status;
+    private OfferStatus status;
     private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     Offer(final OfferId id,
           final Title title,
@@ -115,11 +112,36 @@ public class Offer {
             UserId userId,
             BookingId bookingId
     ) {
-        if (!List.of(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(this.status)) {
+        if (isClosedForBooking()) {
             return new BookingDraftRejected(this.id, userId, bookingId);
         }
         this.bookingIds.add(bookingId);
+        this.updatedAt = LocalDateTime.now();
         return new BookingDraftAccepted(this.id, userId, bookingId);
+    }
+
+    public void negotiate() {
+        if (isClosedForBooking()) {
+            throw new IllegalStateException("Offer %s is not open for booking.".formatted(id.value()));
+        }
+        updateStatus(OfferStatus.IN_NEGOTIATION);
+    }
+
+    public void accept(UserId executorId) {
+        if (isClosedForBooking()) {
+            throw new IllegalStateException("Offer %s is not open for booking.".formatted(id.value()));
+        }
+        updateStatus(OfferStatus.ASSIGNED);
+        this.executorId = executorId;
+    }
+
+    private boolean isClosedForBooking() {
+        return !Arrays.asList(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(status);
+    }
+
+    private void updateStatus(OfferStatus newStatus) {
+        this.status = newStatus;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public OfferId getId() {
@@ -134,15 +156,15 @@ public class Offer {
         return description;
     }
 
-    UserId getAuthorId() {
+    public UserId getAuthorId() {
         return authorId;
     }
 
-    UserId getExecutorId() {
+    public UserId getExecutorId() {
         return executorId;
     }
 
-    Set<BookingId> getBookingIds() {
+    public Set<BookingId> getBookingIds() {
         return bookingIds;
     }
 
@@ -166,7 +188,7 @@ public class Offer {
         return createdAt;
     }
 
-    LocalDateTime getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 }

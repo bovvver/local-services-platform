@@ -1,6 +1,6 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.results.BeginNotificationResult;
+import com.github.bovvver.bookingmanagement.results.BeginNegotiationResult;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
@@ -89,7 +89,7 @@ public class Booking {
         return new Booking(id, userId, offerId, proposedSalary);
     }
 
-    public BeginNotificationResult beginNegotiation(Salary proposedSalary) {
+    public BeginNegotiationResult beginNegotiation(Salary proposedSalary) {
         if (this.status != BookingStatus.PENDING) {
             throw new IllegalStateException(
                     "Cannot begin negotiation for booking with status %s".formatted(this.status)
@@ -110,16 +110,16 @@ public class Booking {
         );
         this.negotiationId = negotiation.getId();
 
-        return new BeginNotificationResult(this, negotiation, initialPosition);
+        return new BeginNegotiationResult(this, negotiation, initialPosition);
     }
 
     public void accept() {
-        validateStatusForAction("accept", BookingStatus.PENDING);
+        validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.ACCEPTED);
     }
 
     public void reject() {
-        validateStatusForAction("reject", BookingStatus.PENDING);
+        validateStatusForAction("reject", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.REJECTED);
     }
 
@@ -140,11 +140,11 @@ public class Booking {
         return id;
     }
 
-    UserId getUserId() {
+    public UserId getUserId() {
         return userId;
     }
 
-    OfferId getOfferId() {
+    public OfferId getOfferId() {
         return offerId;
     }
 
