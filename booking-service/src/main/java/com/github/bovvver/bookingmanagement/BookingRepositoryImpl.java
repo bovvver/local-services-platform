@@ -16,6 +16,11 @@ class BookingRepositoryImpl implements BookingRepository {
     }
 
     @Override
+    public void saveAll(final Iterable<Booking> bookings) {
+        bookingRepository.saveAll(BookingMapper.toEntityList(bookings));
+    }
+
+    @Override
     public void saveNegotiation(final Booking booking, final Negotiation negotiation, final NegotiationPosition position) {
         bookingRepository.save(BookingMapper.toEntity(booking));
         negotiationRepository.save(NegotiationMapper.toEntity(negotiation));

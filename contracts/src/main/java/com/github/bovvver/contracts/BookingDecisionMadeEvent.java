@@ -2,7 +2,7 @@ package com.github.bovvver.contracts;
 
 import java.util.UUID;
 
-public record BookingDecisionCommand (
+public record BookingDecisionMadeEvent(
         UUID bookingId,
         UUID offerId,
         BookingDecisionStatus status,

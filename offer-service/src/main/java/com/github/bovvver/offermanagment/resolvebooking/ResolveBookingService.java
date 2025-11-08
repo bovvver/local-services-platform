@@ -1,13 +1,17 @@
 package com.github.bovvver.offermanagment.resolvebooking;
 
-import com.github.bovvver.contracts.BookingDecisionCommand;
+import com.github.bovvver.contracts.AssignExecutorCommand;
+import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
-import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.contracts.OtherBookingsRejectedEvent;
+import com.github.bovvver.offermanagment.*;
+import com.github.bovvver.offermanagment.vo.UserId;
 import com.github.bovvver.shared.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -17,9 +21,11 @@ class ResolveBookingService {
 
     private static final String OFFER_BOOKING_DECISION = "offer.booking.decision";
     private static final String OFFER_BOOKING_NEGOTIATE = "offer.booking.negotiate";
+    private static final String OFFER_BOOKING_REJECT_OTHERS = "offer.booking.reject.others";
 
-    private final KafkaTemplate<String, BookingDecisionCommand> kafka;
+    private final KafkaTemplate<String, Object> kafka;
     private final OfferReadRepository offerReadRepository;
+    private final OfferWriteRepository offerWriteRepository;
     private final CurrentUser currentUser;
 
     void processBookingDecision(
@@ -33,17 +39,37 @@ class ResolveBookingService {
             );
         }
         validateRequest(request);
-        sendBookingDecisionCommand(createBookingDecisionCommand(
+        sendBookingDecisionMadeEvent(createBookingDecisionMadeEvent(
                 bookingId,
                 offerId,
                 request
         ));
     }
 
-    private void sendBookingDecisionCommand(BookingDecisionCommand cmd) {
+    @Transactional
+    void completeBookingAssignment(final AssignExecutorCommand cmd) {
+        OfferDocument offerDocument = offerReadRepository.findById(cmd.offerId())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Offer with id %s not found during booking decision.".formatted(cmd.offerId())
+                ));
+        Offer offer = OfferMapper.toDomain(offerDocument);
+        offer.accept(UserId.of(cmd.userId()));
+        offerWriteRepository.save(offer);
+
+        kafka.send(OFFER_BOOKING_REJECT_OTHERS, cmd.offerId().toString(), new OtherBookingsRejectedEvent(cmd.offerId()));
+    }
+
+    private void sendBookingDecisionMadeEvent(BookingDecisionMadeEvent cmd) {
+
+        OfferDocument offerDocument = offerReadRepository.findById(cmd.offerId())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Offer with id %s not found during booking decision.".formatted(cmd.offerId())
+                ));
+        Offer offer = OfferMapper.toDomain(offerDocument);
 
         if (cmd.status() == BookingDecisionStatus.NEGOTIATE) {
             kafka.send(OFFER_BOOKING_NEGOTIATE, cmd.bookingId().toString(), cmd);
+            offer.negotiate();
             return;
         }
         kafka.send(OFFER_BOOKING_DECISION, cmd.bookingId().toString(), cmd);
@@ -71,12 +97,12 @@ class ResolveBookingService {
         }
     }
 
-    private BookingDecisionCommand createBookingDecisionCommand(
+    private BookingDecisionMadeEvent createBookingDecisionMadeEvent(
             UUID bookingId,
             UUID offerId,
             BookingDecisionRequest request
     ) {
-        return new BookingDecisionCommand(
+        return new BookingDecisionMadeEvent(
                 bookingId,
                 offerId,
                 request.status(),
