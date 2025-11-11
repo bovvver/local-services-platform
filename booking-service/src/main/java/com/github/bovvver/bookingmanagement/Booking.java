@@ -86,6 +86,12 @@ public class Booking {
             OfferId offerId,
             Salary proposedSalary
     ) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId cannot be null");
+        }
+        if (offerId == null) {
+            throw new IllegalArgumentException("OfferId cannot be null");
+        }
         return new Booking(id, userId, offerId, proposedSalary);
     }
 

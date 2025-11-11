@@ -19,9 +19,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class ResolveBookingService {
 
-    private static final String OFFER_BOOKING_DECISION = "offer.booking.decision";
-    private static final String OFFER_BOOKING_NEGOTIATE = "offer.booking.negotiate";
-    private static final String OFFER_BOOKING_REJECT_OTHERS = "offer.booking.reject.others";
+    static final String OFFER_BOOKING_DECISION = "offer.booking.decision";
+    static final String OFFER_BOOKING_NEGOTIATE = "offer.booking.negotiate";
+    static final String OFFER_BOOKING_REJECT_OTHERS = "offer.booking.reject.others";
 
     private final KafkaTemplate<String, Object> kafka;
     private final OfferReadRepository offerReadRepository;
@@ -77,14 +77,14 @@ class ResolveBookingService {
 
     private boolean checkOwnership(final UUID offerId) {
 
-        UUID currentUserId = currentUser.getId().value();
-        if (currentUserId == null) {
+        UserId currentUserId = currentUser.getId();
+        if (currentUserId == null || currentUserId.value() == null) {
             throw new IllegalStateException("No user logged in.");
         }
 
         return offerReadRepository.existsByIdAndAuthorId(
                 offerId,
-                currentUserId
+                currentUserId.value()
         );
     }
 
