@@ -6,7 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.Set;
 
-class ValidServiceCategoryValidator implements ConstraintValidator<ValidServiceCategory, Set<String>> {
+public class ValidServiceCategoryValidator implements ConstraintValidator<ValidServiceCategory, Set<String>> {
 
     @Override
     public boolean isValid(final Set<String> categories, final ConstraintValidatorContext constraintValidatorContext) {

@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 class ResolveBookingDraftListener {
 
-    private static final String BOOKING_OFFER_AVAILABILITY_REQUEST = "booking.offer.availability.request";
-    private static final String BOOKING_OFFER_AVAILABILITY_REJECTED = "booking.offer.availability.rejected";
+    static final String BOOKING_OFFER_AVAILABILITY_REQUEST = "booking.offer.availability.request";
+    static final String BOOKING_OFFER_AVAILABILITY_REJECTED = "booking.offer.availability.rejected";
 
     private final KafkaTemplate<String, BookingDraftRejectedEvent> kafka;
     private final OfferReadRepository offerReadRepository;

@@ -105,6 +105,9 @@ public class Offer {
             Set<ServiceCategory> serviceCategories,
             Salary salary
     ) {
+        if (authorId == null) {
+            throw new IllegalArgumentException("UserId cannot be null");
+        }
         return new Offer(new OfferId(UUID.randomUUID()), title, description, authorId, location, serviceCategories, salary);
     }
 

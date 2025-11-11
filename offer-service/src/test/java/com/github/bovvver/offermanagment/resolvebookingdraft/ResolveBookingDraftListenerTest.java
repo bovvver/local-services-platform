@@ -1,0 +1,104 @@
+package com.github.bovvver.offermanagment.resolvebookingdraft;
+
+import com.github.bovvver.contracts.BookOfferCommand;
+import com.github.bovvver.contracts.BookingDraftRejectedEvent;
+import com.github.bovvver.event.DomainEvent;
+import com.github.bovvver.event.DomainEventPublisher;
+import com.github.bovvver.offermanagment.OfferDocument;
+import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.offermanagment.vo.Location;
+import com.github.bovvver.offermanagment.vo.OfferStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class ResolveBookingDraftListenerTest {
+
+    @Mock
+    private KafkaTemplate<String, BookingDraftRejectedEvent> kafka;
+
+    @Mock
+    private OfferReadRepository offerReadRepository;
+
+    @Mock
+    private DomainEventPublisher domainEventPublisher;
+
+    @InjectMocks
+    private ResolveBookingDraftListener listener;
+
+    private UUID offerId;
+    private UUID userId;
+    private UUID bookingId;
+    private BookOfferCommand command;
+
+    @BeforeEach
+    void setUp() {
+        offerId = UUID.randomUUID();
+        userId = UUID.randomUUID();
+        bookingId = UUID.randomUUID();
+        command = new BookOfferCommand(offerId, userId, bookingId);
+    }
+
+    @Test
+    void shouldPublishDomainEventWhenOfferExists() {
+        OfferDocument offerDocument = createOfferDocument();
+
+        when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
+
+        listener.onBookingRequestReceived(command);
+
+        verify(domainEventPublisher).publish(any(DomainEvent.class));
+        verifyNoInteractions(kafka);
+    }
+
+    @Test
+    void shouldSendRejectionEventWhenOfferNotFound() {
+        when(offerReadRepository.findById(offerId)).thenReturn(Optional.empty());
+
+        listener.onBookingRequestReceived(command);
+
+        verify(kafka).send(
+                eq(ResolveBookingDraftListener.BOOKING_OFFER_AVAILABILITY_REJECTED),
+                eq(bookingId.toString()),
+                argThat(event ->
+                        event.error().equals("NOT_FOUND") &&
+                                event.offerId().equals(bookingId) &&
+                                event.userId().equals(offerId) &&
+                                event.bookingId().equals(userId) &&
+                                event.reason().contains("Offer with id")
+                )
+        );
+        verifyNoInteractions(domainEventPublisher);
+    }
+
+    private OfferDocument createOfferDocument() {
+        return new OfferDocument(
+                offerId,
+                "Test Title",
+                "Test Description",
+                userId,
+                null,
+                Set.of(),
+                new Location(0.0, 0.0),
+                Set.of(),
+                100.0,
+                OfferStatus.OPEN,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+    }
+}
+
