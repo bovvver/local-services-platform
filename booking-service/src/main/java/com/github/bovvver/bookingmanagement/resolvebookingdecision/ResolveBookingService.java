@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 class ResolveBookingService {
 
-    private static final String OFFER_BOOKING_DECISION_RESPONSE = "offer.booking.decision.response";
+    static final String OFFER_BOOKING_DECISION_RESPONSE = "offer.booking.decision.response";
 
     private final BookingRepository bookingRepository;
     private final BookingReadRepository bookingReadRepository;

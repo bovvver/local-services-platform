@@ -33,7 +33,6 @@ public class Negotiation {
     Negotiation(final NegotiationId id,
                 final BookingId bookingId,
                 final List<NegotiationPosition> positions) {
-
         this(id, bookingId, positions, NegotiationStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
     }
 

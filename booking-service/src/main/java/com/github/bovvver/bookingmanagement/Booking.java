@@ -158,7 +158,7 @@ public class Booking {
         return negotiationId;
     }
 
-    BookingStatus getStatus() {
+    public BookingStatus getStatus() {
         return status;
     }
 

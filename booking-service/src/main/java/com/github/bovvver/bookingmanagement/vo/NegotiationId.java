@@ -9,6 +9,10 @@ public record NegotiationId(UUID value) {
         }
     }
 
+    public static NegotiationId of(UUID value) {
+        return new NegotiationId(value);
+    }
+
     public static NegotiationId generate() {
         return new NegotiationId(UUID.randomUUID());
     }
