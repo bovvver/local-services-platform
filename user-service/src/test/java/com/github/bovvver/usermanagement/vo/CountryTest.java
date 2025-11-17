@@ -14,10 +14,9 @@ class CountryTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenCodeIsNull() {
-        assertThatThrownBy(() -> new Country(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Invalid ISO alpha-2 country code: null");
+    void shouldCreateCountryWithNullValueWhenCountryNameIsNull() {
+        Country country = new Country(null);
+        assertThat(country.code()).isEqualTo(null);
     }
 
     @Test
@@ -46,5 +45,16 @@ class CountryTest {
         assertThatThrownBy(() -> new Country("P1"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Invalid ISO alpha-2 country code: P1");
+    }
+
+    @Test
+    void shouldReturnNullWhenUsingFactoryMethodWithNullCode() {
+        assertThat(Country.of(null)).isNull();
+    }
+
+    @Test
+    void shouldCreateCountryUsingFactoryMethodWithValidCode() {
+        Country country = Country.of("US");
+        assertThat(country.code()).isEqualTo("US");
     }
 }

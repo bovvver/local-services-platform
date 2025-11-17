@@ -14,10 +14,9 @@ class CityTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenCityNameIsNull() {
-        assertThatThrownBy(() -> new City(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("City cannot be blank");
+    void shouldCreateCityWithNullValueWhenCityNameIsNull() {
+        City city = new City(null);
+        assertThat(city.value()).isEqualTo(null);
     }
 
     @Test
@@ -61,5 +60,16 @@ class CityTest {
 
         City city2 = new City("München");
         assertThat(city2.value()).isEqualTo("München");
+    }
+
+    @Test
+    void shouldReturnNullWhenUsingFactoryMethodWithNullValue() {
+        assertThat(City.of(null)).isNull();
+    }
+
+    @Test
+    void shouldCreateCityUsingFactoryMethodWithValidValue() {
+        City city = City.of("London");
+        assertThat(city.value()).isEqualTo("London");
     }
 }
