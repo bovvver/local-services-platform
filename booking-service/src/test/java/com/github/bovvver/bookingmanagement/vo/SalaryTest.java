@@ -2,6 +2,8 @@ package com.github.bovvver.bookingmanagement.vo;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,8 +11,8 @@ class SalaryTest {
 
     @Test
     void shouldCreateSalaryWhenValueIsPositive() {
-        Salary salary = Salary.of(1000.00);
-        assertThat(salary.value()).isEqualTo(1000.0);
+        Salary salary = Salary.of(1000.0);
+        assertThat(salary.value()).isEqualTo(BigDecimal.valueOf(1000.0));
     }
 
     @Test
@@ -23,7 +25,7 @@ class SalaryTest {
     @Test
     void shouldCreateSalaryUsingFactoryMethodWhenValueIsPositive() {
         Salary salary = Salary.of(2000.0);
-        assertThat(salary.value()).isEqualTo(2000.0);
+        assertThat(salary.value()).isEqualTo(BigDecimal.valueOf(2000.0));
     }
 
     @Test
