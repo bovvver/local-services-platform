@@ -1,12 +1,13 @@
 package com.github.bovvver;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.usermanagement.keycloakusercreation.KeycloakUserRequest;
-import com.github.bovvver.usermanagement.keycloakusercreation.UserCreatedResponse;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class KeycloakAuthRESTIT extends BaseIntegrationTest {
 
@@ -16,8 +17,11 @@ class KeycloakAuthRESTIT extends BaseIntegrationTest {
     private static final String TEST_FIRST_NAME = "John";
     private static final String TEST_LAST_NAME = "Doe";
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void shouldCreateUserFromKeycloak() {
+    void shouldCreateUserFromKeycloak() throws Exception {
         KeycloakUserRequest request = new KeycloakUserRequest(
                 TEST_USER_ID,
                 TEST_EMAIL,
@@ -25,18 +29,13 @@ class KeycloakAuthRESTIT extends BaseIntegrationTest {
                 TEST_LAST_NAME
         );
 
-        ResponseEntity<UserCreatedResponse> response = restTemplate.postForEntity(
-                CREATE_USER_ENDPOINT,
-                request,
-                UserCreatedResponse.class
-        );
-        UserCreatedResponse user = response.getBody();
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(user).isNotNull();
-        assertThat(user.userId()).isEqualTo(TEST_USER_ID);
-        assertThat(user.email()).isEqualTo(TEST_EMAIL);
-        assertThat(user.firstName()).isEqualTo(TEST_FIRST_NAME);
-        assertThat(user.lastName()).isEqualTo(TEST_LAST_NAME);
+        mockMvc.perform(post(CREATE_USER_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.userId").value(TEST_USER_ID))
+                .andExpect(jsonPath("$.email").value(TEST_EMAIL))
+                .andExpect(jsonPath("$.firstName").value(TEST_FIRST_NAME))
+                .andExpect(jsonPath("$.lastName").value(TEST_LAST_NAME));
     }
 }

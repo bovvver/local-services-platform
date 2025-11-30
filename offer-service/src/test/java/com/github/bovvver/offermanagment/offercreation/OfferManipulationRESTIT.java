@@ -1,19 +1,19 @@
-package com.github.bovvver;
+package com.github.bovvver.offermanagment.offercreation;
 
-import com.github.bovvver.offermanagment.offercreation.CreateOfferRequest;
-import com.github.bovvver.offermanagment.offercreation.LocationDTO;
-import com.github.bovvver.offermanagment.offercreation.OfferCreatedResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.bovvver.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class OfferManipulationRESTIT extends BaseIntegrationTest {
 
@@ -24,8 +24,11 @@ class OfferManipulationRESTIT extends BaseIntegrationTest {
     private static final LocationDTO LOCATION = new LocationDTO(10, -170);
     private static final String[] SERVICE_CATEGORIES = {"HOME_SERVICES", "TECH_SUPPORT"};
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
-    void shouldCreateOffer() {
+    void shouldCreateOffer() throws Exception {
         CreateOfferRequest request = new CreateOfferRequest(
                 TITLE,
                 DESCRIPTION,
@@ -34,34 +37,26 @@ class OfferManipulationRESTIT extends BaseIntegrationTest {
                 Set.of(SERVICE_CATEGORIES)
         );
 
-        ResponseEntity<OfferCreatedResponse> response = restTemplate.postForEntity(
-                CREATE_OFFER_ENDPOINT,
-                request,
-                OfferCreatedResponse.class
-        );
-        OfferCreatedResponse offer = response.getBody();
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(offer).isNotNull();
-        assertThat(offer.title()).isEqualTo(TITLE);
-        assertThat(offer.description()).isEqualTo(DESCRIPTION);
-        assertThat(offer.salary()).isEqualTo(SALARY);
-        assertThat(offer.location()).isEqualTo(LOCATION);
-        assertThat(offer.serviceCategories()).containsExactlyInAnyOrder(SERVICE_CATEGORIES);
-        assertThat(offer.offerId()).isNotNull();
+        mockMvc.perform(post(CREATE_OFFER_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value(TITLE))
+                .andExpect(jsonPath("$.description").value(DESCRIPTION))
+                .andExpect(jsonPath("$.salary").value(SALARY))
+                .andExpect(jsonPath("$.location.latitude").value(LOCATION.latitude()))
+                .andExpect(jsonPath("$.location.longitude").value(LOCATION.longitude()))
+                .andExpect(jsonPath("$.serviceCategories").isArray())
+                .andExpect(jsonPath("$.offerId").isNotEmpty());
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForValidationCheck")
-    void shouldThrowValidationError(CreateOfferRequest request) {
-
-        ResponseEntity<OfferCreatedResponse> response = restTemplate.postForEntity(
-                CREATE_OFFER_ENDPOINT,
-                request,
-                OfferCreatedResponse.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    void shouldThrowValidationError(CreateOfferRequest request) throws Exception {
+        mockMvc.perform(post(CREATE_OFFER_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     private static Stream<Arguments> provideArgumentsForValidationCheck() {
