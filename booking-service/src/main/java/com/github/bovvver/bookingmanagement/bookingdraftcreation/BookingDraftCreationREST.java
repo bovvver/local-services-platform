@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 class BookingDraftCreationREST {
 
-    private static final String CREATE_BOOKING_ENDPOINT = "/bookings/create";
+    static final String CREATE_BOOKING_ENDPOINT = "/bookings/create";
 
     private final BookingDraftCreationService bookingDraftCreationService;
 
