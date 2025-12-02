@@ -15,6 +15,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,8 @@ import static com.github.bovvver.offermanagment.resolvebooking.ResolveBookingSer
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ResolveBookingRESTIT extends BaseIntegrationTest {
 
@@ -97,8 +99,8 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.status").value(202))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString(testBookingId.toString())))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString(testOfferId.toString())));
+                .andExpect(jsonPath("$.message").value(Matchers.containsString(testBookingId.toString())))
+                .andExpect(jsonPath("$.message").value(Matchers.containsString(testOfferId.toString())));
 
         await().atMost(Duration.ofSeconds(10))
                 .untilAsserted(() -> {
