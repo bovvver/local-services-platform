@@ -7,5 +7,6 @@ public enum OfferStatus {
     IN_PROGRESS,
     COMPLETED,
     CANCELLED,
-    ACTIVE, EXPIRED
+    ACTIVE,
+    EXPIRED
 }

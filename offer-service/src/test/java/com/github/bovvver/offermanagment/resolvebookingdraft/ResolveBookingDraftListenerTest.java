@@ -75,9 +75,9 @@ class ResolveBookingDraftListenerTest {
                 eq(bookingId.toString()),
                 argThat(event ->
                         event.error().equals("NOT_FOUND") &&
-                                event.offerId().equals(bookingId) &&
-                                event.userId().equals(offerId) &&
-                                event.bookingId().equals(userId) &&
+                                event.offerId().equals(offerId) &&
+                                event.userId().equals(userId) &&
+                                event.bookingId().equals(bookingId) &&
                                 event.reason().contains("Offer with id")
                 )
         );
