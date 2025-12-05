@@ -38,9 +38,9 @@ class ResolveBookingDraftListener {
             kafka.send(BOOKING_OFFER_AVAILABILITY_REJECTED, cmd.bookingId().toString(),
                     new BookingDraftRejectedEvent("NOT_FOUND",
                             "Offer with id %s not found".formatted(offerId.value()),
-                            cmd.bookingId(),
-                            offerId.value(),
+                            cmd.offerId(),
                             cmd.userId(),
+                            cmd.bookingId(),
                             LocalDateTime.now()));
             return;
         }

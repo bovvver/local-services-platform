@@ -102,15 +102,15 @@ public class Booking {
             );
         }
         updateStatus(BookingStatus.IN_NEGOTIATION);
-        NegotiationId negotiationId = NegotiationId.generate();
+        NegotiationId newNegotiationId = NegotiationId.generate();
         NegotiationPosition initialPosition = NegotiationPosition.create(
                 NegotiationPositionId.generate(),
-                negotiationId,
+                newNegotiationId,
                 proposedSalary,
                 NegotiationParty.AUTHOR
         );
         Negotiation negotiation = Negotiation.create(
-                negotiationId,
+                newNegotiationId,
                 getId(),
                 List.of(initialPosition)
         );
