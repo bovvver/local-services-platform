@@ -30,6 +30,7 @@ class ResolveBookingService {
 
         if (cmd.status() == BookingDecisionStatus.REJECTED) {
             booking.reject();
+            bookingRepository.save(booking);
             return;
         }
         booking.accept();

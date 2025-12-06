@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -62,7 +63,7 @@ class BookingDraftCreationServiceTest {
 
         @Test
         void shouldCreateDraftAndSendKafkaMessageWhenNoExistingBookingsOrDrafts() {
-            BookOfferRequest request = new BookOfferRequest(offerId, 10_000.0);
+            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
             when(currentUser.getId()).thenReturn(UserId.of(userId));
             when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
             when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
@@ -89,7 +90,7 @@ class BookingDraftCreationServiceTest {
 
         @Test
         void shouldThrowConflictWhenFinalBookingAlreadyExistsForOfferAndUser() {
-            BookOfferRequest request = new BookOfferRequest(offerId, 10_000.0);
+            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
             when(currentUser.getId()).thenReturn(UserId.of(userId));
             when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
 
@@ -105,7 +106,7 @@ class BookingDraftCreationServiceTest {
 
         @Test
         void shouldThrowConflictWhenDraftBookingAlreadyExistsForOfferAndUser() {
-            BookOfferRequest request = new BookOfferRequest(offerId, 10_000.0);
+            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
             when(currentUser.getId()).thenReturn(UserId.of(userId));
             when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
             when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
@@ -121,7 +122,7 @@ class BookingDraftCreationServiceTest {
 
         @Test
         void shouldCheckConflictsUsingCurrentUserId() {
-            BookOfferRequest request = new BookOfferRequest(offerId, 5_000.0);
+            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(5_000.0));
             when(currentUser.getId()).thenReturn(UserId.of(userId));
             when(bookingReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
             when(bookingDraftReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);

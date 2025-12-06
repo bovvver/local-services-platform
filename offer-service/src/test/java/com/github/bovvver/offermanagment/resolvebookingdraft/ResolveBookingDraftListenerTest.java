@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -94,7 +95,7 @@ class ResolveBookingDraftListenerTest {
                 Set.of(),
                 new Location(0.0, 0.0),
                 Set.of(),
-                100.0,
+                BigDecimal.valueOf(100.0),
                 OfferStatus.OPEN,
                 LocalDateTime.now(),
                 LocalDateTime.now()

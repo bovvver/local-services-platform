@@ -24,7 +24,7 @@ public class OfferMapper {
                         document.getLocation().longitude()
                 ),
                 document.getServiceCategories(),
-                Salary.of(document.getSalary()),
+                new Salary(document.getSalary()),
                 document.getStatus(),
                 document.getCreatedAt(),
                 document.getUpdatedAt()

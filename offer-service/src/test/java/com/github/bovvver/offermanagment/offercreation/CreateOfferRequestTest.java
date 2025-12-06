@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Plumbing services",
                 "Professional plumbing repairs and installations",
-                150.0,
+                BigDecimal.valueOf(150.0),
                 validLocation(),
                 Set.of("HOME_SERVICES")
         );
@@ -45,7 +46,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 " ",
                 "Valid description",
-                100.0,
+                BigDecimal.valueOf(100.0),
                 validLocation(),
                 Set.of("HOME_SERVICES")
         );
@@ -60,7 +61,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Valid title",
                 longDescription,
-                100.0,
+                BigDecimal.valueOf(100.0),
                 validLocation(),
                 Set.of("HOME_SERVICES")
         );
@@ -74,7 +75,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Valid title",
                 "Valid description",
-                -5.0,
+                BigDecimal.valueOf(-5.0),
                 validLocation(),
                 Set.of("HOME_SERVICES")
         );
@@ -88,7 +89,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Valid title",
                 "Valid description",
-                100.0,
+                BigDecimal.valueOf(100.0),
                 new LocationDTO(-500, 0),
                 Set.of("HOME_SERVICES")
         );
@@ -104,7 +105,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Valid title",
                 "Valid description",
-                100.0,
+                BigDecimal.valueOf(100.0),
                 validLocation(),
                 categories
         );
@@ -118,7 +119,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Valid title",
                 "Valid description",
-                100.0,
+                BigDecimal.valueOf(100.0),
                 validLocation(),
                 Set.of("INVALID_CATEGORY")
         );
@@ -134,7 +135,7 @@ class CreateOfferRequestTest {
         var request = new CreateOfferRequest(
                 "Valid title",
                 "Valid description",
-                100.0,
+                BigDecimal.valueOf(100.0),
                 validLocation(),
                 Set.of(" ")
         );

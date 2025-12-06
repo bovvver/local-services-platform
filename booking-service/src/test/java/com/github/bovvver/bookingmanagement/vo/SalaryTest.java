@@ -36,6 +36,6 @@ class SalaryTest {
 
     @Test
     void shouldThrowExceptionUsingFactoryMethodWhenValueIsNull() {
-        assertThrows(NullPointerException.class, () -> Salary.of(null));
+        assertThrows(IllegalArgumentException.class, () -> Salary.of(null));
     }
 }

@@ -1,14 +1,22 @@
 package com.github.bovvver.offermanagment.vo;
 
-public record Salary(double value) {
+import jakarta.validation.constraints.Min;
+
+import java.math.BigDecimal;
+
+public record Salary(BigDecimal value) {
 
     public Salary {
-        if (value < 0) {
+        if (value.signum() < 0) {
             throw new IllegalArgumentException("Salary cannot be negative");
+        }
+        if(value.scale() > 2) {
+            throw new IllegalArgumentException("Salary cannot have more than 2 decimal places");
         }
     }
 
-    public static Salary of(double value) {
-        return new Salary(value);
+    public static Salary of(final @Min(value = 0) Double salary) {
+        if (salary == null) throw new IllegalArgumentException("Salary cannot be null");
+        return new Salary(BigDecimal.valueOf(salary));
     }
 }

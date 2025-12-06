@@ -4,8 +4,10 @@ import com.github.bovvver.contracts.BookingDecisionStatus;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.NonNull;
 
+import java.math.BigDecimal;
+
 record BookingDecisionRequest(
         @NonNull BookingDecisionStatus status,
-        @PositiveOrZero Double salary
+        @PositiveOrZero BigDecimal salary
 ) {
 }

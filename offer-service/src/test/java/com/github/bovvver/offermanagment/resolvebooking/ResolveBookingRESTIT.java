@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
@@ -64,7 +65,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
                 currentUser.getId().value(),
                 new Location(40.7128, -74.0060),
                 Set.of(ServiceCategory.HOME_SERVICES),
-                1000.0
+                BigDecimal.valueOf(1000.0)
         );
 
         OfferDocument savedOffer = new OfferDocument(
@@ -137,7 +138,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldNegotiateBookingWithSalaryAndPublishToKafka() throws Exception {
-        double negotiatedSalary = 1500.0;
+        BigDecimal negotiatedSalary = BigDecimal.valueOf(1500.0);
         BookingDecisionRequest request = new BookingDecisionRequest(
                 BookingDecisionStatus.NEGOTIATE,
                 negotiatedSalary
@@ -180,7 +181,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
                 Set.of(),
                 new Location(40.7128, -74.0060),
                 Set.of(ServiceCategory.HOME_SERVICES),
-                1000.0,
+                BigDecimal.valueOf(1000.0),
                 OfferStatus.OPEN,
                 null,
                 null
@@ -231,7 +232,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
     void shouldReturnErrorWhenProvidingSalaryForNonNegotiateStatus() throws Exception {
         BookingDecisionRequest request = new BookingDecisionRequest(
                 BookingDecisionStatus.ACCEPTED,
-                1500.0
+                BigDecimal.valueOf(1500.0)
         );
 
         String endpoint = String.format(RESOLVE_BOOKING_ENDPOINT, testOfferId, testBookingId);
@@ -266,7 +267,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
     void shouldReturnErrorWhenNegativeSalaryProvided() throws Exception {
         BookingDecisionRequest request = new BookingDecisionRequest(
                 BookingDecisionStatus.NEGOTIATE,
-                -100.0
+                BigDecimal.valueOf(-100.0)
         );
 
         String endpoint = String.format(RESOLVE_BOOKING_ENDPOINT, testOfferId, testBookingId);

@@ -58,7 +58,7 @@ class ResolveBookingServiceTest {
 
         resolveBookingService.resolveBooking(command);
 
-        verifyNoInteractions(bookingRepository);
+        verify(bookingRepository).save(any(Booking.class));
         verifyNoInteractions(kafka);
     }
 

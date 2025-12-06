@@ -18,6 +18,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -73,13 +74,13 @@ class BookingDraftCreationService {
         );
     }
 
-    private void createDraftBooking(final BookOfferCommand cmd, final Double salary) {
+    private void createDraftBooking(final BookOfferCommand cmd, final BigDecimal salary) {
 
         BookingDraft bookingDraft = BookingDraft.create(
                 BookingId.of(cmd.bookingId()),
                 OfferId.of(cmd.offerId()),
                 UserId.of(cmd.userId()),
-                Salary.of(salary)
+                new Salary(salary)
         );
         bookingDraftWriteRepository.save(bookingDraft);
     }

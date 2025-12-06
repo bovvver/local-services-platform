@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 public record CreateOfferRequest(
@@ -17,7 +18,7 @@ public record CreateOfferRequest(
         String description,
 
         @PositiveOrZero(message = "Salary must be non-negative")
-        double salary,
+        BigDecimal salary,
 
         @Valid
         LocationDTO location,

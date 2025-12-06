@@ -75,6 +75,18 @@ class BookingTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenSalaryIsNull() {
+        BookingId bookingId = BookingId.of(UUID.randomUUID());
+        UserId userId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+        Salary salary = Salary.of(50000.0);
+        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        booking.accept();
+
+        assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(null));
+    }
+
+    @Test
     void shouldAcceptBookingWhenStatusIsPendingOrInNegotiation() {
         BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());

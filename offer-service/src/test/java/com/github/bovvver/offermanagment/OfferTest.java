@@ -86,7 +86,7 @@ class OfferTest {
                 UserId.of(UUID.randomUUID()),
                 new Location(10, 30),
                 Set.of(ServiceCategory.CLEANING),
-                new Salary(100.0)
+                Salary.of(100.0)
         );
     }
 }

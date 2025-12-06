@@ -21,7 +21,7 @@ class ResolveNegotiationDecisionService {
         BookingEntity bookingEntity = bookingReadRepository.findById(cmd.bookingId());
         Booking booking = BookingMapper.toDomain(bookingEntity);
 
-        BeginNegotiationResult negotiationData = booking.beginNegotiation(Salary.of(cmd.salary()));
+        BeginNegotiationResult negotiationData = booking.beginNegotiation(new Salary(cmd.salary()));
 
         bookingRepository.saveNegotiation(
                 negotiationData.booking(),

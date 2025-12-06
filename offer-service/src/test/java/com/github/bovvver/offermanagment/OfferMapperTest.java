@@ -3,6 +3,7 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.offermanagment.vo.*;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ class OfferMapperTest {
                 UUID.randomUUID(),
                 new Location(52.2297, 21.0122),
                 Set.of(ServiceCategory.HOME_SERVICES, ServiceCategory.CLEANING),
-                5000.0
+                BigDecimal.valueOf(5000.0)
         );
 
         Offer offer = OfferMapper.toDomain(document);
@@ -62,7 +63,7 @@ class OfferMapperTest {
                 UUID.randomUUID(),
                 new Location(52.2297, 21.0122),
                 null,
-                5000.0
+                BigDecimal.valueOf(5000.0)
         );
 
         Offer offer = OfferMapper.toDomain(document);
