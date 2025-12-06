@@ -9,6 +9,7 @@ import com.github.bovvver.shared.CurrentUser;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ class OfferManipulationFacadeTest {
         CreateOfferCommand command = new CreateOfferCommand(
                 "Sample Title",
                 "Sample Description",
-                5000.0,
+                BigDecimal.valueOf(5000.0),
                 Location.of(52.2297, 21.0122),
                 Set.of("HOME_SERVICES", "CLEANING")
         );
@@ -63,7 +64,7 @@ class OfferManipulationFacadeTest {
         CreateOfferCommand command = new CreateOfferCommand(
                 "Sample Title",
                 "Sample Description",
-                5000.0,
+                BigDecimal.valueOf(5000.0),
                 Location.of(52.2297, 21.0122),
                 Set.of("INVALID_CATEGORY")
         );
@@ -82,7 +83,7 @@ class OfferManipulationFacadeTest {
         CreateOfferCommand command = new CreateOfferCommand(
                 null,
                 "Sample Description",
-                5000.0,
+                BigDecimal.valueOf(5000.0),
                 Location.of(52.2297, 21.0122),
                 Set.of("HOME_SERVICES")
         );
@@ -101,7 +102,7 @@ class OfferManipulationFacadeTest {
         CreateOfferCommand command = new CreateOfferCommand(
                 "Sample Title",
                 "Sample Description",
-                -5000.0,
+                BigDecimal.valueOf(-5000.0),
                 Location.of(52.2297, 21.0122),
                 Set.of("HOME_SERVICES")
         );

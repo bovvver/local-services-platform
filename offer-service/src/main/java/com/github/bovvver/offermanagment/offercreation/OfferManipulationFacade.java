@@ -26,7 +26,7 @@ public class OfferManipulationFacade {
                 currentUser.getId(),
                 createOfferCommand.location(),
                 createOfferCommand.serviceCategories().stream().map(ServiceCategory::fromString).collect(Collectors.toSet()),
-                Salary.of(createOfferCommand.salary())
+                new Salary(createOfferCommand.salary())
         );
         return offerWriteRepository.save(createdOffer);
     }

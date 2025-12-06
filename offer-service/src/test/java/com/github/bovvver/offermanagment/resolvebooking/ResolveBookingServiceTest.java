@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -60,7 +61,7 @@ class ResolveBookingServiceTest {
     @MethodSource("provideBookingDecisionScenarios")
     void shouldProcessBookingDecision(
             BookingDecisionStatus status,
-            Double salary,
+            BigDecimal salary,
             String expectedTopic
     ) {
         BookingDecisionRequest request = new BookingDecisionRequest(status, salary);
@@ -104,7 +105,7 @@ class ResolveBookingServiceTest {
 
     @Test
     void shouldThrowExceptionWhenSalaryProvidedForAcceptedStatus() {
-        BookingDecisionRequest request = new BookingDecisionRequest(BookingDecisionStatus.ACCEPTED, 10.0);
+        BookingDecisionRequest request = new BookingDecisionRequest(BookingDecisionStatus.ACCEPTED, BigDecimal.valueOf(10.0));
 
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
         when(offerReadRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
@@ -190,7 +191,7 @@ class ResolveBookingServiceTest {
     private static Stream<Arguments> provideBookingDecisionScenarios() {
         return Stream.of(
                 Arguments.of(BookingDecisionStatus.ACCEPTED, null, OFFER_BOOKING_DECISION),
-                Arguments.of(BookingDecisionStatus.NEGOTIATE, 10.0, OFFER_BOOKING_NEGOTIATE)
+                Arguments.of(BookingDecisionStatus.NEGOTIATE, BigDecimal.valueOf(10.0), OFFER_BOOKING_NEGOTIATE)
         );
     }
 
@@ -204,7 +205,7 @@ class ResolveBookingServiceTest {
                 Set.of(),
                 new Location(0.0, 0.0),
                 Set.of(),
-                100.0,
+                BigDecimal.valueOf(100.0),
                 OfferStatus.OPEN,
                 LocalDateTime.now(),
                 LocalDateTime.now()

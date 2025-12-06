@@ -132,6 +132,12 @@ class OfferTest {
         Offer offer = createOffer();
         LocalDateTime beforeBooking = offer.getUpdatedAt();
 
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         offer.book(UserId.of(UUID.randomUUID()), new BookingId(UUID.randomUUID()));
 
         assertThat(offer.getUpdatedAt()).isAfter(beforeBooking);

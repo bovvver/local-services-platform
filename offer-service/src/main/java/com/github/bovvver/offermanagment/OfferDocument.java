@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class OfferDocument {
 
     private Set<ServiceCategory> serviceCategories;
 
-    private double salary;
+    private BigDecimal salary;
 
     private OfferStatus status;
 
@@ -81,7 +82,7 @@ public class OfferDocument {
                   UUID authorId,
                   Location location,
                   Set<ServiceCategory> serviceCategories,
-                  double salary) {
+                  BigDecimal salary) {
         this(UUID.randomUUID(), title, description, authorId, null,
                 new HashSet<>(), location, serviceCategories, salary,
                 OfferStatus.OPEN, null, null);

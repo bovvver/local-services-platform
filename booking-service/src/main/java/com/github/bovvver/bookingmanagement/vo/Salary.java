@@ -16,6 +16,7 @@ public record Salary(BigDecimal value) {
     }
 
     public static Salary of(final @Min(value = 0) Double salary) {
+        if (salary == null) throw new IllegalArgumentException("Salary cannot be null");
         return new Salary(BigDecimal.valueOf(salary));
     }
 }

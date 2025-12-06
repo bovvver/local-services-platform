@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -41,7 +42,7 @@ class OfferManipulationFacadeTest {
         return new CreateOfferCommand(
                 "Plumbing services",
                 "Professional plumbing repairs and installations",
-                150.0,
+                BigDecimal.valueOf(150.0),
                 null,
                 Set.of("HOME_SERVICES")
         );

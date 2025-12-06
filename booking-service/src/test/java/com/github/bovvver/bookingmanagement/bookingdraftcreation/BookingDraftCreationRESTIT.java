@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static com.github.bovvver.bookingmanagement.bookingdraftcreation.BookingDraftCreationREST.CREATE_BOOKING_ENDPOINT;
@@ -23,7 +24,7 @@ class BookingDraftCreationRESTIT extends BaseIntegrationTest {
     void shouldCreateBookingDraft() throws Exception {
         BookOfferRequest request = new BookOfferRequest(
                 OFFER_ID,
-                60000.0
+                BigDecimal.valueOf(60000.0)
         );
 
         mockMvc.perform(post(CREATE_BOOKING_ENDPOINT)
@@ -36,7 +37,7 @@ class BookingDraftCreationRESTIT extends BaseIntegrationTest {
     void shouldThrowErrorIfBookingExists() throws Exception {
         BookOfferRequest request = new BookOfferRequest(
                 OFFER_ID,
-                60000.0
+                BigDecimal.valueOf(60000.0)
         );
 
         mockMvc.perform(post(CREATE_BOOKING_ENDPOINT)
@@ -54,7 +55,7 @@ class BookingDraftCreationRESTIT extends BaseIntegrationTest {
     void shouldThrowErrorIfSalaryIsNegative() throws Exception {
         BookOfferRequest request = new BookOfferRequest(
                 OFFER_ID,
-                -1.0
+                BigDecimal.valueOf(-1.0)
         );
 
         mockMvc.perform(post(CREATE_BOOKING_ENDPOINT)
@@ -67,7 +68,7 @@ class BookingDraftCreationRESTIT extends BaseIntegrationTest {
     void shouldThrowErrorIfOfferIdIsNull() throws Exception {
         BookOfferRequest request = new BookOfferRequest(
                 null,
-                -1.0
+                BigDecimal.valueOf(-1.0)
         );
 
         mockMvc.perform(post(CREATE_BOOKING_ENDPOINT)

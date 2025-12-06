@@ -2,30 +2,42 @@ package com.github.bovvver.offermanagment.offercreation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class OfferManipulationRESTIT extends BaseIntegrationTest {
 
     private static final String CREATE_OFFER_ENDPOINT = "/create";
     private static final String TITLE = "Test Offer Title";
     private static final String DESCRIPTION = "This is a test offer description.";
-    private static final double SALARY = 50000.0;
+    private static final BigDecimal SALARY = BigDecimal.valueOf(50000.0);
     private static final LocationDTO LOCATION = new LocationDTO(10, -170);
     private static final String[] SERVICE_CATEGORIES = {"HOME_SERVICES", "TECH_SUPPORT"};
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    protected MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    void cleanDatabase() {
+        mongoTemplate.getDb().drop();
+    }
 
     @Test
     void shouldCreateOffer() throws Exception {
@@ -81,7 +93,7 @@ class OfferManipulationRESTIT extends BaseIntegrationTest {
                         new CreateOfferRequest(
                                 TITLE,
                                 DESCRIPTION,
-                                -1000.0,
+                                BigDecimal.valueOf(-1000.0),
                                 LOCATION,
                                 Set.of(SERVICE_CATEGORIES)
                         )),
