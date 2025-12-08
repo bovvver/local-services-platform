@@ -40,7 +40,7 @@ public abstract class BaseIntegrationTest {
     protected MockMvc mockMvc;
 
     @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
+    private static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 

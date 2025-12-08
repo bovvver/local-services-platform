@@ -2,13 +2,11 @@ package com.github.bovvver.offermanagment.offercreation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
@@ -30,14 +28,6 @@ class OfferManipulationRESTIT extends BaseIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    protected MongoTemplate mongoTemplate;
-
-    @BeforeEach
-    void cleanDatabase() {
-        mongoTemplate.getDb().drop();
-    }
 
     @Test
     void shouldCreateOffer() throws Exception {

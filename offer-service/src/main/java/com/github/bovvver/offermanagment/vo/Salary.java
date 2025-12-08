@@ -7,10 +7,13 @@ import java.math.BigDecimal;
 public record Salary(BigDecimal value) {
 
     public Salary {
+        if (value == null) {
+            throw new IllegalArgumentException("Salary value cannot be null");
+        }
         if (value.signum() < 0) {
             throw new IllegalArgumentException("Salary cannot be negative");
         }
-        if(value.scale() > 2) {
+        if (value.scale() > 2) {
             throw new IllegalArgumentException("Salary cannot have more than 2 decimal places");
         }
     }

@@ -162,7 +162,7 @@ class BookingDraftCreationServiceTest {
                 LocalDateTime.now()
         );
 
-        when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(12_345.0);
+        when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(BigDecimal.valueOf(12_345.0));
 
         bookingDraftCreationService.createBooking(event);
 

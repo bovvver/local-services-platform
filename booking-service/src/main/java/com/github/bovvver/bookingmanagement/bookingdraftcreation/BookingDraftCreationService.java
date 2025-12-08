@@ -49,7 +49,7 @@ class BookingDraftCreationService {
 
     @Transactional
     void createBooking(final BookingDraftAcceptedEvent event) {
-        Salary salary = Salary.of(bookingDraftReadRepository.findSalaryByBookingId(event.bookingId()));
+        Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(event.bookingId()));
         bookingDraftWriteRepository.delete(BookingId.of(event.bookingId()));
 
         Booking booking = Booking.create(

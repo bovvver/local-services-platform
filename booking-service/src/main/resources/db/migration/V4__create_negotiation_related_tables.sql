@@ -21,3 +21,8 @@ CREATE TABLE negotiation_positions
 );
 
 CREATE INDEX idx_negotiation_position__negotiation_id ON negotiation_positions (negotiation_id);
+
+ALTER TABLE bookings
+    ADD CONSTRAINT fk_booking_negotiation FOREIGN KEY (negotiation_id)
+        REFERENCES negotiations (id)
+        ON DELETE CASCADE;
