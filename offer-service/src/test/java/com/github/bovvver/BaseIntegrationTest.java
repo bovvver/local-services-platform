@@ -25,22 +25,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public abstract class BaseIntegrationTest {
 
     @Container
-    static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0");
+    protected static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0");
 
     @Container
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka"));
+    protected static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"));
 
     @Autowired
     protected MockMvc mockMvc;
 
     @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        String connectionString = String.format(
-                "mongodb://%s:%d/testdb",
-                mongoDBContainer.getHost(),
-                mongoDBContainer.getFirstMappedPort()
-        );
-        registry.add("spring.data.mongodb.uri", () -> connectionString);
+    private static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 

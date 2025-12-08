@@ -101,10 +101,6 @@ public class Booking {
                     "Cannot begin negotiation for booking with status %s".formatted(this.status)
             );
         }
-        if (proposedSalary == null || proposedSalary.value().signum() < 0) {
-            throw new IllegalArgumentException("Proposed salary must be positive");
-        }
-
         updateStatus(BookingStatus.IN_NEGOTIATION);
         NegotiationId newNegotiationId = NegotiationId.generate();
         NegotiationPosition initialPosition = NegotiationPosition.create(
