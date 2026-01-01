@@ -28,6 +28,7 @@ public class Offer {
     private OfferStatus status;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<DomainEvent> domainEvents;
 
     Offer(final OfferId id,
           final Title title,
@@ -46,13 +47,14 @@ public class Offer {
         this.description = description;
         this.authorId = authorId;
         this.executorId = executorId;
-        this.bookingIds = bookingIds;
+        this.bookingIds = new HashSet<>(bookingIds);
         this.location = location;
-        this.serviceCategories = serviceCategories;
+        this.serviceCategories = new HashSet<>(serviceCategories);
         this.salary = salary;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.domainEvents = new ArrayList<>();
     }
 
     /**
@@ -111,16 +113,16 @@ public class Offer {
         return new Offer(new OfferId(UUID.randomUUID()), title, description, authorId, location, serviceCategories, salary);
     }
 
-    public DomainEvent book(
+    public void book(
             UserId userId,
             BookingId bookingId
     ) {
         if (isClosedForBooking()) {
-            return new BookingDraftRejected(this.id, userId, bookingId);
+            registerEvent(new BookingDraftRejected(this.id, userId, bookingId));
         }
         this.bookingIds.add(bookingId);
         this.updatedAt = LocalDateTime.now();
-        return new BookingDraftAccepted(this.id, userId, bookingId);
+        registerEvent(new BookingDraftAccepted(this.id, userId, bookingId));
     }
 
     public void negotiate() {
@@ -136,6 +138,16 @@ public class Offer {
         }
         updateStatus(OfferStatus.ASSIGNED);
         this.executorId = executorId;
+    }
+
+    protected void registerEvent(DomainEvent event) {
+        domainEvents.add(event);
+    }
+
+    public List<DomainEvent> pullDomainEvents() {
+        List<DomainEvent> events = getDomainEvents();
+        domainEvents.clear();
+        return events;
     }
 
     private boolean isClosedForBooking() {
@@ -193,5 +205,9 @@ public class Offer {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public List<DomainEvent> getDomainEvents() {
+        return List.copyOf(domainEvents);
     }
 }

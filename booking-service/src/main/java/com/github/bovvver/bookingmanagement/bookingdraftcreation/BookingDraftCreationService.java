@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -40,6 +41,10 @@ class BookingDraftCreationService {
         BookOfferCommand cmd = createBookingCommand(request);
         createDraftBooking(cmd, request.salary());
         kafka.send(BOOKING_COMMANDS_TOPIC, cmd.offerId().toString(), cmd);
+
+        RestClient restClient = RestClient.create();
+
+
     }
 
     @Transactional

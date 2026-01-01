@@ -2,8 +2,6 @@ package com.github.bovvver.offermanagment.resolvebookingdraft;
 
 import com.github.bovvver.contracts.BookOfferCommand;
 import com.github.bovvver.contracts.BookingDraftRejectedEvent;
-import com.github.bovvver.event.DomainEvent;
-import com.github.bovvver.event.DomainEventPublisher;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferReadRepository;
 import com.github.bovvver.offermanagment.vo.Location;
@@ -26,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ResolveBookingDraftListenerTest {
+class OfferAvailabilityServiceTest {
 
     @Mock
     private KafkaTemplate<String, BookingDraftRejectedEvent> kafka;
@@ -34,11 +32,8 @@ class ResolveBookingDraftListenerTest {
     @Mock
     private OfferReadRepository offerReadRepository;
 
-    @Mock
-    private DomainEventPublisher domainEventPublisher;
-
     @InjectMocks
-    private ResolveBookingDraftListener listener;
+    private OfferAvailabilityService listener;
 
     private UUID offerId;
     private UUID userId;
@@ -59,9 +54,8 @@ class ResolveBookingDraftListenerTest {
 
         when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        listener.onBookingRequestReceived(command);
+        listener.checkOfferAvailability(command);
 
-        verify(domainEventPublisher).publish(any(DomainEvent.class));
         verifyNoInteractions(kafka);
     }
 
@@ -69,10 +63,10 @@ class ResolveBookingDraftListenerTest {
     void shouldSendRejectionEventWhenOfferNotFound() {
         when(offerReadRepository.findById(offerId)).thenReturn(Optional.empty());
 
-        listener.onBookingRequestReceived(command);
+        listener.checkOfferAvailability(command);
 
         verify(kafka).send(
-                eq(ResolveBookingDraftListener.BOOKING_OFFER_AVAILABILITY_REJECTED),
+                eq(OfferAvailabilityService.BOOKING_OFFER_AVAILABILITY_REJECTED),
                 eq(bookingId.toString()),
                 argThat(event ->
                         event.error().equals("NOT_FOUND") &&
