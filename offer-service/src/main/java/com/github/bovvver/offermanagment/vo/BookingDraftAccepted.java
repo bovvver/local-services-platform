@@ -33,10 +33,6 @@ public class BookingDraftAccepted implements DomainEvent {
         return status;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
     public OfferId getOfferId() {
         return offerId;
     }

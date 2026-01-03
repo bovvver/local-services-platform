@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 record OfferAvailabilityCheckResponse(
-        boolean available,
+        boolean isAvailable,
         String reason,
         LocalDateTime checkedAt,
         HttpStatus httpStatus
