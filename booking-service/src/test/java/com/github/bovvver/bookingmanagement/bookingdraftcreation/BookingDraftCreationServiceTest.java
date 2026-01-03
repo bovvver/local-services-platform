@@ -8,7 +8,6 @@ import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
 import com.github.bovvver.contracts.BookOfferCommand;
-import com.github.bovvver.contracts.BookingDraftAcceptedEvent;
 import com.github.bovvver.shared.CurrentUser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -153,14 +151,7 @@ class BookingDraftCreationServiceTest {
         UUID bookingId = UUID.randomUUID();
         UUID acceptedUserId = UUID.randomUUID();
         UUID eventOfferId = UUID.randomUUID();
-        BookingDraftAcceptedEvent event = new BookingDraftAcceptedEvent(
-                "ACCEPTED",
-                "Booking draft accepted",
-                eventOfferId,
-                acceptedUserId,
-                bookingId,
-                LocalDateTime.now()
-        );
+
 
         when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(BigDecimal.valueOf(12_345.0));
 
@@ -187,14 +178,7 @@ class BookingDraftCreationServiceTest {
         UUID bookingId = UUID.randomUUID();
         UUID acceptedUserId = UUID.randomUUID();
         UUID eventOfferId = UUID.randomUUID();
-        BookingDraftAcceptedEvent event = new BookingDraftAcceptedEvent(
-                "ACCEPTED",
-                "Booking draft accepted",
-                eventOfferId,
-                acceptedUserId,
-                bookingId,
-                LocalDateTime.now()
-        );
+
 
         when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(null);
 

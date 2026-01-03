@@ -13,7 +13,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class OfferAvailabilityREST {
 
-    private static final String RESOLVE_BOOKING_DRAFT_ENDPOINT = "/api/internal/availability";
+    private static final String RESOLVE_BOOKING_DRAFT_ENDPOINT = "/internal/offer/availability";
 
     private final OfferAvailabilityService offerAvailabilityService;
 

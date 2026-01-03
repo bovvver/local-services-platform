@@ -8,13 +8,12 @@ import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
 import com.github.bovvver.contracts.BookOfferCommand;
-import com.github.bovvver.contracts.BookingDraftAcceptedEvent;
 import com.github.bovvver.shared.CurrentUser;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,44 +25,56 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class BookingDraftCreationService {
 
-    private static final String BOOKING_COMMANDS_TOPIC = "booking.offer.availability.request";
+    private static final String RESOLVE_BOOKING_DRAFT_ENDPOINT = "/internal/offer/availability";
 
     private final CurrentUser currentUser;
     private final BookingDraftWriteRepository bookingDraftWriteRepository;
     private final BookingDraftReadRepository bookingDraftReadRepository;
     private final BookingReadRepository bookingReadRepository;
     private final BookingRepository bookingRepository;
-    private final KafkaTemplate<String, BookOfferCommand> kafka;
 
+    @Transactional
     public void processBookingCreation(@Valid BookOfferRequest request) {
 
         checkForExistingBookings(request.offerId());
         BookOfferCommand cmd = createBookingCommand(request);
         createDraftBooking(cmd, request.salary());
-        kafka.send(BOOKING_COMMANDS_TOPIC, cmd.offerId().toString(), cmd);
 
-        RestClient restClient = RestClient.create();
+        RestClient restClient = RestClient.builder()
+                .baseUrl("http://offer-service")
+                .build();
 
+        ResponseEntity<OfferAvailabilityCheckResponse> response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(RESOLVE_BOOKING_DRAFT_ENDPOINT)
+                        .queryParam("offerId", cmd.offerId())
+                        .queryParam("userId", cmd.userId())
+                        .queryParam("bookingId", cmd.bookingId())
+                        .build())
+                .retrieve()
+                .toEntity(OfferAvailabilityCheckResponse.class);
 
+        if (response.getBody() != null && response.getBody().isAvailable()) {
+            createBooking(cmd.bookingId(), cmd.userId(), cmd.offerId());
+        } else if (response.getBody() != null && !response.getBody().isAvailable()) {
+            deleteDraftBooking(cmd.bookingId());
+        }
     }
 
-    @Transactional
     void deleteDraftBooking(final UUID bookingId) {
         bookingDraftWriteRepository.delete(BookingId.of(bookingId));
     }
 
-    @Transactional
-    void createBooking(final BookingDraftAcceptedEvent event) {
-        Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(event.bookingId()));
-        bookingDraftWriteRepository.delete(BookingId.of(event.bookingId()));
+    void createBooking(final UUID bookingId, final UUID userId, final UUID offerId) {
+        Salary salary = Salary.of(bookingDraftReadRepository.findSalaryByBookingId(bookingId));
+        bookingDraftWriteRepository.delete(BookingId.of(bookingId));
 
         Booking booking = Booking.create(
-                BookingId.of(event.bookingId()),
-                UserId.of(event.userId()),
-                OfferId.of(event.offerId()),
+                BookingId.of(bookingId),
+                UserId.of(userId),
+                OfferId.of(offerId),
                 salary
         );
-
         bookingRepository.save(booking);
     }
 
