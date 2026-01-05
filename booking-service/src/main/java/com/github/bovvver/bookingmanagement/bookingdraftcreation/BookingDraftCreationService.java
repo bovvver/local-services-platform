@@ -13,9 +13,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -25,13 +23,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class BookingDraftCreationService {
 
-    private static final String RESOLVE_BOOKING_DRAFT_ENDPOINT = "/internal/offer/availability";
-
     private final CurrentUser currentUser;
     private final BookingDraftWriteRepository bookingDraftWriteRepository;
     private final BookingDraftReadRepository bookingDraftReadRepository;
     private final BookingReadRepository bookingReadRepository;
     private final BookingRepository bookingRepository;
+    private final OfferAvailabilityClient offerAvailabilityClient;
 
     @Transactional
     public void processBookingCreation(@Valid BookOfferRequest request) {
@@ -40,23 +37,15 @@ class BookingDraftCreationService {
         BookOfferCommand cmd = createBookingCommand(request);
         createDraftBooking(cmd, request.salary());
 
-        RestClient restClient = RestClient.builder()
-                .baseUrl("http://offer-service")
-                .build();
+        boolean isOfferAvailable = offerAvailabilityClient.isOfferAvailable(
+                cmd.bookingId(),
+                cmd.offerId(),
+                cmd.userId()
+        );
 
-        ResponseEntity<OfferAvailabilityCheckResponse> response = restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(RESOLVE_BOOKING_DRAFT_ENDPOINT)
-                        .queryParam("offerId", cmd.offerId())
-                        .queryParam("userId", cmd.userId())
-                        .queryParam("bookingId", cmd.bookingId())
-                        .build())
-                .retrieve()
-                .toEntity(OfferAvailabilityCheckResponse.class);
-
-        if (response.getBody() != null && response.getBody().isAvailable()) {
+        if (isOfferAvailable) {
             createBooking(cmd.bookingId(), cmd.userId(), cmd.offerId());
-        } else if (response.getBody() != null && !response.getBody().isAvailable()) {
+        } else {
             deleteDraftBooking(cmd.bookingId());
         }
     }

@@ -9,7 +9,6 @@ import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
 import com.github.bovvver.contracts.BookOfferCommand;
 import com.github.bovvver.shared.CurrentUser;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -48,6 +47,9 @@ class BookingDraftCreationServiceTest {
     private BookingRepository bookingRepository;
 
     @Mock
+    private OfferAvailabilityClient offerAvailabilityClient;
+
+    @Mock
     private KafkaTemplate<String, BookOfferCommand> kafka;
 
     @InjectMocks
@@ -56,83 +58,74 @@ class BookingDraftCreationServiceTest {
     private final UUID offerId = UUID.randomUUID();
     private final UUID userId = UUID.randomUUID();
 
-    @Nested
-    class ProcessBookingCreation {
+    @Test
+    void shouldCreateDraftWhenNoExistingBookingsOrDrafts() {
+        BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
 
-        @Test
-        void shouldCreateDraftAndSendKafkaMessageWhenNoExistingBookingsOrDrafts() {
-            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
-            when(currentUser.getId()).thenReturn(UserId.of(userId));
-            when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
-            when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+        when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId))
+                .thenReturn(false);
+        when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId))
+                .thenReturn(false);
+        when(offerAvailabilityClient.isOfferAvailable(any(), eq(offerId), eq(userId)))
+                .thenReturn(true);
 
-            bookingDraftCreationService.processBookingCreation(request);
+        bookingDraftCreationService.processBookingCreation(request);
 
-            ArgumentCaptor<BookingDraft> draftCaptor = ArgumentCaptor.forClass(BookingDraft.class);
-            verify(bookingDraftWriteRepository).save(draftCaptor.capture());
-            BookingDraft savedDraft = draftCaptor.getValue();
+        ArgumentCaptor<BookingDraft> captor = ArgumentCaptor.forClass(BookingDraft.class);
+        verify(bookingDraftWriteRepository).save(captor.capture());
+        BookingDraft savedDraft = captor.getValue();
 
-            assertThat(savedDraft.getOfferId().value()).isEqualTo(offerId);
-            assertThat(savedDraft.getUserId().value()).isEqualTo(userId);
-            assertThat(savedDraft.getSalary()).isEqualTo(Salary.of(10_000.0));
-            assertThat(savedDraft.getBookingId().value()).isNotNull();
+        assertThat(savedDraft.getOfferId().value()).isEqualTo(offerId);
+        assertThat(savedDraft.getUserId().value()).isEqualTo(userId);
+        assertThat(savedDraft.getSalary()).isEqualTo(Salary.of(10_000.0));
+        assertThat(savedDraft.getBookingId().value()).isNotNull();
+    }
 
-            ArgumentCaptor<BookOfferCommand> commandCaptor = ArgumentCaptor.forClass(BookOfferCommand.class);
-            verify(kafka).send(eq("booking.offer.availability.request"), anyString(), commandCaptor.capture());
-            BookOfferCommand sentCommand = commandCaptor.getValue();
+    @Test
+    void shouldThrowConflictWhenFinalBookingAlreadyExistsForOfferAndUser() {
+        BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+        when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
 
-            assertThat(sentCommand.offerId()).isEqualTo(offerId);
-            assertThat(sentCommand.userId()).isEqualTo(userId);
-            assertThat(sentCommand.bookingId()).isEqualTo(savedDraft.getBookingId().value());
-        }
+        assertThatThrownBy(() -> bookingDraftCreationService.processBookingCreation(request))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
 
-        @Test
-        void shouldThrowConflictWhenFinalBookingAlreadyExistsForOfferAndUser() {
-            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
-            when(currentUser.getId()).thenReturn(UserId.of(userId));
-            when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
+        verify(bookingDraftReadRepository, never()).existsByOfferIdAndUserId(any(), any());
+        verifyNoInteractions(bookingDraftWriteRepository);
+    }
 
-            assertThatThrownBy(() -> bookingDraftCreationService.processBookingCreation(request))
-                    .isInstanceOf(ResponseStatusException.class)
-                    .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-                    .isEqualTo(HttpStatus.CONFLICT);
+    @Test
+    void shouldThrowConflictWhenDraftBookingAlreadyExistsForOfferAndUser() {
+        BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+        when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
+        when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
 
-            verify(bookingDraftReadRepository, never()).existsByOfferIdAndUserId(any(), any());
-            verifyNoInteractions(bookingDraftWriteRepository);
-            verifyNoInteractions(kafka);
-        }
+        assertThatThrownBy(() -> bookingDraftCreationService.processBookingCreation(request))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
 
-        @Test
-        void shouldThrowConflictWhenDraftBookingAlreadyExistsForOfferAndUser() {
-            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
-            when(currentUser.getId()).thenReturn(UserId.of(userId));
-            when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(false);
-            when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
+        verifyNoInteractions(bookingDraftWriteRepository);
+    }
 
-            assertThatThrownBy(() -> bookingDraftCreationService.processBookingCreation(request))
-                    .isInstanceOf(ResponseStatusException.class)
-                    .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-                    .isEqualTo(HttpStatus.CONFLICT);
+    @Test
+    void shouldCheckConflictsUsingCurrentUserId() {
+        BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(5_000.0));
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+        when(bookingReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
+        when(bookingDraftReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
 
-            verifyNoInteractions(bookingDraftWriteRepository);
-            verifyNoInteractions(kafka);
-        }
+        bookingDraftCreationService.processBookingCreation(request);
 
-        @Test
-        void shouldCheckConflictsUsingCurrentUserId() {
-            BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(5_000.0));
-            when(currentUser.getId()).thenReturn(UserId.of(userId));
-            when(bookingReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
-            when(bookingDraftReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
+        ArgumentCaptor<UUID> userIdCaptor = ArgumentCaptor.forClass(UUID.class);
+        verify(bookingReadRepository).existsByOfferIdAndUserId(eq(offerId), userIdCaptor.capture());
+        assertThat(userIdCaptor.getValue()).isEqualTo(userId);
 
-            bookingDraftCreationService.processBookingCreation(request);
-
-            ArgumentCaptor<UUID> userIdCaptor = ArgumentCaptor.forClass(UUID.class);
-            verify(bookingReadRepository).existsByOfferIdAndUserId(eq(offerId), userIdCaptor.capture());
-            assertThat(userIdCaptor.getValue()).isEqualTo(userId);
-
-            verify(bookingDraftReadRepository).existsByOfferIdAndUserId(eq(offerId), eq(userId));
-        }
+        verify(bookingDraftReadRepository).existsByOfferIdAndUserId(eq(offerId), eq(userId));
     }
 
     @Test
@@ -152,10 +145,9 @@ class BookingDraftCreationServiceTest {
         UUID acceptedUserId = UUID.randomUUID();
         UUID eventOfferId = UUID.randomUUID();
 
+        when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(12_345.0);
 
-        when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(BigDecimal.valueOf(12_345.0));
-
-        bookingDraftCreationService.createBooking(event);
+        bookingDraftCreationService.createBooking(bookingId, acceptedUserId, eventOfferId);
 
         verify(bookingDraftReadRepository).findSalaryByBookingId(bookingId);
         verify(bookingDraftWriteRepository).delete(BookingId.of(bookingId));
@@ -179,9 +171,8 @@ class BookingDraftCreationServiceTest {
         UUID acceptedUserId = UUID.randomUUID();
         UUID eventOfferId = UUID.randomUUID();
 
-
         when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(null);
 
-        assertThatThrownBy(() -> bookingDraftCreationService.createBooking(event));
+        assertThatThrownBy(() -> bookingDraftCreationService.createBooking(bookingId, acceptedUserId, eventOfferId));
     }
 }

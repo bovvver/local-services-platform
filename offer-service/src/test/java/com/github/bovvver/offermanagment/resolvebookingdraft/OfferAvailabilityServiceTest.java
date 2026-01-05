@@ -1,8 +1,8 @@
 package com.github.bovvver.offermanagment.resolvebookingdraft;
 
-import com.github.bovvver.contracts.BookOfferCommand;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,7 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OfferAvailabilityServiceTest {
@@ -26,54 +28,58 @@ class OfferAvailabilityServiceTest {
     @Mock
     private OfferReadRepository offerReadRepository;
 
+    @Mock
+    private OfferWriteRepository offerWriteRepository;
+
     @InjectMocks
-    private OfferAvailabilityService listener;
+    private OfferAvailabilityService offerAvailabilityService;
 
     private UUID offerId;
     private UUID userId;
     private UUID bookingId;
-    private BookOfferCommand command;
 
     @BeforeEach
     void setUp() {
         offerId = UUID.randomUUID();
         userId = UUID.randomUUID();
         bookingId = UUID.randomUUID();
-        command = new BookOfferCommand(offerId, userId, bookingId);
     }
 
     @Test
-    void shouldPublishDomainEventWhenOfferExists() {
-        OfferDocument offerDocument = createOfferDocument();
+    void shouldReturnOfferAvailableStatus() {
+        OfferDocument offerDocument = createOfferDocument(OfferStatus.OPEN);
 
         when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        listener.checkOfferAvailability(command);
+        OfferAvailabilityCheckResponse response = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
 
-        verifyNoInteractions(kafka);
+        assertThat(response.httpStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(response.isAvailable()).isTrue();
     }
 
     @Test
-    void shouldSendRejectionEventWhenOfferNotFound() {
-        when(offerReadRepository.findById(offerId)).thenReturn(Optional.empty());
+    void shouldReturnOfferUnavailableStatus() {
+        OfferDocument offerDocument = createOfferDocument(OfferStatus.ASSIGNED);
 
-        listener.checkOfferAvailability(command);
+        when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        verify(kafka).send(
-                eq(OfferAvailabilityService.BOOKING_OFFER_AVAILABILITY_REJECTED),
-                eq(bookingId.toString()),
-                argThat(event ->
-                        event.error().equals("NOT_FOUND") &&
-                                event.offerId().equals(offerId) &&
-                                event.userId().equals(userId) &&
-                                event.bookingId().equals(bookingId) &&
-                                event.reason().contains("Offer with id")
-                )
-        );
-        verifyNoInteractions(domainEventPublisher);
+        OfferAvailabilityCheckResponse response = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
+
+        assertThat(response.httpStatus()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.isAvailable()).isFalse();
     }
 
-    private OfferDocument createOfferDocument() {
+    @Test
+    void shouldReturnOfferNotFoundStatus() {
+        when(offerReadRepository.findById(offerId)).thenReturn(Optional.empty());
+
+        OfferAvailabilityCheckResponse response = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
+
+        assertThat(response.httpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.isAvailable()).isFalse();
+    }
+
+    private OfferDocument createOfferDocument(OfferStatus status) {
         return new OfferDocument(
                 offerId,
                 "Test Title",
@@ -84,10 +90,9 @@ class OfferAvailabilityServiceTest {
                 new Location(0.0, 0.0),
                 Set.of(),
                 BigDecimal.valueOf(100.0),
-                OfferStatus.OPEN,
+                status,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
     }
 }
-
