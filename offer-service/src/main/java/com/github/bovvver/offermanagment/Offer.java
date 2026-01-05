@@ -119,6 +119,7 @@ public class Offer {
     ) {
         if (isClosedForBooking()) {
             registerEvent(new BookingDraftRejected(this.id, userId, bookingId));
+            return;
         }
         this.bookingIds.add(bookingId);
         this.updatedAt = LocalDateTime.now();

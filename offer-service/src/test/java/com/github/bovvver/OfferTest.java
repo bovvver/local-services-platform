@@ -6,6 +6,7 @@ import com.github.bovvver.offermanagment.vo.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,9 +21,10 @@ class OfferTest {
         UserId userId = UserId.of(UUID.randomUUID());
         BookingId bookingId = new BookingId(UUID.randomUUID());
 
-        DomainEvent event = offer.book(userId, bookingId);
+        offer.book(UserId.of(UUID.randomUUID()), bookingId);
 
-        assertThat(event).isInstanceOf(BookingDraftAccepted.class);
+        assertThat(offer.getDomainEvents())
+                .anyMatch(e -> e instanceof BookingDraftAccepted);
         assertThat(offer.getBookingIds()).contains(bookingId);
     }
 
@@ -34,9 +36,10 @@ class OfferTest {
         UserId userId = UserId.of(UUID.randomUUID());
         BookingId bookingId = new BookingId(UUID.randomUUID());
 
-        DomainEvent event = offer.book(userId, bookingId);
+        offer.book(userId, bookingId);
 
-        assertThat(event).isInstanceOf(BookingDraftRejected.class);
+        assertThat(offer.getDomainEvents())
+                .anyMatch(e -> e instanceof BookingDraftRejected);
         assertThat(offer.getBookingIds()).doesNotContain(bookingId);
     }
 
@@ -67,9 +70,10 @@ class OfferTest {
         offer.negotiate();
         BookingId bookingId = new BookingId(UUID.randomUUID());
 
-        DomainEvent event = offer.book(UserId.of(UUID.randomUUID()), bookingId);
+        offer.book(UserId.of(UUID.randomUUID()), bookingId);
 
-        assertThat(event).isInstanceOf(BookingDraftAccepted.class);
+        assertThat(offer.getDomainEvents())
+                .anyMatch(e -> e instanceof BookingDraftAccepted);
         assertThat(offer.getBookingIds()).contains(bookingId);
     }
 
@@ -173,6 +177,30 @@ class OfferTest {
         offer.accept(UserId.of(UUID.randomUUID()));
 
         assertThat(offer.getUpdatedAt()).isAfter(beforeAccepting);
+    }
+
+    @Test
+    void shouldReturnAllDomainEventsAndClearTheList() {
+        Offer offer = createOffer();
+        UserId userId = UserId.of(UUID.randomUUID());
+        BookingId bookingId = new BookingId(UUID.randomUUID());
+        offer.book(userId, bookingId);
+
+        List<DomainEvent> events = offer.pullDomainEvents();
+
+        assertThat(events).hasSize(1);
+        assertThat(events.getFirst()).isInstanceOf(BookingDraftAccepted.class);
+        assertThat(offer.getDomainEvents()).isEmpty();
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoDomainEventsExist() {
+        Offer offer = createOffer();
+
+        List<DomainEvent> events = offer.pullDomainEvents();
+
+        assertThat(events).isEmpty();
+        assertThat(offer.getDomainEvents()).isEmpty();
     }
 
     private Offer createOffer() {
