@@ -28,7 +28,7 @@ public class Offer {
     private OfferStatus status;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<DomainEvent> domainEvents;
+    private final List<DomainEvent> domainEvents;
 
     Offer(final OfferId id,
           final Title title,
@@ -49,7 +49,7 @@ public class Offer {
         this.executorId = executorId;
         this.bookingIds = new HashSet<>(bookingIds);
         this.location = location;
-        this.serviceCategories = new HashSet<>(serviceCategories);
+        this.serviceCategories = serviceCategories;
         this.salary = salary;
         this.status = status;
         this.createdAt = createdAt;
