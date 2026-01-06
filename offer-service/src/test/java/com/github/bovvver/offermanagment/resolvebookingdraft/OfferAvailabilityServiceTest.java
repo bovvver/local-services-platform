@@ -1,5 +1,6 @@
 package com.github.bovvver.offermanagment.resolvebookingdraft;
 
+import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferReadRepository;
 import com.github.bovvver.offermanagment.OfferWriteRepository;
@@ -20,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,10 +54,11 @@ class OfferAvailabilityServiceTest {
 
         when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        OfferAvailabilityCheckResponse response = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
+        OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
 
-        assertThat(response.httpStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(response.httpStatusCode()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.isAvailable()).isTrue();
+        verify(offerWriteRepository).save(any(Offer.class));
     }
 
     @Test
@@ -63,9 +67,9 @@ class OfferAvailabilityServiceTest {
 
         when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        OfferAvailabilityCheckResponse response = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
+        OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
 
-        assertThat(response.httpStatus()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.httpStatusCode()).isEqualTo(HttpStatus.CONFLICT.value());
         assertThat(response.isAvailable()).isFalse();
     }
 
@@ -73,9 +77,9 @@ class OfferAvailabilityServiceTest {
     void shouldReturnOfferNotFoundStatus() {
         when(offerReadRepository.findById(offerId)).thenReturn(Optional.empty());
 
-        OfferAvailabilityCheckResponse response = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
+        OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
 
-        assertThat(response.httpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.httpStatusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
         assertThat(response.isAvailable()).isFalse();
     }
 

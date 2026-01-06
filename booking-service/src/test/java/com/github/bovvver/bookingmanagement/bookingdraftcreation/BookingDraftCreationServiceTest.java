@@ -7,7 +7,6 @@ import com.github.bovvver.bookingmanagement.vo.BookingId;
 import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
-import com.github.bovvver.contracts.BookOfferCommand;
 import com.github.bovvver.shared.CurrentUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -49,9 +47,6 @@ class BookingDraftCreationServiceTest {
     @Mock
     private OfferAvailabilityClient offerAvailabilityClient;
 
-    @Mock
-    private KafkaTemplate<String, BookOfferCommand> kafka;
-
     @InjectMocks
     private BookingDraftCreationService bookingDraftCreationService;
 
@@ -62,6 +57,7 @@ class BookingDraftCreationServiceTest {
     void shouldCreateDraftWhenNoExistingBookingsOrDrafts() {
         BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
 
+        when(bookingDraftReadRepository.findSalaryByBookingId(any())).thenReturn(BigDecimal.valueOf(10_000.0));
         when(currentUser.getId()).thenReturn(UserId.of(userId));
         when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId))
                 .thenReturn(false);
@@ -80,6 +76,22 @@ class BookingDraftCreationServiceTest {
         assertThat(savedDraft.getUserId().value()).isEqualTo(userId);
         assertThat(savedDraft.getSalary()).isEqualTo(Salary.of(10_000.0));
         assertThat(savedDraft.getBookingId().value()).isNotNull();
+    }
+
+    @Test
+    void shouldRemoveDraftWhenOfferUnavailable() {
+        BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
+
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+        when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId))
+                .thenReturn(false);
+        when(bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, userId))
+                .thenReturn(false);
+        when(offerAvailabilityClient.isOfferAvailable(any(), eq(offerId), eq(userId)))
+                .thenReturn(false);
+
+        bookingDraftCreationService.processBookingCreation(request);
+        verify(bookingDraftWriteRepository).delete(any(BookingId.class));
     }
 
     @Test
@@ -136,7 +148,7 @@ class BookingDraftCreationServiceTest {
 
         verify(bookingDraftWriteRepository).delete(BookingId.of(bookingId));
         verifyNoMoreInteractions(bookingDraftWriteRepository);
-        verifyNoInteractions(bookingDraftReadRepository, bookingReadRepository, bookingRepository, kafka);
+        verifyNoInteractions(bookingDraftReadRepository, bookingReadRepository, bookingRepository);
     }
 
     @Test
@@ -145,7 +157,7 @@ class BookingDraftCreationServiceTest {
         UUID acceptedUserId = UUID.randomUUID();
         UUID eventOfferId = UUID.randomUUID();
 
-        when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(12_345.0);
+        when(bookingDraftReadRepository.findSalaryByBookingId(bookingId)).thenReturn(BigDecimal.valueOf(12_345.0));
 
         bookingDraftCreationService.createBooking(bookingId, acceptedUserId, eventOfferId);
 

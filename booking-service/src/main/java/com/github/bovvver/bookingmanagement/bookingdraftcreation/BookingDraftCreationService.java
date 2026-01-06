@@ -55,7 +55,7 @@ class BookingDraftCreationService {
     }
 
     void createBooking(final UUID bookingId, final UUID userId, final UUID offerId) {
-        Salary salary = Salary.of(bookingDraftReadRepository.findSalaryByBookingId(bookingId));
+        Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(bookingId));
         bookingDraftWriteRepository.delete(BookingId.of(bookingId));
 
         Booking booking = Booking.create(

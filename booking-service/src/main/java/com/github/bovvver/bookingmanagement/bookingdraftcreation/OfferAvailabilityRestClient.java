@@ -17,7 +17,7 @@ class OfferAvailabilityRestClient implements OfferAvailabilityClient {
     @Override
     public boolean isOfferAvailable(final UUID bookingId, final UUID offerId, final UUID userId) {
         OfferAvailabilityCheckResponse response =
-                restClient.get()
+                restClient.post()
                         .uri(uriBuilder -> uriBuilder
                                 .path(RESOLVE_BOOKING_DRAFT_ENDPOINT)
                                 .queryParam("offerId", offerId)
