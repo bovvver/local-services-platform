@@ -3,7 +3,7 @@ package com.github.bovvver.offermanagment.resolvebookingdraft;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,19 +13,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class OfferAvailabilityREST {
 
-    private static final String RESOLVE_BOOKING_DRAFT_ENDPOINT = "/internal/offer/availability";
+    private static final String OFFER_AVAILABILITY_ENDPOINT = "/internal/offer/availability";
 
     private final OfferAvailabilityService offerAvailabilityService;
 
-    @GetMapping(path = RESOLVE_BOOKING_DRAFT_ENDPOINT)
-    ResponseEntity<OfferAvailabilityCheckResponse> resolveBookingDraft(
+    @PostMapping(path = OFFER_AVAILABILITY_ENDPOINT)
+    ResponseEntity<OfferAvailabilityCheckResponse> attemptOfferBooking(
             @NotNull @RequestParam UUID offerId,
             @NotNull @RequestParam UUID userId,
             @NotNull @RequestParam UUID bookingId
     ) {
-        OfferAvailabilityCheckResponse result = offerAvailabilityService.checkOfferAvailability(offerId, userId, bookingId);
+        OfferAvailabilityCheckResponse result = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
         return ResponseEntity
-                .status(result.httpStatus())
+                .status(result.httpStatusCode())
                 .body(result);
     }
 }

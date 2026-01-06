@@ -8,18 +8,18 @@ record OfferAvailabilityCheckResponse(
         boolean isAvailable,
         String reason,
         LocalDateTime checkedAt,
-        HttpStatus httpStatus
+        int httpStatusCode
 ) {
 
     static OfferAvailabilityCheckResponse available() {
-        return new OfferAvailabilityCheckResponse(true, "Offer is open for booking.", LocalDateTime.now(), HttpStatus.OK);
+        return new OfferAvailabilityCheckResponse(true, "Offer is open for booking.", LocalDateTime.now(), HttpStatus.OK.value());
     }
 
     static OfferAvailabilityCheckResponse unavailable() {
-        return new OfferAvailabilityCheckResponse(false, "Offer is already closed for booking.", LocalDateTime.now(), HttpStatus.CONFLICT);
+        return new OfferAvailabilityCheckResponse(false, "Offer is already closed for booking.", LocalDateTime.now(), HttpStatus.CONFLICT.value());
     }
 
     static OfferAvailabilityCheckResponse notFound() {
-        return new OfferAvailabilityCheckResponse(false, "Offer not found", LocalDateTime.now(), HttpStatus.NOT_FOUND);
+        return new OfferAvailabilityCheckResponse(false, "Offer not found", LocalDateTime.now(), HttpStatus.NOT_FOUND.value());
     }
 }

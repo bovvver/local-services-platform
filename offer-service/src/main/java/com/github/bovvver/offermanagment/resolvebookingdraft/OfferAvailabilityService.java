@@ -11,6 +11,7 @@ import com.github.bovvver.offermanagment.vo.BookingId;
 import com.github.bovvver.offermanagment.vo.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,8 @@ class OfferAvailabilityService {
     private final OfferReadRepository offerReadRepository;
     private final OfferWriteRepository offerWriteRepository;
 
-    OfferAvailabilityCheckResponse checkOfferAvailability(UUID offerId, UUID userId, UUID bookingId) {
+    @Transactional
+    OfferAvailabilityCheckResponse attemptOfferBooking(UUID offerId, UUID userId, UUID bookingId) {
 
         Offer offer = OfferMapper.toDomain(offerReadRepository.findById(offerId).orElse(null));
         if (offer == null) {
