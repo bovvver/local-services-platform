@@ -1,9 +1,11 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.results.BeginNegotiationResult;
+import com.github.bovvver.bookingmanagement.event.DomainEvent;
+import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -31,6 +33,7 @@ public class Booking {
     private final Salary finalSalary;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private final List<DomainEvent> domainEvents;
 
     Booking(final BookingId id,
             final UserId userId,
@@ -48,6 +51,7 @@ public class Booking {
         this.finalSalary = finalSalary;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.domainEvents = new ArrayList<>();
     }
 
     /**
@@ -95,7 +99,7 @@ public class Booking {
         return new Booking(id, userId, offerId, proposedSalary);
     }
 
-    public BeginNegotiationResult beginNegotiation(Salary proposedSalary) {
+    public void beginNegotiation(Salary proposedSalary) {
         if (this.status != BookingStatus.PENDING) {
             throw new IllegalStateException(
                     "Cannot begin negotiation for booking with status %s".formatted(this.status)
@@ -115,8 +119,7 @@ public class Booking {
                 List.of(initialPosition)
         );
         this.negotiationId = negotiation.getId();
-
-        return new BeginNegotiationResult(this, negotiation, initialPosition);
+        registerEvent(new NegotiationStarted(this.getId(), negotiation.getId(), initialPosition.getId()));
     }
 
     public void accept() {
@@ -140,6 +143,16 @@ public class Booking {
     private void updateStatus(BookingStatus status) {
         this.status = status;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    protected void registerEvent(DomainEvent event) {
+        domainEvents.add(event);
+    }
+
+    public List<DomainEvent> pullDomainEvents() {
+        List<DomainEvent> events = getDomainEvents();
+        domainEvents.clear();
+        return events;
     }
 
     BookingId getId() {
@@ -172,5 +185,9 @@ public class Booking {
 
     LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public List<DomainEvent> getDomainEvents() {
+        return List.copyOf(domainEvents);
     }
 }

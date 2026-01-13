@@ -1,7 +1,6 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
 import com.github.bovvver.bookingmanagement.*;
-import com.github.bovvver.bookingmanagement.results.BeginNegotiationResult;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import jakarta.transaction.Transactional;
@@ -21,12 +20,11 @@ class ResolveNegotiationDecisionService {
         BookingEntity bookingEntity = bookingReadRepository.findById(cmd.bookingId());
         Booking booking = BookingMapper.toDomain(bookingEntity);
 
-        BeginNegotiationResult negotiationData = booking.beginNegotiation(new Salary(cmd.salary()));
+        booking.beginNegotiation(new Salary(cmd.salary()));
+        bookingRepository.save(booking);
 
-        bookingRepository.saveNegotiation(
-                negotiationData.booking(),
-                negotiationData.negotiation(),
-                negotiationData.position()
-        );
+        booking.pullDomainEvents().stream()
+                .map(el -> NegotiationEventMapper.toOutboxEvent(el))
+
     }
 }
