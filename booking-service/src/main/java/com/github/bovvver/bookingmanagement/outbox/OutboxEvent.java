@@ -1,11 +1,9 @@
 package com.github.bovvver.bookingmanagement.outbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -23,15 +21,18 @@ public class OutboxEvent {
     @Column(name = "id", nullable = false)
     private UUID id;
 
+    @Getter
     @Column(name = "aggregate_id", nullable = false)
     private UUID aggregateId;
 
     @Column(name = "aggregate_type", nullable = false, length = 50)
     private String aggregateType;
 
+    @Getter
     @Column(name = "event_type", nullable = false, length = 100)
     private String eventType;
 
+    @Getter
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
     private JsonNode payload;
@@ -41,6 +42,13 @@ public class OutboxEvent {
 
     @Column(name = "processed", nullable = false)
     private boolean processed = false;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OutboxStatus status;
+
+    @Column(name = "error_message", length = 1000)
+    private String errorMessage;
 
     public static OutboxEvent create(
             UUID aggregateId,
@@ -56,7 +64,21 @@ public class OutboxEvent {
                 eventType,
                 payload,
                 occurredAt,
-                false
+                false,
+                OutboxStatus.NEW,
+                null
         );
+    }
+
+    public void markSent() {
+        this.processed = true;
+        this.status = OutboxStatus.SENT;
+        this.errorMessage = null;
+    }
+
+    public void markFailed(String errorMessage) {
+        this.processed = false;
+        this.status = OutboxStatus.FAILED;
+        this.errorMessage = errorMessage;
     }
 }

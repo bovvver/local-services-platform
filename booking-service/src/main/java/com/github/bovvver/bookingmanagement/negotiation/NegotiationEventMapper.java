@@ -4,43 +4,37 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.outbox.OutboxEvent;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.stream.Stream;
-
+@Component
+@RequiredArgsConstructor
 class NegotiationEventMapper {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    private static Stream<Object> mapToIntegrationEvents(DomainEvent domainEvent) {
+    public OutboxEvent toOutboxEvent(DomainEvent domainEvent) {
 
-        if (domainEvent instanceof NegotiationStarted e) {
-            return Stream.of(
-                    new NegotiationStartedIntegrationEvent(
-                            e.message(),
-                            e.bookingId().value(),
-                            e.negotiationId().value(),
-                            e.positionId().value(),
-                            e.getTimestamp()
-                    )
-            );
+        if (!(domainEvent instanceof NegotiationStarted e)) {
+            return null;
         }
-        return Stream.empty();
-    }
 
-    private static OutboxEvent toOutboxEvent(NegotiationStartedIntegrationEvent integrationEvent) {
+        NegotiationStartedIntegrationEvent integrationEvent =
+                new NegotiationStartedIntegrationEvent(
+                        e.message(),
+                        e.bookingId().value(),
+                        e.negotiationId().value(),
+                        e.positionId().value(),
+                        e.getTimestamp()
+                );
+
         JsonNode payload = objectMapper.valueToTree(integrationEvent);
         return OutboxEvent.create(
                 integrationEvent.bookingId(),
                 "Negotiation",
                 "NegotiationStarted",
                 payload,
-                LocalDateTime.now()
+                integrationEvent.timestamp()
         );
-    }
-
-    static OutboxEvent toOutboxEvent(NegotiationStarted domainEvent) {
-        Stream<Object> integrationEvent = mapToIntegrationEvents(domainEvent);
-        return toOutboxEvent(integrationEvent);
     }
 }
