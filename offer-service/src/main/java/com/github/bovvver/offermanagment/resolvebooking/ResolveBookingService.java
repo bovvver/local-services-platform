@@ -24,7 +24,7 @@ class ResolveBookingService {
     static final String OFFER_BOOKING_REJECT_OTHERS = "offer.booking.reject.others";
 
     private final KafkaTemplate<String, Object> kafka;
-    private final OfferReadRepository offerReadRepository;
+    private final OfferRepository offerRepository;
     private final OfferWriteRepository offerWriteRepository;
     private final CurrentUser currentUser;
 
@@ -48,7 +48,7 @@ class ResolveBookingService {
 
     @Transactional
     void completeBookingAssignment(final AssignExecutorCommand cmd) {
-        OfferDocument offerDocument = offerReadRepository.findById(cmd.offerId())
+        OfferDocument offerDocument = offerRepository.findById(cmd.offerId())
                 .orElseThrow(() -> new IllegalStateException(
                         "Offer with id %s not found during booking decision.".formatted(cmd.offerId())
                 ));
@@ -61,7 +61,7 @@ class ResolveBookingService {
 
     private void sendBookingDecisionMadeEvent(BookingDecisionMadeEvent cmd) {
 
-        OfferDocument offerDocument = offerReadRepository.findById(cmd.offerId())
+        OfferDocument offerDocument = offerRepository.findById(cmd.offerId())
                 .orElseThrow(() -> new IllegalStateException(
                         "Offer with id %s not found during booking decision.".formatted(cmd.offerId())
                 ));
@@ -82,7 +82,7 @@ class ResolveBookingService {
             throw new IllegalStateException("No user logged in.");
         }
 
-        return offerReadRepository.existsByIdAndAuthorId(
+        return offerRepository.existsByIdAndAuthorId(
                 offerId,
                 currentUserId.value()
         );

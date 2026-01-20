@@ -4,7 +4,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.UUID;
 
-public interface OfferReadRepository extends MongoRepository<OfferDocument, UUID> {
+public interface OfferRepository extends MongoRepository<OfferDocument, UUID> {
 
     boolean existsByIdAndAuthorId(UUID offerId, UUID currentUserId);
 }

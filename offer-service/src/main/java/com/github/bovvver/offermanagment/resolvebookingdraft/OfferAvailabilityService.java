@@ -3,7 +3,7 @@ package com.github.bovvver.offermanagment.resolvebookingdraft;
 import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferMapper;
-import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.BookingDraftAccepted;
 import com.github.bovvver.offermanagment.vo.BookingDraftRejected;
@@ -20,13 +20,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class OfferAvailabilityService {
 
-    private final OfferReadRepository offerReadRepository;
+    private final OfferRepository offerRepository;
     private final OfferWriteRepository offerWriteRepository;
 
     @Transactional
     OfferAvailabilityCheckResponse attemptOfferBooking(UUID offerId, UUID userId, UUID bookingId) {
 
-        Offer offer = OfferMapper.toDomain(offerReadRepository.findById(offerId).orElse(null));
+        Offer offer = OfferMapper.toDomain(offerRepository.findById(offerId).orElse(null));
         if (offer == null) {
             return OfferAvailabilityCheckResponse.notFound();
         }

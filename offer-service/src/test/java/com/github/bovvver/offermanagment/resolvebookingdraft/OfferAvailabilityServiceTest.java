@@ -2,7 +2,7 @@ package com.github.bovvver.offermanagment.resolvebookingdraft;
 
 import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
-import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 class OfferAvailabilityServiceTest {
 
     @Mock
-    private OfferReadRepository offerReadRepository;
+    private OfferRepository offerRepository;
 
     @Mock
     private OfferWriteRepository offerWriteRepository;
@@ -52,7 +52,7 @@ class OfferAvailabilityServiceTest {
     void shouldReturnOfferAvailableStatus() {
         OfferDocument offerDocument = createOfferDocument(OfferStatus.OPEN);
 
-        when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
         OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
 
@@ -65,7 +65,7 @@ class OfferAvailabilityServiceTest {
     void shouldReturnOfferUnavailableStatus() {
         OfferDocument offerDocument = createOfferDocument(OfferStatus.ASSIGNED);
 
-        when(offerReadRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
         OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
 
@@ -75,7 +75,7 @@ class OfferAvailabilityServiceTest {
 
     @Test
     void shouldReturnOfferNotFoundStatus() {
-        when(offerReadRepository.findById(offerId)).thenReturn(Optional.empty());
+        when(offerRepository.findById(offerId)).thenReturn(Optional.empty());
 
         OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
 
