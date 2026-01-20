@@ -5,7 +5,7 @@ import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
 import com.github.bovvver.contracts.OtherBookingsRejectedEvent;
 import com.github.bovvver.offermanagment.OfferDocument;
-import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
@@ -46,7 +46,7 @@ class ResolveBookingServiceTest {
     private KafkaTemplate<String, Object> kafka;
 
     @Mock
-    private OfferReadRepository offerReadRepository;
+    private OfferRepository offerRepository;
 
     @Mock
     private OfferWriteRepository offerWriteRepository;
@@ -67,9 +67,9 @@ class ResolveBookingServiceTest {
         BookingDecisionRequest request = new BookingDecisionRequest(status, salary);
 
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
-        when(offerReadRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
+        when(offerRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
                 .thenReturn(true);
-        when(offerReadRepository.findById(OFFER_ID))
+        when(offerRepository.findById(OFFER_ID))
                 .thenReturn(Optional.of(createOfferDocument()));
 
         resolveBookingService.processBookingDecision(
@@ -95,7 +95,7 @@ class ResolveBookingServiceTest {
         BookingDecisionRequest request = new BookingDecisionRequest(BookingDecisionStatus.ACCEPTED, null);
 
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
-        when(offerReadRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
+        when(offerRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
                 .thenReturn(false);
 
         assertThrows(IllegalStateException.class, () ->
@@ -108,7 +108,7 @@ class ResolveBookingServiceTest {
         BookingDecisionRequest request = new BookingDecisionRequest(BookingDecisionStatus.ACCEPTED, BigDecimal.valueOf(10.0));
 
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
-        when(offerReadRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
+        when(offerRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
                 .thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -121,7 +121,7 @@ class ResolveBookingServiceTest {
         BookingDecisionRequest request = new BookingDecisionRequest(BookingDecisionStatus.NEGOTIATE, null);
 
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
-        when(offerReadRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
+        when(offerRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
                 .thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -144,7 +144,7 @@ class ResolveBookingServiceTest {
     void shouldCompleteBookingAssignmentAndSaveOffer() {
         AssignExecutorCommand cmd = new AssignExecutorCommand(OFFER_ID, USER_ID);
 
-        when(offerReadRepository.findById(OFFER_ID))
+        when(offerRepository.findById(OFFER_ID))
                 .thenReturn(Optional.of(createOfferDocument()));
 
         resolveBookingService.completeBookingAssignment(cmd);
@@ -165,7 +165,7 @@ class ResolveBookingServiceTest {
     void shouldThrowExceptionWhenOfferNotFoundDuringAssignment() {
         AssignExecutorCommand cmd = new AssignExecutorCommand(OFFER_ID, USER_ID);
 
-        when(offerReadRepository.findById(OFFER_ID))
+        when(offerRepository.findById(OFFER_ID))
                 .thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class, () ->
@@ -178,9 +178,9 @@ class ResolveBookingServiceTest {
         BookingDecisionRequest request = new BookingDecisionRequest(BookingDecisionStatus.ACCEPTED, null);
 
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
-        when(offerReadRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
+        when(offerRepository.existsByIdAndAuthorId(OFFER_ID, USER_ID))
                 .thenReturn(true);
-        when(offerReadRepository.findById(OFFER_ID))
+        when(offerRepository.findById(OFFER_ID))
                 .thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class, () ->

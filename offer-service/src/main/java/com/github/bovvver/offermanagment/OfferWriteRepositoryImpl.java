@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 class OfferWriteRepositoryImpl implements OfferWriteRepository {
-    private final MongoOfferRepository repository;
+    private final OfferRepository repository;
 
     @Override
     public Offer save(final Offer offer) {

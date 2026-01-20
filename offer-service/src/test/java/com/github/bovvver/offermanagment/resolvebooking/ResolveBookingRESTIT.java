@@ -5,7 +5,7 @@ import com.github.bovvver.BaseIntegrationTest;
 import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
 import com.github.bovvver.offermanagment.OfferDocument;
-import com.github.bovvver.offermanagment.OfferReadRepository;
+import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
@@ -42,7 +42,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
     private static final String RESOLVE_BOOKING_ENDPOINT = "/%s/bookings/%s/decision";
 
     @Autowired
-    private OfferReadRepository offerReadRepository;
+    private OfferRepository offerRepository;
 
     @Autowired
     private CurrentUser currentUser;
@@ -82,7 +82,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
                 testOffer.getCreatedAt(),
                 testOffer.getUpdatedAt()
         );
-        offerReadRepository.save(savedOffer);
+        offerRepository.save(savedOffer);
         setupKafkaConsumerForTopic(OFFER_BOOKING_DECISION);
     }
 
@@ -186,7 +186,7 @@ class ResolveBookingRESTIT extends BaseIntegrationTest {
                 null,
                 null
         );
-        offerReadRepository.save(offerWithDifferentOwner);
+        offerRepository.save(offerWithDifferentOwner);
 
         BookingDecisionRequest request = new BookingDecisionRequest(
                 BookingDecisionStatus.ACCEPTED,
