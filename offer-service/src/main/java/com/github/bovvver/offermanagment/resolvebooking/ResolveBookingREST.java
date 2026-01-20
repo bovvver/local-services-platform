@@ -1,13 +1,11 @@
 package com.github.bovvver.offermanagment.resolvebooking;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -16,8 +14,22 @@ import java.util.UUID;
 class ResolveBookingREST {
 
     private static final String RESOLVE_BOOKING_ENDPOINT = "/{offerId}/bookings/{bookingId}/decision";
+    private static final String OFFER_AVAILABILITY_ENDPOINT = "/internal/offer/availability";
 
     private final ResolveBookingService resolveBookingService;
+    private final OfferAvailabilityService offerAvailabilityService;
+
+    @PostMapping(path = OFFER_AVAILABILITY_ENDPOINT)
+    ResponseEntity<OfferAvailabilityCheckResponse> attemptOfferBooking(
+            @NotNull @RequestParam UUID offerId,
+            @NotNull @RequestParam UUID userId,
+            @NotNull @RequestParam UUID bookingId
+    ) {
+        OfferAvailabilityCheckResponse result = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
+        return ResponseEntity
+                .status(result.httpStatusCode())
+                .body(result);
+    }
 
     @PostMapping(path = RESOLVE_BOOKING_ENDPOINT)
     ResponseEntity<BookingDecisionResponse> resolveBookingStatus(

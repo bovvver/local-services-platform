@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingdraftcreation;
+package com.github.bovvver.bookingmanagement.bookingcreation;
 
 import com.github.bovvver.bookingmanagement.Booking;
 import com.github.bovvver.bookingmanagement.BookingReadRepository;
@@ -16,16 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-class BookingDraftCreationService {
+class BookingCreationService {
 
     private final CurrentUser currentUser;
-    private final BookingDraftWriteRepository bookingDraftWriteRepository;
-    private final BookingDraftReadRepository bookingDraftReadRepository;
     private final BookingReadRepository bookingReadRepository;
     private final BookingRepository bookingRepository;
     private final OfferAvailabilityClient offerAvailabilityClient;
@@ -35,7 +32,6 @@ class BookingDraftCreationService {
 
         checkForExistingBookings(request.offerId());
         BookOfferCommand cmd = createBookingCommand(request);
-        createDraftBooking(cmd, request.salary());
 
         boolean isOfferAvailable = offerAvailabilityClient.isOfferAvailable(
                 cmd.bookingId(),
@@ -45,24 +41,18 @@ class BookingDraftCreationService {
 
         if (isOfferAvailable) {
             createBooking(cmd.bookingId(), cmd.userId(), cmd.offerId());
-        } else {
-            deleteDraftBooking(cmd.bookingId());
         }
     }
 
-    void deleteDraftBooking(final UUID bookingId) {
-        bookingDraftWriteRepository.delete(BookingId.of(bookingId));
-    }
-
     void createBooking(final UUID bookingId, final UUID userId, final UUID offerId) {
-        Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(bookingId));
-        bookingDraftWriteRepository.delete(BookingId.of(bookingId));
+        // Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(bookingId)); // FIXME: will be covered by saga in later PR
 
         Booking booking = Booking.create(
                 BookingId.of(bookingId),
                 UserId.of(userId),
                 OfferId.of(offerId),
-                salary
+                Salary.of(0.0)
+                // salary
         );
         bookingRepository.save(booking);
     }
@@ -79,28 +69,12 @@ class BookingDraftCreationService {
         );
     }
 
-    private void createDraftBooking(final BookOfferCommand cmd, final BigDecimal salary) {
-
-        BookingDraft bookingDraft = BookingDraft.create(
-                BookingId.of(cmd.bookingId()),
-                OfferId.of(cmd.offerId()),
-                UserId.of(cmd.userId()),
-                new Salary(salary)
-        );
-        bookingDraftWriteRepository.save(bookingDraft);
-    }
-
     private void checkForExistingBookings(UUID offerId) {
         UUID currentUserId = currentUser.getId().value();
 
         if (bookingReadRepository.existsByOfferIdAndUserId(offerId, currentUserId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "A booking for this offer already exists for the current user.");
-        }
-
-        if (bookingDraftReadRepository.existsByOfferIdAndUserId(offerId, currentUserId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "A booking draft for this offer already exists for the current user.");
         }
     }
 }

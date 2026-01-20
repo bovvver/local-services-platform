@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingdraftcreation;
+package com.github.bovvver.bookingmanagement.bookingcreation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
@@ -10,13 +10,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static com.github.bovvver.bookingmanagement.bookingdraftcreation.BookingDraftCreationREST.CREATE_BOOKING_ENDPOINT;
+import static com.github.bovvver.bookingmanagement.bookingcreation.BookingCreationREST.CREATE_BOOKING_ENDPOINT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class BookingDraftCreationRESTIT extends BaseIntegrationTest {
+class BookingCreationRESTIT extends BaseIntegrationTest {
 
     private final UUID OFFER_ID = UUID.randomUUID();
 
@@ -27,7 +27,7 @@ class BookingDraftCreationRESTIT extends BaseIntegrationTest {
     private OfferAvailabilityClient offerAvailabilityClient;
 
     @Test
-    void shouldCreateBookingDraft() throws Exception {
+    void shouldCreateBooking() throws Exception {
         when(offerAvailabilityClient.isOfferAvailable(any(), any(), any())).thenReturn(true);
 
         BookOfferRequest request = new BookOfferRequest(

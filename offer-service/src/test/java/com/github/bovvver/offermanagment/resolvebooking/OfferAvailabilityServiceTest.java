@@ -1,4 +1,4 @@
-package com.github.bovvver.offermanagment.resolvebookingdraft;
+package com.github.bovvver.offermanagment.resolvebooking;
 
 import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
