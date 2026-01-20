@@ -1,4 +1,4 @@
-package com.github.bovvver.offermanagment.resolvebookingdraft;
+package com.github.bovvver.offermanagment.resolvebooking;
 
 import org.springframework.http.HttpStatus;
 

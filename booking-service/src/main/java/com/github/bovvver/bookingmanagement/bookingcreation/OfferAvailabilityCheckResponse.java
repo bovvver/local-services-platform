@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.bookingdraftcreation;
+package com.github.bovvver.bookingmanagement.bookingcreation;
 
 import java.time.LocalDateTime;
 
