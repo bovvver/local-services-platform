@@ -35,12 +35,11 @@ public class NegotiationPosition {
     }
 
     static NegotiationPosition create(
-            final NegotiationPositionId id,
-            final NegotiationId negotiationId,
+            final NegotiationId negotiation,
             final Salary proposedSalary,
             final NegotiationParty proposedBy
     ) {
-        return new NegotiationPosition(id, negotiationId, proposedSalary, proposedBy);
+        return new NegotiationPosition(NegotiationPositionId.generate(), negotiation, proposedSalary, proposedBy);
     }
 
     NegotiationPositionId getId() {

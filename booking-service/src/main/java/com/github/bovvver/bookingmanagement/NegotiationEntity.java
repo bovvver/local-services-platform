@@ -5,23 +5,20 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter
-@Table(
-        name = "negotiations",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "negotiations_bookings_unique",
-                        columnNames = {"id", "booking_id"}
-                )
-        }
-)
+@Setter
+@Table(name = "negotiations")
+@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 @NoArgsConstructor
 class NegotiationEntity {
@@ -29,9 +26,13 @@ class NegotiationEntity {
     @Id
     private UUID id;
 
-    @Column(name = "booking_id", nullable = false)
-    private UUID bookingId;
+    @OneToOne(mappedBy = "negotiation")
+    private BookingEntity booking;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "negotiation", orphanRemoval = true)
+    private List<NegotiationPositionEntity> positions;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NegotiationStatus status;
 

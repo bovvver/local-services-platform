@@ -59,7 +59,7 @@ class BookingTest {
 
         assertThat(result).isNotNull();
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);
-        assertThat(booking.getNegotiationId()).isNotNull();
+        assertThat(booking.getNegotiation()).isNotNull();
     }
 
     @Test
