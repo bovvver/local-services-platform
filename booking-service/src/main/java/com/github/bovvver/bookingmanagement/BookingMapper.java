@@ -8,28 +8,44 @@ import java.util.List;
 public class BookingMapper {
 
     public static BookingEntity toEntity(Booking booking) {
-        return new BookingEntity(
+
+        BookingEntity bookingEntity = new BookingEntity(
                 booking.getId().value(),
                 booking.getUserId().value(),
                 booking.getOfferId().value(),
-                booking.getNegotiationId() == null ? null : booking.getNegotiationId().value(),
+                null,
                 booking.getStatus(),
                 booking.getFinalSalary() != null ? booking.getFinalSalary().value() : null,
                 booking.getCreatedAt(),
                 booking.getUpdatedAt()
         );
+
+        if (booking.getNegotiation() != null) {
+            NegotiationEntity negotiationEntity =
+                    NegotiationMapper.toEntity(booking.getNegotiation());
+
+            negotiationEntity.setBooking(bookingEntity);
+            bookingEntity.setNegotiation(negotiationEntity);
+        }
+
+        return bookingEntity;
     }
 
-    public static Booking toDomain(BookingEntity bookingEntity) {
+    public static Booking toDomain(BookingEntity entity) {
+        Negotiation negotiation = NegotiationMapper.toDomain(
+                entity.getNegotiation(),
+                entity.getId()
+        );
+
         return new Booking(
-                new BookingId(bookingEntity.getId()),
-                new UserId(bookingEntity.getUserId()),
-                new OfferId(bookingEntity.getOfferId()),
-                bookingEntity.getNegotiationId() == null ? null : new NegotiationId(bookingEntity.getNegotiationId()),
-                bookingEntity.getStatus(),
-                bookingEntity.getFinalSalary() != null ? new Salary(bookingEntity.getFinalSalary()) : null,
-                bookingEntity.getCreatedAt(),
-                bookingEntity.getUpdatedAt()
+                new BookingId(entity.getId()),
+                new UserId(entity.getUserId()),
+                new OfferId(entity.getOfferId()),
+                negotiation,
+                entity.getStatus(),
+                entity.getFinalSalary() != null ? new Salary(entity.getFinalSalary()) : null,
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
         );
     }
 

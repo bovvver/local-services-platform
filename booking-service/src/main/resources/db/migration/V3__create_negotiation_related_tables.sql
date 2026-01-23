@@ -4,7 +4,11 @@ CREATE TABLE negotiations
     booking_id UUID        NOT NULL,
     status     VARCHAR(20) NOT NULL,
     started_at TIMESTAMP   NOT NULL,
-    updated_at TIMESTAMP   NOT NULL
+    updated_at TIMESTAMP   NOT NULL,
+    CONSTRAINT fk_negotiations_booking FOREIGN KEY (booking_id)
+        REFERENCES bookings (id)
+        ON DELETE CASCADE,
+    CONSTRAINT uq_negotiations_booking UNIQUE (booking_id)
 );
 
 CREATE TABLE negotiation_positions
@@ -23,6 +27,12 @@ CREATE TABLE negotiation_positions
 CREATE INDEX idx_negotiation_position__negotiation_id ON negotiation_positions (negotiation_id);
 
 ALTER TABLE bookings
+    ADD COLUMN negotiation_id UUID;
+
+ALTER TABLE bookings
     ADD CONSTRAINT fk_booking_negotiation FOREIGN KEY (negotiation_id)
         REFERENCES negotiations (id)
         ON DELETE CASCADE;
+
+ALTER TABLE bookings
+    ADD CONSTRAINT uq_bookings_negotiation UNIQUE (negotiation_id);

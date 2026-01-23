@@ -4,7 +4,6 @@ import com.github.bovvver.bookingmanagement.results.BeginNegotiationResult;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -26,7 +25,7 @@ public class Booking {
     private final BookingId id;
     private final UserId userId;
     private final OfferId offerId;
-    private NegotiationId negotiationId;
+    private Negotiation negotiation;
     private BookingStatus status;
     private final Salary finalSalary;
     private final LocalDateTime createdAt;
@@ -35,7 +34,7 @@ public class Booking {
     Booking(final BookingId id,
             final UserId userId,
             final OfferId offerId,
-            final NegotiationId negotiationId,
+            final Negotiation negotiation,
             final BookingStatus status,
             final Salary finalSalary,
             final LocalDateTime createdAt,
@@ -43,7 +42,7 @@ public class Booking {
         this.id = id;
         this.userId = userId;
         this.offerId = offerId;
-        this.negotiationId = negotiationId;
+        this.negotiation = negotiation;
         this.status = status;
         this.finalSalary = finalSalary;
         this.createdAt = createdAt;
@@ -102,20 +101,11 @@ public class Booking {
             );
         }
         updateStatus(BookingStatus.IN_NEGOTIATION);
-        NegotiationId newNegotiationId = NegotiationId.generate();
-        NegotiationPosition initialPosition = NegotiationPosition.create(
-                NegotiationPositionId.generate(),
-                newNegotiationId,
-                proposedSalary,
-                NegotiationParty.AUTHOR
-        );
-        Negotiation negotiation = Negotiation.create(
-                newNegotiationId,
-                getId(),
-                List.of(initialPosition)
-        );
-        this.negotiationId = negotiation.getId();
 
+        Negotiation negotiation = Negotiation.create(this.id);
+        negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
+
+        this.negotiation = negotiation;
         return new BeginNegotiationResult(this, negotiation, initialPosition);
     }
 
@@ -154,8 +144,8 @@ public class Booking {
         return offerId;
     }
 
-    NegotiationId getNegotiationId() {
-        return negotiationId;
+    Negotiation getNegotiation() {
+        return negotiation;
     }
 
     public BookingStatus getStatus() {

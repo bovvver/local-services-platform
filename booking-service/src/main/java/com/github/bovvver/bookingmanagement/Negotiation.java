@@ -1,10 +1,9 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.BookingId;
-import com.github.bovvver.bookingmanagement.vo.NegotiationId;
-import com.github.bovvver.bookingmanagement.vo.NegotiationStatus;
+import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Negotiation {
@@ -37,11 +36,17 @@ public class Negotiation {
     }
 
     static Negotiation create(
-            final NegotiationId id,
-            final BookingId bookingId,
-            final List<NegotiationPosition> positions
+            final BookingId bookingId
     ) {
-        return new Negotiation(id, bookingId, positions);
+        return new Negotiation(NegotiationId.generate(), bookingId, new ArrayList<>());
+    }
+
+    void addPosition(Salary proposedSalary, final NegotiationParty proposedBy) {
+        if(this.status != NegotiationStatus.ACTIVE) {
+            throw new IllegalStateException("Cannot add position to a non-active negotiation.");
+        }
+        NegotiationPosition position = NegotiationPosition.create(this.id, proposedSalary, proposedBy);
+        this.positions.add(position);
     }
 
     NegotiationId getId() {
@@ -53,7 +58,7 @@ public class Negotiation {
     }
 
     List<NegotiationPosition> getPositions() {
-        return positions;
+        return List.copyOf(positions);
     }
 
     NegotiationStatus getStatus() {
