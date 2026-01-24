@@ -120,7 +120,8 @@ public class Booking {
         negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
 
         this.negotiation = negotiation;
-        registerEvent(new NegotiationStarted(this.getId(), negotiation.getId(), initialPosition.getId()));}
+        registerEvent(new NegotiationStarted(this.getId(), negotiation.getId()));
+    }
 
     public void accept() {
         validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);

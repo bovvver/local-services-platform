@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -47,8 +48,14 @@ public class OutboxEvent {
     @Enumerated(EnumType.STRING)
     private OutboxStatus status;
 
-    @Column(name = "error_message", length = 1000)
-    private String errorMessage;
+    @Column(name = "last_error", length = 1000)
+    private String lastError;
+
+    @Column(name = "retry_count", nullable = false)
+    private int retryCount = 0;
+
+    @Column(name = "next_retry_at")
+    private LocalDateTime nextRetryAt;
 
     public static OutboxEvent create(
             UUID aggregateId,
@@ -66,19 +73,51 @@ public class OutboxEvent {
                 occurredAt,
                 false,
                 OutboxStatus.NEW,
+                null,
+                0,
                 null
         );
     }
 
-    public void markSent() {
-        this.processed = true;
-        this.status = OutboxStatus.SENT;
-        this.errorMessage = null;
+    /**
+     * Handles the successful processing of the outbox event.
+     * Marks the event as processed and updates its status to SENT.
+     */
+    public void handleSuccess() {
+        handleStatusChange(true, OutboxStatus.SENT, null);
     }
 
-    public void markFailed(String errorMessage) {
+    /**
+     * Exponential backoff retry mechanism.
+     * Handles the failure of processing the outbox event.
+     * If the maximum retry count is reached, the event is marked as DEAD.
+     * Otherwise, the retry count is incremented, and the next retry time is calculated
+     * using an exponential backoff strategy. The event's status is updated to FAILED.
+     *
+     * @param errorMessage The error message describing the failure reason.
+     */
+    public void handleFailure(String errorMessage) {
+        int MAX_RETRIES = 5;
+        int BASE_DELAY_SECONDS = 5;
         this.processed = false;
-        this.status = OutboxStatus.FAILED;
-        this.errorMessage = errorMessage;
+
+        if (this.retryCount >= MAX_RETRIES) {
+            handleStatusChange(false, OutboxStatus.DEAD, errorMessage);
+            return;
+        }
+
+        Duration delay = Duration.ofSeconds(
+                BASE_DELAY_SECONDS * (1L << this.retryCount)
+        );
+
+        this.retryCount += 1;
+        this.nextRetryAt = LocalDateTime.now().plus(delay);
+        handleStatusChange(false, OutboxStatus.FAILED, errorMessage);
+    }
+
+    private void handleStatusChange(boolean isProcessed, OutboxStatus newStatus, String errorMessage) {
+        this.processed = isProcessed;
+        this.status = newStatus;
+        this.lastError = errorMessage;
     }
 }

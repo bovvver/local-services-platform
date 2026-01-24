@@ -24,7 +24,6 @@ class NegotiationEventMapper {
                         e.message(),
                         e.bookingId().value(),
                         e.negotiationId().value(),
-                        e.positionId().value(),
                         e.getTimestamp()
                 );
 
