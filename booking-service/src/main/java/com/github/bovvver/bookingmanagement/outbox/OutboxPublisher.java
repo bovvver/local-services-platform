@@ -3,10 +3,17 @@ package com.github.bovvver.bookingmanagement.outbox;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Component responsible for publishing outbox events to the event bus.
+ * It periodically retrieves events with status NEW or FAILED from the outbox repository,
+ * attempts to publish them, and updates their status accordingly.
+ */
 @Component
+@Transactional
 @RequiredArgsConstructor
 class OutboxPublisher {
 
@@ -19,9 +26,11 @@ class OutboxPublisher {
         for (OutboxEvent event : events) {
             try {
                 eventBus.publish(event);
-                event.markSent();
+                event.handleSuccess();
+                outboxRepository.save(event);
             } catch (Exception e) {
-                event.markFailed(e.getMessage());
+                event.handleFailure(e.getMessage());
+                outboxRepository.save(event);
             }
         }
     }

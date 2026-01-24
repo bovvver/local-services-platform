@@ -1,5 +1,5 @@
 package com.github.bovvver.bookingmanagement.outbox;
 
 public enum OutboxStatus {
-    NEW, SENT, FAILED
+    NEW, SENT, FAILED, DEAD
 }

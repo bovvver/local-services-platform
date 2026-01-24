@@ -1,6 +1,5 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.vo.*;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +51,7 @@ class BookingTest {
         Salary salary = Salary.of(50000.0);
         Booking booking = Booking.create(userId, offerId, salary);
 
-        NegotiationStarted result = booking.beginNegotiation(salary);
+        booking.beginNegotiation(salary);
 
         assertThat(result).isNotNull();
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);

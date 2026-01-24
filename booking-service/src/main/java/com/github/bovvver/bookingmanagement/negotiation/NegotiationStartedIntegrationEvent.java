@@ -7,7 +7,6 @@ public record NegotiationStartedIntegrationEvent(
         String message,
         UUID bookingId,
         UUID negotiationId,
-        UUID positionId,
         LocalDateTime timestamp
 ) {
 }
