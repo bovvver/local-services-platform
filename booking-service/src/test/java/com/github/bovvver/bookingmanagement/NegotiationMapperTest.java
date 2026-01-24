@@ -23,7 +23,7 @@ class NegotiationMapperTest {
 
         assertThat(entity).isNotNull();
         assertThat(entity.getId()).isEqualTo(negotiation.getId().value());
-        assertThat(entity.getBookingId()).isEqualTo(negotiation.getBookingId().value());
+        assertThat(entity.getBooking().getId()).isEqualTo(negotiation.getBookingId().value());
         assertThat(entity.getStatus()).isEqualTo(negotiation.getStatus());
         assertThat(entity.getStartedAt()).isEqualTo(negotiation.getStartedAt());
         assertThat(entity.getLastUpdatedAt()).isEqualTo(negotiation.getLastUpdatedAt());
