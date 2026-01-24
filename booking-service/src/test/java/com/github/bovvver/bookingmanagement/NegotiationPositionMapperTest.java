@@ -12,7 +12,6 @@ class NegotiationPositionMapperTest {
     @Test
     void shouldMapNegotiationPositionToEntityCorrectly() {
         NegotiationPosition negotiationPosition = NegotiationPosition.create(
-                NegotiationPositionId.of(UUID.randomUUID()),
                 NegotiationId.of(UUID.randomUUID()),
                 Salary.of(1000.0),
                 NegotiationParty.AUTHOR
@@ -22,7 +21,7 @@ class NegotiationPositionMapperTest {
 
         assertThat(entity).isNotNull();
         assertThat(entity.getId()).isEqualTo(negotiationPosition.getId().value());
-        assertThat(entity.getNegotiationId()).isEqualTo(negotiationPosition.getNegotiationId().value());
+        assertThat(entity.getNegotiation().getId()).isEqualTo(negotiationPosition.getNegotiationId().value());
         assertThat(entity.getProposedSalary()).isEqualTo(negotiationPosition.getProposedSalary().value());
         assertThat(entity.getProposedBy()).isEqualTo(negotiationPosition.getProposedBy());
         assertThat(entity.getProposedAt()).isEqualTo(negotiationPosition.getProposedAt());

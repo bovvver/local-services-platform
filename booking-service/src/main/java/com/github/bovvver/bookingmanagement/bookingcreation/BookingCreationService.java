@@ -3,7 +3,6 @@ package com.github.bovvver.bookingmanagement.bookingcreation;
 import com.github.bovvver.bookingmanagement.Booking;
 import com.github.bovvver.bookingmanagement.BookingReadRepository;
 import com.github.bovvver.bookingmanagement.BookingRepository;
-import com.github.bovvver.bookingmanagement.vo.BookingId;
 import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
@@ -48,7 +47,6 @@ class BookingCreationService {
         // Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(bookingId)); // FIXME: will be covered by saga in later PR
 
         Booking booking = Booking.create(
-                BookingId.of(bookingId),
                 UserId.of(userId),
                 OfferId.of(offerId),
                 Salary.of(0.0)

@@ -4,6 +4,7 @@ import com.github.bovvver.bookingmanagement.results.BeginNegotiationResult;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -94,6 +95,14 @@ public class Booking {
         return new Booking(id, userId, offerId, proposedSalary);
     }
 
+    public static Booking create(
+            UserId userId,
+            OfferId offerId,
+            Salary proposedSalary
+    ) {
+        return create(BookingId.of(UUID.randomUUID()), userId, offerId, proposedSalary);
+    }
+
     public BeginNegotiationResult beginNegotiation(Salary proposedSalary) {
         if (this.status != BookingStatus.PENDING) {
             throw new IllegalStateException(
@@ -106,7 +115,8 @@ public class Booking {
         negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
 
         this.negotiation = negotiation;
-        return new BeginNegotiationResult(this, negotiation, initialPosition);
+        NegotiationPosition initialPosition = negotiation.getPositions().get(0);
+        return new BeginNegotiationResult(this, negotiation, initialPosition); // FIXME: saga pr will remove returning dtos from domain
     }
 
     public void accept() {

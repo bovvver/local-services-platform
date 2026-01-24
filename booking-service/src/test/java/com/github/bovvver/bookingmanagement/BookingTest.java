@@ -31,29 +31,26 @@ class BookingTest {
 
     @Test
     void shouldThrowExceptionWhenUserIdIsNull() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
 
-        assertThrows(IllegalArgumentException.class, () -> Booking.create(bookingId, null, offerId, salary));
+        assertThrows(IllegalArgumentException.class, () -> Booking.create(null, offerId, salary));
     }
 
     @Test
     void shouldThrowExceptionWhenOfferIdIsNull() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
 
-        assertThrows(IllegalArgumentException.class, () -> Booking.create(bookingId, userId, null, salary));
+        assertThrows(IllegalArgumentException.class, () -> Booking.create(userId, null, salary));
     }
 
     @Test
     void shouldBeginNegotiationWhenStatusIsPending() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
 
         BeginNegotiationResult result = booking.beginNegotiation(salary);
 
@@ -64,11 +61,10 @@ class BookingTest {
 
     @Test
     void shouldThrowExceptionWhenBeginNegotiationWithInvalidStatus() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
         assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(salary));
@@ -76,11 +72,10 @@ class BookingTest {
 
     @Test
     void shouldThrowExceptionWhenSalaryIsNull() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
         assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(null));
@@ -88,11 +83,10 @@ class BookingTest {
 
     @Test
     void shouldAcceptBookingWhenStatusIsPendingOrInNegotiation() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
 
         booking.accept();
 
@@ -101,11 +95,10 @@ class BookingTest {
 
     @Test
     void shouldRejectBookingWhenStatusIsPendingOrInNegotiation() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
 
         booking.reject();
 
@@ -114,11 +107,10 @@ class BookingTest {
 
     @Test
     void shouldThrowExceptionWhenAcceptWithInvalidStatus() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
         booking.reject();
 
         assertThrows(IllegalStateException.class, booking::accept);
@@ -126,14 +118,12 @@ class BookingTest {
 
     @Test
     void shouldThrowExceptionWhenRejectWithInvalidStatus() {
-        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(bookingId, userId, offerId, salary);
+        Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
         assertThrows(IllegalStateException.class, booking::reject);
     }
-    
 }

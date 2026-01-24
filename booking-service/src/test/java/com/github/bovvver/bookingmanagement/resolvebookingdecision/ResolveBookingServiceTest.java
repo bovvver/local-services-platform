@@ -1,10 +1,7 @@
 package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
-import com.github.bovvver.bookingmanagement.Booking;
-import com.github.bovvver.bookingmanagement.BookingEntity;
-import com.github.bovvver.bookingmanagement.BookingReadRepository;
-import com.github.bovvver.bookingmanagement.BookingRepository;
-import com.github.bovvver.bookingmanagement.vo.BookingStatus;
+import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.vo.*;
 import com.github.bovvver.contracts.AssignExecutorCommand;
 import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
@@ -16,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
@@ -148,15 +143,12 @@ class ResolveBookingServiceTest {
     }
 
     private BookingEntity getTestBookingEntity() {
-        return new BookingEntity(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                BookingStatus.PENDING,
-                BigDecimal.valueOf(60000),
-                LocalDateTime.now(),
-                LocalDateTime.now()
+        Booking booking = Booking.create(
+                UserId.of(UUID.randomUUID()),
+                OfferId.of(offerId),
+                Salary.of(60000.0)
         );
+        booking.beginNegotiation(Salary.of(65000.0));
+        return BookingMapper.toEntity(booking);
     }
 }

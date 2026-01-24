@@ -23,10 +23,11 @@ class ResolveNegotiationDecisionService {
 
         BeginNegotiationResult negotiationData = booking.beginNegotiation(new Salary(cmd.salary()));
 
-        bookingRepository.saveNegotiation(
-                negotiationData.booking(),
-                negotiationData.negotiation(),
-                negotiationData.position()
-        );
+        // FIXME: Implement persistence logic
+//        bookingRepository.saveNegotiation(
+//                negotiationData.booking(),
+//                negotiationData.negotiation(),
+//                negotiationData.position()
+//        );
     }
 }
