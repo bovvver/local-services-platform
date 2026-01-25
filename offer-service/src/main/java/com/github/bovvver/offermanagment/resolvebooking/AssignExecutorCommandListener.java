@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class AssignExecutorCommandListener {
 
-    private static final String OFFER_BOOKING_DECISION_RESPONSE = "offer.booking.decision.response";
+    private static final String OFFER_BOOKING_DECISION_RESPONSE = "booking.accepted";
 
     private final ResolveBookingService resolveBookingService;
 

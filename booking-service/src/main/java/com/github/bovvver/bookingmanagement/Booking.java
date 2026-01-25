@@ -2,6 +2,7 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
+import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccepted;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
@@ -126,6 +127,7 @@ public class Booking {
     public void accept() {
         validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.ACCEPTED);
+        registerEvent(new BookingAccepted(this.getOfferId(), this.getUserId()));
     }
 
     public void reject() {

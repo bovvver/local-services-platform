@@ -1,27 +1,26 @@
 package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
 import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.BookingStatus;
-import com.github.bovvver.contracts.AssignExecutorCommand;
 import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
 import com.github.bovvver.contracts.OtherBookingsRejectedEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 class ResolveBookingService {
 
-    static final String OFFER_BOOKING_DECISION_RESPONSE = "offer.booking.decision.response";
-
     private final BookingRepository bookingRepository;
     private final BookingReadRepository bookingReadRepository;
-    private final KafkaTemplate<String, AssignExecutorCommand> kafka;
+    private final OutboxRepository outboxRepository;
+    private final BookingDecisionMapper bookingDecisionMapper;
 
     @Transactional
     void resolveBooking(BookingDecisionMadeEvent cmd) {
@@ -36,11 +35,10 @@ class ResolveBookingService {
         booking.accept();
         bookingRepository.save(booking);
 
-        kafka.send(OFFER_BOOKING_DECISION_RESPONSE, cmd.bookingId().toString(),
-                new AssignExecutorCommand(
-                        booking.getOfferId().value(),
-                        booking.getUserId().value()
-                ));
+        booking.pullDomainEvents().stream()
+                .map(bookingDecisionMapper::toOutboxEvent)
+                .filter(Objects::nonNull)
+                .forEach(outboxRepository::save);
     }
 
     @Transactional
