@@ -53,3 +53,8 @@ info:
   app:
     name: booking-service
     description: Booking Service for Local Services Platform
+
+messaging:
+  topics:
+    NegotiationStarted: booking.negotiation.started
+    BookingAccepted: booking.accepted
