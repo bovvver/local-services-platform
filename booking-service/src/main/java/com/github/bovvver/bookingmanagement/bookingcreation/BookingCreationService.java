@@ -3,6 +3,7 @@ package com.github.bovvver.bookingmanagement.bookingcreation;
 import com.github.bovvver.bookingmanagement.Booking;
 import com.github.bovvver.bookingmanagement.BookingReadRepository;
 import com.github.bovvver.bookingmanagement.BookingRepository;
+import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -24,35 +26,27 @@ class BookingCreationService {
     private final CurrentUser currentUser;
     private final BookingReadRepository bookingReadRepository;
     private final BookingRepository bookingRepository;
-    private final OfferAvailabilityClient offerAvailabilityClient;
+    private final OutboxRepository outboxRepository;
+    private final BookingEventMapper bookingEventMapper;
 
     @Transactional
     public void processBookingCreation(@Valid BookOfferRequest request) {
 
         checkForExistingBookings(request.offerId());
-        BookOfferCommand cmd = createBookingCommand(request);
-
-        boolean isOfferAvailable = offerAvailabilityClient.isOfferAvailable(
-                cmd.bookingId(),
-                cmd.offerId(),
-                cmd.userId()
-        );
-
-        if (isOfferAvailable) {
-            createBooking(cmd.bookingId(), cmd.userId(), cmd.offerId());
-        }
+        createBooking(createBookingCommand(request));
     }
 
-    void createBooking(final UUID bookingId, final UUID userId, final UUID offerId) {
-        // Salary salary = new Salary(bookingDraftReadRepository.findSalaryByBookingId(bookingId)); // FIXME: will be covered by saga in later PR
-
+    void createBooking(BookOfferCommand command) {
         Booking booking = Booking.create(
-                UserId.of(userId),
-                OfferId.of(offerId),
-                Salary.of(0.0)
-                // salary
+                UserId.of(command.userId()),
+                OfferId.of(command.offerId()),
+                new Salary(command.salary())
         );
         bookingRepository.save(booking);
+        booking.pullDomainEvents().stream()
+                .map(bookingEventMapper::toOutboxEvent)
+                .filter(Objects::nonNull)
+                .forEach(outboxRepository::save);
     }
 
     private BookOfferCommand createBookingCommand(final BookOfferRequest request) {
@@ -63,7 +57,8 @@ class BookingCreationService {
         return new BookOfferCommand(
                 request.offerId(),
                 currentUserId,
-                bookingId
+                bookingId,
+                request.salary()
         );
     }
 
