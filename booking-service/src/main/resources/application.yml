@@ -58,3 +58,4 @@ messaging:
   topics:
     NegotiationStarted: booking.negotiation.started
     BookingAccepted: booking.accepted
+    BookingCreated: booking.created

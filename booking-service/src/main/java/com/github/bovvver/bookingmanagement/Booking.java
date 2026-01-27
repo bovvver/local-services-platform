@@ -1,5 +1,6 @@
 package com.github.bovvver.bookingmanagement;
 
+import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccepted;
@@ -98,7 +99,9 @@ public class Booking {
         if (offerId == null) {
             throw new IllegalArgumentException("OfferId cannot be null");
         }
-        return new Booking(id, userId, offerId, proposedSalary);
+        Booking booking = new Booking(id, userId, offerId, proposedSalary);
+        booking.registerEvent(new BookingCreated(booking.getId(), booking.getUserId(), booking.getOfferId(), booking.getFinalSalary()));
+        return booking;
     }
 
     public static Booking create(
