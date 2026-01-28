@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.outbox;
+package com.github.bovvver.offermanagment.outbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
