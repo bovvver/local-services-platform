@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 @Configuration
 class MongockConfig {
 
-    private final static String MIGRATIONS_PACKAGE = "com.github.bovvver.offermanagment.offercreation.migrations";
+    private final static String MIGRATIONS_PACKAGE = "com.github.bovvver.migrations";
 
     /**
      * Creates and configures a `MongockInitializingBeanRunner` bean.
