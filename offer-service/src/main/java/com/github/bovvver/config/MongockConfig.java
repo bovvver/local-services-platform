@@ -15,6 +15,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 @Configuration
 class MongockConfig {
 
+    private final static String MIGRATIONS_PACKAGE = "com.github.bovvver.offermanagment.offercreation.migrations";
+
     /**
      * Creates and configures a `MongockInitializingBeanRunner` bean.
      * This runner is responsible for executing database migrations using Mongock.
@@ -28,7 +30,7 @@ class MongockConfig {
         return MongockSpringboot.builder()
                 .setDriver(SpringDataMongoV4Driver.withDefaultLock(mongoTemplate))
                 .setSpringContext(springContext)
-                .addMigrationScanPackage("com.github.bovvver.migrations")
+                .addMigrationScanPackage(MIGRATIONS_PACKAGE)
                 .buildInitializingBeanRunner();
     }
 }
