@@ -1,4 +1,4 @@
-package com.github.bovvver.offermanagment.offercreation.migrations;
+package com.github.bovvver.migrations;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
