@@ -1,68 +1,62 @@
 package com.github.bovvver.offermanagment.outbox;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import jakarta.persistence.Id;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@Table(name = "outbox_events")
+@Document(collection = "outbox_events")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class OutboxEvent {
 
     @Id
-    @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Getter
-    @Column(name = "aggregate_id", nullable = false)
+    @Field("aggregate_id")
     private UUID aggregateId;
 
-    @Column(name = "aggregate_type", nullable = false, length = 50)
     private String aggregateType;
-
-    @Getter
-    @Column(name = "event_type", nullable = false, length = 100)
     private String eventType;
 
-    @Getter
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
-    private JsonNode payload;
+    private String payload;
 
-    @Column(name = "occurred_at", nullable = false)
+    @Field("occurred_at")
     private LocalDateTime occurredAt;
 
-    @Column(name = "processed", nullable = false)
     private boolean processed = false;
-
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
     private OutboxStatus status;
 
-    @Column(name = "last_error", length = 1000)
+    @Field("last_error")
     private String lastError;
 
-    @Column(name = "retry_count", nullable = false)
+    @Field("retry_count")
     private int retryCount = 0;
 
-    @Column(name = "next_retry_at")
+    @Field("next_retry_at")
     private LocalDateTime nextRetryAt;
+
+    @Version
+    private Long version;
 
     public static OutboxEvent create(
             UUID aggregateId,
             String aggregateType,
             String eventType,
-            JsonNode payload,
+            String payload,
             LocalDateTime occurredAt
     ) {
         return new OutboxEvent(
@@ -76,7 +70,8 @@ public class OutboxEvent {
                 OutboxStatus.NEW,
                 null,
                 0,
-                null
+                null,
+                0L
         );
     }
 
@@ -114,6 +109,19 @@ public class OutboxEvent {
         this.retryCount += 1;
         this.nextRetryAt = LocalDateTime.now().plus(delay);
         handleStatusChange(false, OutboxStatus.FAILED, errorMessage);
+    }
+
+    public JsonNode getPayloadAsJson() {
+        if (payload == null) {
+            return null;
+        }
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readTree(this.payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse payload JSON", e);
+        }
     }
 
     private void handleStatusChange(boolean isProcessed, OutboxStatus newStatus, String errorMessage) {

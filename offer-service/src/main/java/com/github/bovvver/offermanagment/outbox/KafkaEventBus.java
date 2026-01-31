@@ -21,6 +21,6 @@ class KafkaEventBus implements EventBus {
     @Override
     public void publish(OutboxEvent outboxEvent) {
         String topic = topicResolver.resolve(outboxEvent);
-        kafka.send(topic, outboxEvent.getAggregateId().toString(), outboxEvent.getPayload());
+        kafka.send(topic, outboxEvent.getAggregateId().toString(), outboxEvent.getPayloadAsJson());
     }
 }
