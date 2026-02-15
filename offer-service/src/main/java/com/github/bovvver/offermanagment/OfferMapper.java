@@ -3,7 +3,6 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.offermanagment.vo.*;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class OfferMapper {
 
@@ -19,7 +18,6 @@ public class OfferMapper {
                 Description.of(document.getDescription()),
                 UserId.of(document.getAuthorId()),
                 document.getExecutorId() == null ? null : UserId.of(document.getExecutorId()),
-                BookingId.fromAll(document.getBookingIds()),
                 Location.of(
                         document.getLocation().latitude(),
                         document.getLocation().longitude()
@@ -28,7 +26,6 @@ public class OfferMapper {
                 new Salary(document.getSalary()),
                 document.getStatus(),
                 document.getCreatedAt(),
-                document.getUpdatedAt(),
                 new ArrayList<>()
         );
     }
@@ -40,7 +37,6 @@ public class OfferMapper {
                 offer.getDescription().value(),
                 offer.getAuthorId().value(),
                 offer.getExecutorId() != null ? offer.getExecutorId().value() : null,
-                offer.getBookingIds().stream().map(BookingId::value).collect(Collectors.toSet()),
                 Location.of(
                         offer.getLocation().latitude(),
                         offer.getLocation().longitude()
@@ -48,8 +44,7 @@ public class OfferMapper {
                 offer.getServiceCategories(),
                 offer.getSalary().value(),
                 offer.getStatus(),
-                offer.getCreatedAt(),
-                offer.getUpdatedAt()
+                offer.getCreatedAt()
         );
     }
 }
