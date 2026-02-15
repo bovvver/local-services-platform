@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * <p>Lifecycle:</p>
  * <ul>
  *     <li>New bookings are created with {@link BookingStatus#PENDING} status.</li>
- *     <li>{@link #createdAt} and {@link #updatedAt} are initialized at creation time.</li>
+ *     <li>{@link #createdAt} is initialized at creation time.</li>
  *     <li>Status and timestamps may change later in the booking flow.</li>
  * </ul>
  */
@@ -33,9 +33,8 @@ public class Booking {
     private final OfferId offerId;
     private Negotiation negotiation;
     private BookingStatus status;
-    private final Salary finalSalary;
+    private final Salary salary;
     private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private final List<DomainEvent> domainEvents;
 
     Booking(final BookingId id,
@@ -43,17 +42,15 @@ public class Booking {
             final OfferId offerId,
             final Negotiation negotiation,
             final BookingStatus status,
-            final Salary finalSalary,
-            final LocalDateTime createdAt,
-            final LocalDateTime updatedAt) {
+            final Salary salary,
+            final LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.offerId = offerId;
         this.negotiation = negotiation;
         this.status = status;
-        this.finalSalary = finalSalary;
+        this.salary = salary;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.domainEvents = new ArrayList<>();
     }
 
@@ -63,20 +60,19 @@ public class Booking {
      * <ul>
      *     <li>{@link #status} = {@link BookingStatus#PENDING}</li>
      *     <li>{@link #createdAt} = current timestamp</li>
-     *     <li>{@link #updatedAt} = same as {@link #createdAt}</li>
      * </ul>
      *
      * @param id          unique identifier of the booking
      * @param userId      identifier of the user making the booking
      * @param offerId     identifier of the offer being booked
-     * @param finalSalary final salary for the booking, if any
+     * @param salary final salary for the booking, if any
      */
     Booking(BookingId id,
             UserId userId,
             OfferId offerId,
-            Salary finalSalary
+            Salary salary
     ) {
-        this(id, userId, offerId, null, BookingStatus.PENDING, finalSalary, LocalDateTime.now(), LocalDateTime.now());
+        this(id, userId, offerId, null, BookingStatus.PENDING, salary, LocalDateTime.now());
     }
 
     /**
@@ -100,7 +96,7 @@ public class Booking {
             throw new IllegalArgumentException("OfferId cannot be null");
         }
         Booking booking = new Booking(id, userId, offerId, proposedSalary);
-        booking.registerEvent(new BookingCreated(booking.getId(), booking.getUserId(), booking.getOfferId(), booking.getFinalSalary()));
+        booking.registerEvent(new BookingCreated(booking.getId(), booking.getUserId(), booking.getOfferId(), booking.getSalary()));
         return booking;
     }
 
@@ -148,7 +144,6 @@ public class Booking {
 
     private void updateStatus(BookingStatus status) {
         this.status = status;
-        this.updatedAt = LocalDateTime.now();
     }
 
     protected void registerEvent(DomainEvent event) {
@@ -181,16 +176,12 @@ public class Booking {
         return status;
     }
 
-    Salary getFinalSalary() {
-        return finalSalary;
+    Salary getSalary() {
+        return salary;
     }
 
     LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 
     public List<DomainEvent> getDomainEvents() {

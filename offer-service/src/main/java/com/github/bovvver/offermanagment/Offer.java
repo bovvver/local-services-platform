@@ -21,13 +21,11 @@ public class Offer {
     private final Description description;
     private final UserId authorId;
     private UserId executorId;
-    private final Set<BookingId> bookingIds;
     private final Location location;
     private final Set<ServiceCategory> serviceCategories;
     private final Salary salary;
     private OfferStatus status;
     private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private final List<IntegrationEvent> integrationEvents;
 
     Offer(final OfferId id,
@@ -35,13 +33,11 @@ public class Offer {
           final Description description,
           final UserId authorId,
           final UserId executorId,
-          final Set<BookingId> bookingIds,
           final Location location,
           final Set<ServiceCategory> serviceCategories,
           final Salary salary,
           final OfferStatus status,
           final LocalDateTime createdAt,
-          final LocalDateTime updatedAt,
           final List<IntegrationEvent> integrationEvents
     ) {
         this.id = id;
@@ -49,13 +45,11 @@ public class Offer {
         this.description = description;
         this.authorId = authorId;
         this.executorId = executorId;
-        this.bookingIds = new HashSet<>(bookingIds);
         this.location = location;
         this.serviceCategories = serviceCategories;
         this.salary = salary;
         this.status = status;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.integrationEvents = integrationEvents;
     }
 
@@ -64,9 +58,7 @@ public class Offer {
      * <p>Default values:</p>
      * <ul>
      *     <li>{@link #executorId} = {@code null}</li>
-     *     <li>{@link #bookingIds} initialized as empty set</li>
      *     <li>{@link #status} = {@link OfferStatus#OPEN}</li>
-     *     <li>{@link #createdAt} and {@link #updatedAt} = current date/time</li>
      * </ul>
      *
      * @param id                unique identifier of the offer
@@ -86,8 +78,8 @@ public class Offer {
           Salary salary) {
 
         this(id, title, description, authorId, null,
-                new HashSet<>(), location, serviceCategories, salary,
-                OfferStatus.OPEN, LocalDateTime.now(), LocalDateTime.now(),
+                location, serviceCategories, salary,
+                OfferStatus.OPEN, LocalDateTime.now(),
                 new ArrayList<>());
     }
 
@@ -123,7 +115,6 @@ public class Offer {
             addIntegrationEvent(new BookingRejected(this.id.value(), bookingId.value()));
             return;
         }
-        this.bookingIds.add(bookingId);
         addIntegrationEvent(new BookingAccepted(this.id.value(), bookingId.value()));
     }
 
@@ -146,7 +137,6 @@ public class Offer {
     }
 
     public void reject(BookingId bookingId) {
-        this.bookingIds.remove(bookingId);
         addIntegrationEvent(new BookingRejected(this.id.value(), bookingId.value()));
     }
 
@@ -162,12 +152,10 @@ public class Offer {
 
     private void updateStatus(OfferStatus newStatus) {
         this.status = newStatus;
-        this.updatedAt = LocalDateTime.now();
     }
 
     private void addIntegrationEvent(IntegrationEvent integrationEvent) {
         this.integrationEvents.add(integrationEvent);
-        this.updatedAt = LocalDateTime.now();
     }
 
     public OfferId getId() {
@@ -190,10 +178,6 @@ public class Offer {
         return executorId;
     }
 
-    public Set<BookingId> getBookingIds() {
-        return bookingIds;
-    }
-
     public Location getLocation() {
         return location;
     }
@@ -212,9 +196,5 @@ public class Offer {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }

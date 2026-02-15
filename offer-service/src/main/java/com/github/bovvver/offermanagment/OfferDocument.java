@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,7 +24,7 @@ import java.util.UUID;
  * and timestamps for creation and last modification.
  * </p>
  *
- * <p>Collections such as {@link #bookingIds} and {@link #serviceCategories} are
+ * <p>Collection {@link #serviceCategories} is
  * stored as embedded arrays in the document.</p>
  */
 @AllArgsConstructor
@@ -45,8 +44,6 @@ public class OfferDocument {
 
     private UUID executorId;
 
-    private Set<UUID> bookingIds;
-
     private Location location;
 
     private Set<ServiceCategory> serviceCategories;
@@ -54,7 +51,6 @@ public class OfferDocument {
     private BigDecimal salary;
 
     private OfferStatus status;
-
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -67,7 +63,6 @@ public class OfferDocument {
      * <p>Default values:</p>
      * <ul>
      *     <li>{@link #executorId} = {@code null}</li>
-     *     <li>{@link #bookingIds} initialized as empty set</li>
      *     <li>{@link #serviceCategories} initialized as empty set</li>
      *     <li>{@link #status} = {@link OfferStatus#OPEN}</li>
      * </ul>
@@ -85,7 +80,7 @@ public class OfferDocument {
                   Set<ServiceCategory> serviceCategories,
                   BigDecimal salary) {
         this(UUID.randomUUID(), title, description, authorId, null,
-                new HashSet<>(), location, serviceCategories, salary,
+                location, serviceCategories, salary,
                 OfferStatus.OPEN, null, null);
     }
 }

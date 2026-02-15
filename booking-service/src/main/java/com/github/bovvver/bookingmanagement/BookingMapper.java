@@ -15,9 +15,8 @@ public class BookingMapper {
                 booking.getOfferId().value(),
                 null,
                 booking.getStatus(),
-                booking.getFinalSalary() != null ? booking.getFinalSalary().value() : null,
-                booking.getCreatedAt(),
-                booking.getUpdatedAt()
+                booking.getSalary() != null ? booking.getSalary().value() : null,
+                booking.getCreatedAt()
         );
 
         if (booking.getNegotiation() != null) {
@@ -44,8 +43,7 @@ public class BookingMapper {
                 negotiation,
                 entity.getStatus(),
                 entity.getFinalSalary() != null ? new Salary(entity.getFinalSalary()) : null,
-                entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getCreatedAt()
         );
     }
 
