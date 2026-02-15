@@ -2,7 +2,6 @@ package com.github.bovvver.migrations;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import io.mongock.api.annotations.ChangeUnit;
@@ -24,12 +23,7 @@ public class OutboxInitializer {
 
         MongoCollection<Document> collection = mongoDatabase.getCollection("outbox_events");
 
-        collection.createIndex(Indexes.ascending("authorId"));
-
-        IndexOptions partialIndexOptions = new IndexOptions()
-                .name("idx_outbox_status")
-                .partialFilterExpression(Filters.eq("processed", false));
-        collection.createIndex(Indexes.ascending("status"), partialIndexOptions);
+        collection.createIndex(Indexes.ascending("id"));
 
         collection.createIndex(
                 Indexes.ascending("occurredAt"),

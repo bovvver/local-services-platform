@@ -39,9 +39,21 @@ services:
 
   offer-mongo:
     image: mongo:7
-    container_name: offer-mongo
+    container_name: offer-mongo-primary
     ports:
-      - "${OFFER_MONGO_INITDB_PORT:-7080}:27017"
+      - "${OFFER_MONGO_INITDB_PORT:-27017}:27017"
+    command: mongod --replSet offer-mongo-secondary --bind_ip_all
+    healthcheck:
+      test: >
+        mongosh --eval "
+          rs.initiate({
+            _id: 'offer-mongo-secondary',
+            members: [{ _id: 0, host: 'mongo:27017' }]
+          })
+        " || true
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ../volumes/offer-mongo:/data/db
     environment:

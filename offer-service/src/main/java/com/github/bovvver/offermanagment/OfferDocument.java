@@ -55,6 +55,7 @@ public class OfferDocument {
 
     private OfferStatus status;
 
+
     @CreatedDate
     private LocalDateTime createdAt;
 

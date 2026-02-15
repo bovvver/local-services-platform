@@ -53,7 +53,7 @@ class MongoConfig {
     @Bean
     public MongoTemplate mongoTemplate() {
         String connectionString = String.format(
-                "mongodb://%s:%s@%s:%s/%s?authSource=admin",
+                "mongodb://%s:%s@%s:%s/%s?authSource=admin&replicaSet=offer-mongo-secondary",
                 DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
         );
 

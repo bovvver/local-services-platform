@@ -22,10 +22,9 @@ class ResolveBookingREST {
     @PostMapping(path = OFFER_AVAILABILITY_ENDPOINT)
     ResponseEntity<OfferAvailabilityCheckResponse> attemptOfferBooking(
             @NotNull @RequestParam UUID offerId,
-            @NotNull @RequestParam UUID userId,
             @NotNull @RequestParam UUID bookingId
     ) {
-        OfferAvailabilityCheckResponse result = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
+        OfferAvailabilityCheckResponse result = offerAvailabilityService.attemptOfferBooking(offerId, bookingId);
         return ResponseEntity
                 .status(result.httpStatusCode())
                 .body(result);
