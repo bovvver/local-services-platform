@@ -1,6 +1,8 @@
 package com.github.bovvver;
 
 import com.github.bovvver.event.DomainEvent;
+import com.github.bovvver.offermanagment.events.BookingAccepted;
+import com.github.bovvver.offermanagment.events.BookingRejected;
 import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.vo.*;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ class OfferTest {
         offer.book(UserId.of(UUID.randomUUID()), bookingId);
 
         assertThat(offer.getDomainEvents())
-                .anyMatch(e -> e instanceof BookingDraftAccepted);
+                .anyMatch(e -> e instanceof BookingAccepted);
         assertThat(offer.getBookingIds()).contains(bookingId);
     }
 
@@ -39,7 +41,7 @@ class OfferTest {
         offer.book(userId, bookingId);
 
         assertThat(offer.getDomainEvents())
-                .anyMatch(e -> e instanceof BookingDraftRejected);
+                .anyMatch(e -> e instanceof BookingRejected);
         assertThat(offer.getBookingIds()).doesNotContain(bookingId);
     }
 
@@ -73,7 +75,7 @@ class OfferTest {
         offer.book(UserId.of(UUID.randomUUID()), bookingId);
 
         assertThat(offer.getDomainEvents())
-                .anyMatch(e -> e instanceof BookingDraftAccepted);
+                .anyMatch(e -> e instanceof BookingAccepted);
         assertThat(offer.getBookingIds()).contains(bookingId);
     }
 
@@ -189,7 +191,7 @@ class OfferTest {
         List<DomainEvent> events = offer.pullDomainEvents();
 
         assertThat(events).hasSize(1);
-        assertThat(events.getFirst()).isInstanceOf(BookingDraftAccepted.class);
+        assertThat(events.getFirst()).isInstanceOf(BookingAccepted.class);
         assertThat(offer.getDomainEvents()).isEmpty();
     }
 

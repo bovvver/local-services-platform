@@ -2,6 +2,7 @@ package com.github.bovvver.offermanagment;
 
 import com.github.bovvver.offermanagment.vo.*;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class OfferMapper {
@@ -27,7 +28,8 @@ public class OfferMapper {
                 new Salary(document.getSalary()),
                 document.getStatus(),
                 document.getCreatedAt(),
-                document.getUpdatedAt()
+                document.getUpdatedAt(),
+                new ArrayList<>()
         );
     }
 

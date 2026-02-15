@@ -45,3 +45,11 @@ info:
   app:
     name: offer-service
     description: Offer Service for Local Services Platform
+
+messaging:
+  topics:
+    ExecutorAssigned: executor.assigned
+    NegotiationStarted: negotiation.started
+    BookingAccepted: booking.accepted
+    BookingRejected: booking.rejected
+    ExecutorAssignmentFailed: executor.assignment.failed

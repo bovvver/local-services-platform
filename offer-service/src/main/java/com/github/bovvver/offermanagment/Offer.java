@@ -1,6 +1,6 @@
 package com.github.bovvver.offermanagment;
 
-import com.github.bovvver.event.DomainEvent;
+import com.github.bovvver.offermanagment.events.*;
 import com.github.bovvver.offermanagment.vo.*;
 
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class Offer {
     private OfferStatus status;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private final List<DomainEvent> domainEvents;
+    private final List<IntegrationEvent> integrationEvents;
 
     Offer(final OfferId id,
           final Title title,
@@ -41,7 +41,9 @@ public class Offer {
           final Salary salary,
           final OfferStatus status,
           final LocalDateTime createdAt,
-          final LocalDateTime updatedAt) {
+          final LocalDateTime updatedAt,
+          final List<IntegrationEvent> integrationEvents
+    ) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -54,7 +56,7 @@ public class Offer {
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.domainEvents = new ArrayList<>();
+        this.integrationEvents = integrationEvents;
     }
 
     /**
@@ -85,7 +87,8 @@ public class Offer {
 
         this(id, title, description, authorId, null,
                 new HashSet<>(), location, serviceCategories, salary,
-                OfferStatus.OPEN, LocalDateTime.now(), LocalDateTime.now());
+                OfferStatus.OPEN, LocalDateTime.now(), LocalDateTime.now(),
+                new ArrayList<>());
     }
 
     /**
@@ -114,41 +117,43 @@ public class Offer {
     }
 
     public void book(
-            UserId userId,
             BookingId bookingId
     ) {
         if (isClosedForBooking()) {
-            registerEvent(new BookingDraftRejected(this.id, userId, bookingId));
+            addIntegrationEvent(new BookingRejected(this.id.value(), bookingId.value()));
             return;
         }
         this.bookingIds.add(bookingId);
-        this.updatedAt = LocalDateTime.now();
-        registerEvent(new BookingDraftAccepted(this.id, userId, bookingId));
+        addIntegrationEvent(new BookingAccepted(this.id.value(), bookingId.value()));
     }
 
-    public void negotiate() {
+    public void negotiate(BookingId bookingId, Salary salary) {
         if (isClosedForBooking()) {
-            throw new IllegalStateException("Offer %s is not open for booking.".formatted(id.value()));
+            throw new IllegalStateException("Offer %s is closed for negotiation.".formatted(id.value()));
         }
         updateStatus(OfferStatus.IN_NEGOTIATION);
+        addIntegrationEvent(new NegotiationStarted(bookingId.value(), this.id.value(), salary.value()));
     }
 
     public void accept(UserId executorId) {
         if (isClosedForBooking()) {
-            throw new IllegalStateException("Offer %s is not open for booking.".formatted(id.value()));
+            addIntegrationEvent(new ExecutorAssignmentFailed(this.id.value(), executorId.value()));
+            return;
         }
-        updateStatus(OfferStatus.ASSIGNED);
         this.executorId = executorId;
+        updateStatus(OfferStatus.ASSIGNED);
+        addIntegrationEvent(new ExecutorAssigned(this.id.value(), executorId.value()));
     }
 
-    protected void registerEvent(DomainEvent event) {
-        domainEvents.add(event);
+    public void reject(BookingId bookingId) {
+        this.bookingIds.remove(bookingId);
+        addIntegrationEvent(new BookingRejected(this.id.value(), bookingId.value()));
     }
 
-    public List<DomainEvent> pullDomainEvents() {
-        List<DomainEvent> events = getDomainEvents();
-        domainEvents.clear();
-        return events;
+    public List<IntegrationEvent> pullEvents() {
+        List<IntegrationEvent> copy = List.copyOf(integrationEvents);
+        integrationEvents.clear();
+        return copy;
     }
 
     private boolean isClosedForBooking() {
@@ -157,6 +162,11 @@ public class Offer {
 
     private void updateStatus(OfferStatus newStatus) {
         this.status = newStatus;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    private void addIntegrationEvent(IntegrationEvent integrationEvent) {
+        this.integrationEvents.add(integrationEvent);
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -206,9 +216,5 @@ public class Offer {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
-    }
-
-    public List<DomainEvent> getDomainEvents() {
-        return List.copyOf(domainEvents);
     }
 }
