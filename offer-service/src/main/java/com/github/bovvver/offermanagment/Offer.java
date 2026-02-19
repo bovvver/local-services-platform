@@ -108,36 +108,18 @@ public class Offer {
         return new Offer(new OfferId(UUID.randomUUID()), title, description, authorId, location, serviceCategories, salary);
     }
 
-    public void book(
-            BookingId bookingId
-    ) {
-        if (isClosedForBooking()) {
-            addIntegrationEvent(new BookingRejected(this.id.value(), bookingId.value()));
-            return;
-        }
-        addIntegrationEvent(new BookingAccepted(this.id.value(), bookingId.value()));
-    }
-
-    public void negotiate(BookingId bookingId, Salary salary) {
-        if (isClosedForBooking()) {
-            throw new IllegalStateException("Offer %s is closed for negotiation.".formatted(id.value()));
-        }
-        updateStatus(OfferStatus.IN_NEGOTIATION);
-        addIntegrationEvent(new NegotiationStarted(bookingId.value(), this.id.value(), salary.value()));
-    }
-
     public void accept(UserId executorId) {
         if (isClosedForBooking()) {
             addIntegrationEvent(new ExecutorAssignmentFailed(this.id.value(), executorId.value()));
             return;
         }
         this.executorId = executorId;
-        updateStatus(OfferStatus.ASSIGNED);
+        this.status = OfferStatus.ASSIGNED;
         addIntegrationEvent(new ExecutorAssigned(this.id.value(), executorId.value()));
     }
 
-    public void reject(BookingId bookingId) {
-        addIntegrationEvent(new BookingRejected(this.id.value(), bookingId.value()));
+    public boolean isOwnedBy(UserId userId) {
+        return this.authorId.equals(userId);
     }
 
     public List<IntegrationEvent> pullEvents() {
@@ -148,10 +130,6 @@ public class Offer {
 
     private boolean isClosedForBooking() {
         return !Arrays.asList(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(status);
-    }
-
-    private void updateStatus(OfferStatus newStatus) {
-        this.status = newStatus;
     }
 
     private void addIntegrationEvent(IntegrationEvent integrationEvent) {

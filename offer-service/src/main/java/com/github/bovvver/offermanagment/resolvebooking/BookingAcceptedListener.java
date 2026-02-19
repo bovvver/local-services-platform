@@ -1,20 +1,20 @@
 package com.github.bovvver.offermanagment.resolvebooking;
 
-import com.github.bovvver.contracts.AssignExecutorCommand;
+import com.github.bovvver.contracts.BookingAcceptedIntegrationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-class AssignExecutorCommandListener {
+class BookingAcceptedListener {
 
     private static final String OFFER_BOOKING_DECISION_RESPONSE = "booking.accepted";
 
     private final ResolveBookingService resolveBookingService;
 
     @KafkaListener(topics = OFFER_BOOKING_DECISION_RESPONSE, groupId = "booking-service")
-    public void on(AssignExecutorCommand cmd) {
-        resolveBookingService.completeBookingAssignment(cmd);
+    public void on(BookingAcceptedIntegrationEvent event) {
+        resolveBookingService.completeBookingAssignment(event);
     }
 }

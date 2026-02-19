@@ -2,7 +2,6 @@ package com.github.bovvver.offermanagment.resolvebooking;
 
 import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
-import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OfferAvailabilityServiceTest {
+class OfferOwnershipServiceTest {
 
     @Mock
     private OfferRepository offerRepository;
@@ -35,7 +34,7 @@ class OfferAvailabilityServiceTest {
     private OfferWriteRepository offerWriteRepository;
 
     @InjectMocks
-    private OfferAvailabilityService offerAvailabilityService;
+    private OfferOwnershipService offerOwnershipService;
 
     private UUID offerId;
     private UUID userId;
@@ -54,10 +53,10 @@ class OfferAvailabilityServiceTest {
 
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
+        OfferOwnershipCheckResponse response = offerOwnershipService.checkOfferOwnership(offerId, userId, bookingId);
 
         assertThat(response.httpStatusCode()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.isAvailable()).isTrue();
+        assertThat(response.isOwner()).isTrue();
         verify(offerWriteRepository).save(any(Offer.class));
     }
 
@@ -67,20 +66,20 @@ class OfferAvailabilityServiceTest {
 
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
 
-        OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
+        OfferOwnershipCheckResponse response = offerOwnershipService.checkOfferOwnership(offerId, userId, bookingId);
 
         assertThat(response.httpStatusCode()).isEqualTo(HttpStatus.CONFLICT.value());
-        assertThat(response.isAvailable()).isFalse();
+        assertThat(response.isOwner()).isFalse();
     }
 
     @Test
     void shouldReturnOfferNotFoundStatus() {
         when(offerRepository.findById(offerId)).thenReturn(Optional.empty());
 
-        OfferAvailabilityCheckResponse response = offerAvailabilityService.attemptOfferBooking(offerId, userId, bookingId);
+        OfferOwnershipCheckResponse response = offerOwnershipService.checkOfferOwnership(offerId, userId, bookingId);
 
         assertThat(response.httpStatusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
-        assertThat(response.isAvailable()).isFalse();
+        assertThat(response.isOwner()).isFalse();
     }
 
     private OfferDocument createOfferDocument(OfferStatus status) {

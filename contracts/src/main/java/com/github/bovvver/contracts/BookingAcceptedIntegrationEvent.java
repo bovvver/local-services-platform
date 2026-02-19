@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.resolvebookingdecision;
+package com.github.bovvver.contracts;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

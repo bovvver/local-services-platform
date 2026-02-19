@@ -1,8 +1,6 @@
 package com.github.bovvver;
 
 import com.github.bovvver.event.DomainEvent;
-import com.github.bovvver.offermanagment.events.BookingAccepted;
-import com.github.bovvver.offermanagment.events.BookingRejected;
 import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.vo.*;
 import org.junit.jupiter.api.Test;

@@ -1,11 +1,8 @@
 package com.github.bovvver.offermanagment.resolvebooking;
 
 import com.github.bovvver.contracts.AssignExecutorCommand;
-import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
-import com.github.bovvver.contracts.OtherBookingsRejectedEvent;
 import com.github.bovvver.offermanagment.OfferDocument;
-import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.OfferWriteRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
@@ -28,7 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.github.bovvver.offermanagment.resolvebooking.ResolveBookingService.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
