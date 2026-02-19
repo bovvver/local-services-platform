@@ -49,7 +49,4 @@ info:
 messaging:
   topics:
     ExecutorAssigned: executor.assigned
-    NegotiationStarted: negotiation.started
-    BookingAccepted: booking.accepted
-    BookingRejected: booking.rejected
     ExecutorAssignmentFailed: executor.assignment.failed

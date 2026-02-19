@@ -1,4 +1,4 @@
-package com.github.bovvver.offermanagment.resolvebooking;
+package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
 record BookingDecisionResponse (
         int status,

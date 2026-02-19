@@ -1,11 +1,9 @@
 package com.github.bovvver.offermanagment.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bovvver.offermanagment.events.BookingAccepted;
-import com.github.bovvver.offermanagment.events.BookingRejected;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
+import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.events.IntegrationEvent;
-import com.github.bovvver.offermanagment.events.NegotiationStarted;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.FullDocument;
 import com.mongodb.client.model.changestream.OperationType;
@@ -71,14 +69,8 @@ class OutboxChangeStreamListener {
     private Object deserializeEvent(String eventType, String payload) {
         try {
             return switch (eventType) {
-                case "BookingAccepted" ->
-                    objectMapper.readValue(payload, BookingAccepted.class);
-                case "BookingRejected" ->
-                    objectMapper.readValue(payload, BookingRejected.class);
-                case "NegotiationStarted" ->
-                    objectMapper.readValue(payload, NegotiationStarted.class);
-                case "ExecutorAssigned" ->
-                    objectMapper.readValue(payload, ExecutorAssigned.class);
+                case "ExecutorAssigned" -> objectMapper.readValue(payload, ExecutorAssigned.class);
+                case "ExecutorAssignmentFailed" -> objectMapper.readValue(payload, ExecutorAssignmentFailed.class);
                 default -> {
                     log.warn("Unknown event type in outbox: {}", eventType);
                     yield null;

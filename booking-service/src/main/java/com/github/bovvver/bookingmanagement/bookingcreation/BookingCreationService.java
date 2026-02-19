@@ -7,7 +7,6 @@ import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import com.github.bovvver.bookingmanagement.vo.UserId;
-import com.github.bovvver.contracts.BookOfferCommand;
 import com.github.bovvver.shared.CurrentUser;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;

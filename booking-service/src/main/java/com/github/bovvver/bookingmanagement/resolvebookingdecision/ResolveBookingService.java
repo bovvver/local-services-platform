@@ -1,17 +1,16 @@
 package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
 import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.negotiation.NegotiationFacade;
 import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
-import com.github.bovvver.bookingmanagement.vo.BookingStatus;
-import com.github.bovvver.contracts.BookingDecisionMadeEvent;
-import com.github.bovvver.contracts.BookingDecisionStatus;
-import com.github.bovvver.contracts.OtherBookingsRejectedEvent;
-import jakarta.transaction.Transactional;
+import com.github.bovvver.shared.CurrentUser;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,19 +20,46 @@ class ResolveBookingService {
     private final BookingReadRepository bookingReadRepository;
     private final OutboxRepository outboxRepository;
     private final BookingDecisionMapper bookingDecisionMapper;
+    private final NegotiationFacade negotiationFacade;
+    private final OfferOwnershipValidator offerOwnershipValidator;
+    private final CurrentUser currentUser;
 
-    @Transactional
-    void resolveBooking(BookingDecisionMadeEvent cmd) {
+    void processBookingDecision(
+            UUID bookingId,
+            @Valid BookingDecisionRequest request
+    ) {
+        offerOwnershipValidator.validate(currentUser.getId().value() ,bookingId);
+        validateRequest(request);
+        handleBookingDecision(bookingId, request);
+    }
 
-        Booking booking = BookingMapper.toDomain(bookingReadRepository.findById(cmd.bookingId()));
+    private void handleBookingDecision(UUID bookingId, @Valid BookingDecisionRequest request) {
 
-        if (cmd.status() == BookingDecisionStatus.REJECTED) {
+        Booking booking = BookingMapper.toDomain(bookingReadRepository.findById(bookingId));
+
+        BookingDecisionStatus status = request.status();
+        if (status == BookingDecisionStatus.NEGOTIATE) {
+            negotiationFacade.beginNegotiation(bookingId, request.salary());
+        } else if (status == BookingDecisionStatus.ACCEPTED) {
+            acceptBooking(booking);
+        } else {
             booking.reject();
             bookingRepository.save(booking);
-            return;
         }
+    }
+
+    private void acceptBooking(Booking booking) {
+
+        List<BookingEntity> bookingsEntitiesToReject = bookingReadRepository.findAllByOfferIdAndIdIsNot(
+                booking.getOfferId().value(),
+                booking.getId().value()
+        );
+        List<Booking> bookingsToReject = BookingMapper.toDomainList(bookingsEntitiesToReject);
+        bookingsToReject.forEach(Booking::reject);
         booking.accept();
-        bookingRepository.save(booking);
+
+        bookingsToReject.addFirst(booking);
+        bookingRepository.saveAll(bookingsToReject);
 
         booking.pullDomainEvents().stream()
                 .map(bookingDecisionMapper::toOutboxEvent)
@@ -41,14 +67,12 @@ class ResolveBookingService {
                 .forEach(outboxRepository::save);
     }
 
-    @Transactional
-    void rejectOtherBookings(final OtherBookingsRejectedEvent event) {
-        List<BookingEntity> bookingEntities = bookingReadRepository.findAllByOfferIdAndStatusNotIn(
-                event.offerId(),
-                List.of(BookingStatus.ACCEPTED, BookingStatus.REJECTED)
-        );
-        List<Booking> bookings = BookingMapper.toDomainList(bookingEntities);
-        bookings.forEach(Booking::reject);
-        bookingRepository.saveAll(bookings);
+    private void validateRequest(@Valid BookingDecisionRequest request) {
+        if (request.status() == BookingDecisionStatus.NEGOTIATE && request.salary() == null) {
+            throw new IllegalArgumentException("Salary must be provided when status is NEGOTIATE");
+        }
+        if (request.status() != BookingDecisionStatus.NEGOTIATE && request.salary() != null) {
+            throw new IllegalArgumentException("Salary can't be provided when status is not NEGOTIATE");
+        }
     }
 }

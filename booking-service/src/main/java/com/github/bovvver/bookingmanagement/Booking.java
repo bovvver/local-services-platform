@@ -156,7 +156,7 @@ public class Booking {
         return events;
     }
 
-    BookingId getId() {
+    public BookingId getId() {
         return id;
     }
 

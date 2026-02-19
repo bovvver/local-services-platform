@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.outbox.OutboxEvent;
+import com.github.bovvver.contracts.BookingAcceptedIntegrationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -3,12 +3,13 @@ package com.github.bovvver.bookingmanagement.negotiation;
 import com.github.bovvver.bookingmanagement.*;
 import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.Salary;
-import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +21,12 @@ class ResolveNegotiationDecisionService {
     private final NegotiationEventMapper negotiationEventMapper;
 
     @Transactional
-    void beginNegotiation(BookingDecisionMadeEvent cmd) {
+    void beginNegotiation(UUID bookingId, BigDecimal salary) {
 
-        BookingEntity bookingEntity = bookingReadRepository.findById(cmd.bookingId());
+        BookingEntity bookingEntity = bookingReadRepository.findById(bookingId);
         Booking booking = BookingMapper.toDomain(bookingEntity);
 
-        booking.beginNegotiation(new Salary(cmd.salary()));
+        booking.beginNegotiation(new Salary(salary));
         bookingRepository.save(booking);
 
         booking.pullDomainEvents().stream()

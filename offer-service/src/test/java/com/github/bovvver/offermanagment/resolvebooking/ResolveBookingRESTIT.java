@@ -2,10 +2,8 @@ package com.github.bovvver.offermanagment.resolvebooking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
-import com.github.bovvver.contracts.BookingDecisionMadeEvent;
 import com.github.bovvver.contracts.BookingDecisionStatus;
 import com.github.bovvver.offermanagment.OfferDocument;
-import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;

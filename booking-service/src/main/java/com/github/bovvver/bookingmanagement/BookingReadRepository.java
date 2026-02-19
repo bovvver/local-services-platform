@@ -1,6 +1,5 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.BookingStatus;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
@@ -12,5 +11,5 @@ public interface BookingReadRepository extends Repository<BookingEntity, UUID> {
 
     boolean existsByOfferIdAndUserId(UUID offerId, UUID userId);
 
-    List<BookingEntity> findAllByOfferIdAndStatusNotIn(UUID offerId, List<BookingStatus> statuses);
+    List<BookingEntity> findAllByOfferIdAndIdIsNot(UUID offerId, UUID bookingId);
 }
