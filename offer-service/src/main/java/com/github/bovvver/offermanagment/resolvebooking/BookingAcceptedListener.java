@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class BookingAcceptedListener {
 
-    private static final String OFFER_BOOKING_DECISION_RESPONSE = "booking.accepted";
+    private static final String OFFER_BOOKING_DECISION_TOPIC = "booking.accepted";
 
     private final ResolveBookingService resolveBookingService;
 
-    @KafkaListener(topics = OFFER_BOOKING_DECISION_RESPONSE, groupId = "booking-service")
+    @KafkaListener(topics = OFFER_BOOKING_DECISION_TOPIC, groupId = "offer-service")
     public void onBookingAccepted(BookingAcceptedIntegrationEvent event) {
         resolveBookingService.completeBookingAssignment(event);
     }

@@ -29,7 +29,7 @@ class ResolveBookingREST {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
                 new BookingDecisionResponse(
                         HttpStatus.ACCEPTED.value(),
-                        "Booking decision for bookingId %s is being processed".formatted(bookingId)
+                        "Booking decision for offerId %s is being processed".formatted(bookingId)
                 )
         );
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.outbox.OutboxEvent;
+import com.github.bovvver.contracts.NegotiationStartedIntegrationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,14 +23,13 @@ class NegotiationEventMapper {
         NegotiationStartedIntegrationEvent integrationEvent =
                 new NegotiationStartedIntegrationEvent(
                         e.message(),
-                        e.bookingId().value(),
-                        e.negotiationId().value(),
+                        e.offerId().value(),
                         e.getTimestamp()
                 );
 
         JsonNode payload = objectMapper.valueToTree(integrationEvent);
         return OutboxEvent.create(
-                integrationEvent.bookingId(),
+                integrationEvent.offerId(),
                 "Negotiation",
                 "NegotiationStarted",
                 payload,

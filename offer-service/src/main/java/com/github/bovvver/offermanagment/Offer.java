@@ -122,6 +122,13 @@ public class Offer {
         return this.authorId.equals(userId);
     }
 
+    public void changeStatus(OfferStatus newStatus) {
+        if (this.status == newStatus) {
+            return;
+        }
+        this.status = newStatus;
+    }
+
     public List<IntegrationEvent> pullEvents() {
         List<IntegrationEvent> copy = List.copyOf(integrationEvents);
         integrationEvents.clear();
