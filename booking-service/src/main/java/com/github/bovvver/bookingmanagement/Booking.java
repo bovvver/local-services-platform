@@ -120,7 +120,7 @@ public class Booking {
         negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
 
         this.negotiation = negotiation;
-        registerEvent(new NegotiationStarted(this.getId(), negotiation.getId()));
+        registerEvent(new NegotiationStarted(this.getOfferId()));
     }
 
     public void accept() {
