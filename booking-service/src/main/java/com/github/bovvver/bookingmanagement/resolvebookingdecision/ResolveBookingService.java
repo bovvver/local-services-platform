@@ -28,8 +28,8 @@ class ResolveBookingService {
             UUID bookingId,
             @Valid BookingDecisionRequest request
     ) {
-        offerOwnershipValidator.validate(currentUser.getId().value() ,bookingId);
         validateRequest(request);
+        offerOwnershipValidator.validate(currentUser.getId().value() ,bookingId);
         handleBookingDecision(bookingId, request);
     }
 

@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = ValidServiceCategoryValidator.class)
-public @interface ValidServiceCategory {
+@interface ValidServiceCategory {
 
     String message() default "Invalid service category";
     Class<?>[] groups() default {};

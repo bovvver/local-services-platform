@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Set;
 
-public record CreateOfferRequest(
+record CreateOfferRequest(
         @NotBlank(message = "Title cannot be blank")
         @Size(max = 100, message = "Title cannot exceed 100 characters")
         String title,

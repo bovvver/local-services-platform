@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OutboxEvent {
+class OutboxEvent {
 
     @Id
     private UUID id;

@@ -2,6 +2,7 @@ package com.github.bovvver.offermanagment.resolvebooking;
 
 import com.github.bovvver.contracts.BookingAcceptedIntegrationEvent;
 import com.github.bovvver.offermanagment.*;
+import com.github.bovvver.offermanagment.outbox.OutboxService;
 import com.github.bovvver.offermanagment.vo.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 class ResolveBookingService {
 
     private final OfferRepository offerRepository;
-    private final OfferWriteRepository offerWriteRepository;
+    private final OutboxService outboxService;
 
     @Transactional
     void completeBookingAssignment(final BookingAcceptedIntegrationEvent event) {
@@ -23,6 +24,6 @@ class ResolveBookingService {
         Offer offer = OfferMapper.toDomain(offerDocument);
         offer.accept(UserId.of(event.userId()));
 
-        offerWriteRepository.save(offer);
+        outboxService.saveAndPassToOutbox(offer, "Offer");
     }
 }

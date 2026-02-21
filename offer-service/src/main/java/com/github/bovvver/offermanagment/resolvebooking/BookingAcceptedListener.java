@@ -14,7 +14,7 @@ class BookingAcceptedListener {
     private final ResolveBookingService resolveBookingService;
 
     @KafkaListener(topics = OFFER_BOOKING_DECISION_RESPONSE, groupId = "booking-service")
-    public void on(BookingAcceptedIntegrationEvent event) {
+    public void onBookingAccepted(BookingAcceptedIntegrationEvent event) {
         resolveBookingService.completeBookingAssignment(event);
     }
 }

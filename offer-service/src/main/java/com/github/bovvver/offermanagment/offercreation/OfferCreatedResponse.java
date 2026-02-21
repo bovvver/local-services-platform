@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-public record OfferCreatedResponse(
+record OfferCreatedResponse(
         UUID offerId,
         String title,
         String description,
