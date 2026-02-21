@@ -6,6 +6,6 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record BookOfferRequest(@NotNull UUID offerId,
+record BookOfferRequest(@NotNull UUID offerId,
                                @Positive BigDecimal salary) {
 }

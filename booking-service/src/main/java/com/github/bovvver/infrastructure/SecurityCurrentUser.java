@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class SecurityCurrentUser implements CurrentUser {
+class SecurityCurrentUser implements CurrentUser {
 
     final static String SUB_CLAIM = "sub";
     final static String NO_VALID_JWT_MESSAGE = "No valid JWT found.";

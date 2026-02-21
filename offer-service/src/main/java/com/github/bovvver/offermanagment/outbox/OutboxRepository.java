@@ -4,5 +4,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.UUID;
 
-public interface OutboxRepository extends MongoRepository<OutboxEvent, UUID> {
+interface OutboxRepository extends MongoRepository<OutboxEvent, UUID> {
 }
