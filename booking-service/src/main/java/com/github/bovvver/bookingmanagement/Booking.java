@@ -120,13 +120,13 @@ public class Booking {
         negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
 
         this.negotiation = negotiation;
-        registerEvent(new NegotiationStarted(this.getOfferId()));
+        registerEvent(new NegotiationStarted(this.getOfferId(), this.getId()));
     }
 
     public void accept() {
         validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.ACCEPTED);
-        registerEvent(new BookingAccepted(this.getOfferId(), this.getUserId()));
+        registerEvent(new BookingAccepted(this.getOfferId(), this.getUserId(), this.getId()));
     }
 
     public void reject() {

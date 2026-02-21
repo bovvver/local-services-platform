@@ -6,6 +6,7 @@ import java.util.UUID;
 public record NegotiationStartedIntegrationEvent(
         String message,
         UUID offerId,
+        UUID bookingId,
         LocalDateTime timestamp
 ) {
 }

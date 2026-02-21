@@ -24,6 +24,7 @@ class NegotiationEventMapper {
                 new NegotiationStartedIntegrationEvent(
                         e.message(),
                         e.offerId().value(),
+                        e.bookingId().value(),
                         e.getTimestamp()
                 );
 

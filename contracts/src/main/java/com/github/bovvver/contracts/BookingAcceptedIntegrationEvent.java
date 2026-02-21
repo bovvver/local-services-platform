@@ -7,6 +7,7 @@ public record BookingAcceptedIntegrationEvent(
         String message,
         UUID offerId,
         UUID userId,
+        UUID bookingId,
         LocalDateTime timestamp
 ) {
 }
