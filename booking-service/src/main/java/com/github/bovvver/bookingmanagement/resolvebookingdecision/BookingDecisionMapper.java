@@ -24,6 +24,7 @@ class BookingDecisionMapper {
                 e.message(),
                 e.offerId().value(),
                 e.userId().value(),
+                e.bookingId().value(),
                 e.getTimestamp()
         );
 
