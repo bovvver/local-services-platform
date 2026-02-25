@@ -123,6 +123,16 @@ public class Booking {
         registerEvent(new NegotiationStarted(this.getOfferId(), this.getId()));
     }
 
+    public void cancelNegotiation() {
+        if (this.status != BookingStatus.IN_NEGOTIATION) {
+            throw new IllegalStateException(
+                    "Cannot cancel negotiation for booking with status %s".formatted(this.status)
+            );
+        }
+        updateStatus(BookingStatus.PENDING);
+        this.negotiation = null;
+    }
+
     public void accept() {
         validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.ACCEPTED);

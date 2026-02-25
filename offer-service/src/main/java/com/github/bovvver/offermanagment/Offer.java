@@ -26,7 +26,7 @@ public class Offer {
     private final Salary salary;
     private OfferStatus status;
     private final LocalDateTime createdAt;
-    private final List<IntegrationEvent> integrationEvents;
+    private final List<DomainEvent> domainEvents;
 
     Offer(final OfferId id,
           final Title title,
@@ -38,7 +38,7 @@ public class Offer {
           final Salary salary,
           final OfferStatus status,
           final LocalDateTime createdAt,
-          final List<IntegrationEvent> integrationEvents
+          final List<DomainEvent> domainEvents
     ) {
         this.id = id;
         this.title = title;
@@ -50,7 +50,7 @@ public class Offer {
         this.salary = salary;
         this.status = status;
         this.createdAt = createdAt;
-        this.integrationEvents = integrationEvents;
+        this.domainEvents = domainEvents;
     }
 
     /**
@@ -129,9 +129,9 @@ public class Offer {
         this.status = newStatus;
     }
 
-    public List<IntegrationEvent> pullEvents() {
-        List<IntegrationEvent> copy = List.copyOf(integrationEvents);
-        integrationEvents.clear();
+    public List<DomainEvent> pullEvents() {
+        List<DomainEvent> copy = List.copyOf(domainEvents);
+        domainEvents.clear();
         return copy;
     }
 
@@ -139,8 +139,8 @@ public class Offer {
         return !Arrays.asList(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(status);
     }
 
-    private void addIntegrationEvent(IntegrationEvent integrationEvent) {
-        this.integrationEvents.add(integrationEvent);
+    private void addIntegrationEvent(DomainEvent domainEvent) {
+        this.domainEvents.add(domainEvent);
     }
 
     public OfferId getId() {
