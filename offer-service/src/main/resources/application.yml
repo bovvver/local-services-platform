@@ -50,3 +50,5 @@ messaging:
   topics:
     ExecutorAssigned: executor.assigned
     ExecutorAssignmentFailed: executor.assignment.failed
+    NegotiationStartedFailure: negotiation.started.failure
+    BookingAcceptedFailure: booking.accepted.failure

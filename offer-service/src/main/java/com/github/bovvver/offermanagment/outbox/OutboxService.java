@@ -2,7 +2,7 @@ package com.github.bovvver.offermanagment.outbox;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bovvver.offermanagment.events.IntegrationEvent;
+import com.github.bovvver.offermanagment.events.DomainEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +19,9 @@ public class OutboxService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void passToOutbox(List<IntegrationEvent> events, UUID aggregateId, String aggregateType) {
+    public void passToOutbox(List<DomainEvent> events, UUID aggregateId, String aggregateType) {
 
-        for (IntegrationEvent event : events) {
+        for (DomainEvent event : events) {
             try {
                 String payload = objectMapper.writeValueAsString(event);
                 OutboxEvent outboxEvent = OutboxEvent.create(

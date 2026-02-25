@@ -1,7 +1,7 @@
 package com.github.bovvver.offermanagment.outbox;
 
-import com.github.bovvver.offermanagment.events.IntegrationEvent;
+import com.github.bovvver.offermanagment.events.DomainEvent;
 
 public interface EventBus {
-    void publish(IntegrationEvent integrationEvent);
+    void publish(DomainEvent domainEvent);
 }
