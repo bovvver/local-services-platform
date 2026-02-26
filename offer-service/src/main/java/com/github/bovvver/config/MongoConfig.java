@@ -24,6 +24,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
  *     <li>{@code OFFER_MONGO_INITDB_HOST} - hostname or IP address of MongoDB server</li>
  *     <li>{@code OFFER_MONGO_INITDB_DATABASE} - database name</li>
  *     <li>{@code OFFER_MONGO_INITDB_PORT} - database port</li>
+ *     <li>{@code OFFER_MONGO_REPLICA_SET_NAME} - replica set name (default: {@code offer-mongo-rs})</li>
  * </ul>
  *
  * <p>Connection string format:</p>
@@ -50,11 +51,14 @@ class MongoConfig {
     @Value("${OFFER_MONGO_INITDB_PORT}")
     private String DB_PORT;
 
+    @Value("${OFFER_MONGO_REPLICA_SET_NAME}")
+    private String REPLICA_SET_NAME;
+
     @Bean
     public MongoTemplate mongoTemplate() {
         String connectionString = String.format(
-                "mongodb://%s:%s@%s:%s/%s?authSource=admin&replicaSet=offer-mongo-secondary",
-                DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
+                "mongodb://%s:%s@%s:%s/%s?authSource=admin&replicaSet=%s",
+                DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME, REPLICA_SET_NAME
         );
 
         MongoClientSettings settings = MongoClientSettings.builder()
