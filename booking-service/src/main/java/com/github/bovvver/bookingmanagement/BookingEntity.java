@@ -28,7 +28,7 @@ import java.util.UUID;
  *     <li>{@link #userId} – identifier of the booking user</li>
  *     <li>{@link #offerId} – identifier of the booked offer</li>
  *     <li>{@link #status} – current booking state</li>
- *     <li>{@link #finalSalary} – final salary</li>
+ *     <li>{@link #salary} – final salary</li>
  *     <li>{@link #createdAt}, {@link #updatedAt} – managed automatically via auditing</li>
  * </ul>
  *
@@ -73,7 +73,7 @@ public class BookingEntity {
     private BookingStatus status;
 
     @Column(precision = 10, scale = 2)
-    private BigDecimal finalSalary;
+    private BigDecimal salary;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
