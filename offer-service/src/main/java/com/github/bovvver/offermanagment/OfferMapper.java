@@ -37,14 +37,12 @@ public class OfferMapper {
                 offer.getDescription().value(),
                 offer.getAuthorId().value(),
                 offer.getExecutorId() != null ? offer.getExecutorId().value() : null,
-                Location.of(
-                        offer.getLocation().latitude(),
-                        offer.getLocation().longitude()
-                ),
+                offer.getLocation(),
                 offer.getServiceCategories(),
                 offer.getSalary().value(),
                 offer.getStatus(),
-                offer.getCreatedAt()
+                offer.getCreatedAt(),
+                null    // managed by MongoDB
         );
     }
 }

@@ -34,7 +34,7 @@ class BookingMapperTest {
         assertThat(entity.getNegotiation().getPositions()).hasSize(1);
         assertThat(entity.getNegotiation().getPositions().getFirst().getProposedSalary()).isEqualTo(BigDecimal.valueOf(55000.0));
         assertThat(entity.getStatus()).isEqualTo(booking.getStatus());
-        assertThat(entity.getFinalSalary()).isEqualTo(booking.getSalary().value());
+        assertThat(entity.getSalary()).isEqualTo(booking.getSalary().value());
         assertThat(entity.getCreatedAt()).isEqualTo(booking.getCreatedAt());
         assertThat(entity.getUpdatedAt()).isEqualTo(booking.getUpdatedAt());
     }
@@ -85,7 +85,7 @@ class BookingMapperTest {
         assertThat(booking.getNegotiation().getPositions().getFirst().getProposedSalary().value())
                 .isEqualTo(BigDecimal.valueOf(55000));
         assertThat(booking.getStatus()).isEqualTo(entity.getStatus());
-        assertThat(booking.getSalary().value()).isEqualTo(entity.getFinalSalary());
+        assertThat(booking.getSalary().value()).isEqualTo(entity.getSalary());
         assertThat(booking.getCreatedAt()).isEqualTo(entity.getCreatedAt());
         assertThat(booking.getUpdatedAt()).isEqualTo(entity.getUpdatedAt());
     }

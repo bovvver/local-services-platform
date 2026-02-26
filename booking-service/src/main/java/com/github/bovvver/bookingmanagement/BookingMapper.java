@@ -16,7 +16,8 @@ public class BookingMapper {
                 null,
                 booking.getStatus(),
                 booking.getSalary() != null ? booking.getSalary().value() : null,
-                booking.getCreatedAt()
+                booking.getCreatedAt(),
+                null    // managed by JPA auditing, set to null here
         );
 
         if (booking.getNegotiation() != null) {
@@ -42,7 +43,7 @@ public class BookingMapper {
                 new OfferId(entity.getOfferId()),
                 negotiation,
                 entity.getStatus(),
-                entity.getFinalSalary() != null ? new Salary(entity.getFinalSalary()) : null,
+                entity.getSalary() != null ? new Salary(entity.getSalary()) : null,
                 entity.getCreatedAt()
         );
     }
