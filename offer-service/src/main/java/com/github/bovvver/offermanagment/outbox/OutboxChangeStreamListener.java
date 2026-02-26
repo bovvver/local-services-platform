@@ -41,7 +41,7 @@ class OutboxChangeStreamListener {
                     .watch()
                     .fullDocument(FullDocument.UPDATE_LOOKUP)
                     .forEach(this::handleChange);
-        }).start();
+        });
     }
 
     private void handleChange(ChangeStreamDocument<Document> change) {
