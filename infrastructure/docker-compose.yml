@@ -57,7 +57,7 @@ services:
           } catch(e) {
             rs.initiate({
               _id: 'offer-mongo-rs',
-              members: [{ _id: 0, host: 'offer-mongo-primary:27017' }]
+              members: [{ _id: 0, host: '${OFFER_MONGO_INITDB_HOST:-localhost}:${OFFER_MONGO_INITDB_PORT:-27017}' }]
             });
           }
         " || exit 1

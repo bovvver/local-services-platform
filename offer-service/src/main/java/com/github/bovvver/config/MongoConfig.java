@@ -57,7 +57,7 @@ class MongoConfig {
     @Bean
     public MongoTemplate mongoTemplate() {
         String connectionString = String.format(
-                "mongodb://%s:%s@%s:%s/%s?authSource=admin&replicaSet=%s",
+                "mongodb://%s:%s@%s:%s/%s?authSource=admin&replicaSet=%s&directConnection=true",
                 DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME, REPLICA_SET_NAME
         );
 
