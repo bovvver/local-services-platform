@@ -1,7 +1,7 @@
 package com.github.bovvver.offermanagment.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bovvver.offermanagment.events.DomainEvent;
+import com.github.bovvver.contracts.IntegrationEvent;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentMapper;
@@ -61,9 +61,9 @@ class OutboxChangeStreamListener {
 
             log.debug("Processing outbox event: type={}", eventType);
 
-            Object integrationEvent = deserializeEvent(eventType, payload);
+            IntegrationEvent integrationEvent = deserializeEvent(eventType, payload);
             if (integrationEvent != null) {
-                eventBus.publish((DomainEvent) integrationEvent);
+                eventBus.publish(integrationEvent);
                 log.info("Published event to Kafka: {}", eventType);
             }
         } catch (Exception e) {
@@ -71,7 +71,7 @@ class OutboxChangeStreamListener {
         }
     }
 
-    private Object deserializeEvent(String eventType, String payload) {
+    private IntegrationEvent deserializeEvent(String eventType, String payload) {
         try {
             return switch (eventType) {
                 case "ExecutorAssigned" -> ExecutorAssignmentMapper.successToIntegrationEvent(objectMapper.readValue(payload, ExecutorAssigned.class));

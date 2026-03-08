@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@ConfigurationProperties(prefix = "messaging.topics")
+@ConfigurationProperties(prefix = "messaging")
 @Getter
 class MessagingProperties {
 

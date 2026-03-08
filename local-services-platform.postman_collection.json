@@ -1,0 +1,968 @@
+{
+	"info": {
+		"_postman_id": "2b45f6fd-d4e4-4808-95a0-0feea69bfe86",
+		"name": "Local Services Platform",
+		"description": "Request collection for testing the Local Services Platform API.\n\nTo use this collection, set the following collection variables:\n- `gateway_url` → http://localhost:8072\n- `access_token` → JWT Bearer token from Keycloak\n- `keycloak_api_key` → Keycloak API key value (X-Keycloak-API-Key)\n\nServices running locally:\n- Gateway:         http://localhost:8072\n- User Service:    http://localhost:8080\n- Booking Service: http://localhost:8090\n- Offer Service:   http://localhost:9000\n- Keycloak:        http://localhost:7080",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27586421"
+	},
+	"item": [
+		{
+			"name": "User Service",
+			"item": [
+				{
+					"name": "Create User from Keycloak SPI",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-Keycloak-API-Key",
+								"value": "{{keycloak_api_key}}",
+								"description": "Required Keycloak API key (endpoint is public but protected by this key)"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"keycloakUserId\": \"{{user_id}}\",\n  \"email\": \"john.doe@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/user-service/keycloak/auth/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"user-service",
+								"keycloak",
+								"auth",
+								"create"
+							]
+						},
+						"description": "Creates a new user based on data provided by the Keycloak SPI.\n\nPublic endpoint (no JWT token required), but protected by the X-Keycloak-API-Key header.\n\nReturns HTTP 201 with the created user data.\n\nFields:\n- keycloakUserId (String / UUID) – Keycloak user identifier\n- email (String) – email address\n- firstName (String) – first name\n- lastName (String) – last name"
+					},
+					"response": [
+						{
+							"name": "201 Created – user created",
+							"originalRequest": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Keycloak-API-Key",
+										"value": "{{keycloak_api_key}}",
+										"description": "Required Keycloak API key (endpoint is public but protected by this key)"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"keycloakUserId\": \"{{user_id}}\",\n  \"email\": \"john.doe@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{gateway_url}}/user-service/keycloak/auth/create",
+									"host": [
+										"{{gateway_url}}"
+									],
+									"path": [
+										"user-service",
+										"keycloak",
+										"auth",
+										"create"
+									]
+								},
+								"description": "Creates a new user based on data provided by the Keycloak SPI.\n\nPublic endpoint (no JWT token required), but protected by the X-Keycloak-API-Key header.\n\nReturns HTTP 201 with the created user data.\n\nFields:\n- keycloakUserId (String / UUID) – Keycloak user identifier\n- email (String) – email address\n- firstName (String) – first name\n- lastName (String) – last name"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000003\",\n  \"email\": \"john.doe@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+						}
+					]
+				}
+			],
+			"description": "User Service endpoints (port 8080). Path via gateway: /user-service/..."
+		},
+		{
+			"name": "Offer Service",
+			"item": [
+				{
+					"name": "Create Offer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Computer Repair\",\n  \"description\": \"Professional repair service for desktop computers and laptops. Fast diagnostics and component replacement.\",\n  \"salary\": 150.00,\n  \"location\": {\n    \"latitude\": 52.2297,\n    \"longitude\": 21.0122\n  },\n  \"serviceCategories\": [\"TECH_SUPPORT\", \"REPAIR\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/offer-service/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"offer-service",
+								"create"
+							]
+						},
+						"description": "Creates a new service offer.\n\nRequires a JWT token.\nReturns HTTP 201 with the created offer data.\n\nFields:\n- title (String, max 100 chars, required)\n- description (String, max 1000 chars, required)\n- salary (BigDecimal, >= 0, optional)\n- location.latitude (double, -90 to 90)\n- location.longitude (double, -180 to 180)\n- serviceCategories (Set<String>, max 5 items)\n  Allowed values: HOME_SERVICES, AUTOMOTIVE, BEAUTY_WELLNESS,\n  EDUCATION, TECH_SUPPORT, DELIVERY, CLEANING, REPAIR, GARDENING, PET_SERVICES"
+					},
+					"response": [
+						{
+							"name": "201 Created – offer created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Computer Repair\",\n  \"description\": \"Professional repair service for desktop computers and laptops. Fast diagnostics and component replacement.\",\n  \"salary\": 150.00,\n  \"location\": {\n    \"latitude\": 52.2297,\n    \"longitude\": 21.0122\n  },\n  \"serviceCategories\": [\"TECH_SUPPORT\", \"REPAIR\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{gateway_url}}/offer-service/create",
+									"host": [
+										"{{gateway_url}}"
+									],
+									"path": [
+										"offer-service",
+										"create"
+									]
+								},
+								"description": "Creates a new service offer.\n\nRequires a JWT token.\nReturns HTTP 201 with the created offer data.\n\nFields:\n- title (String, max 100 chars, required)\n- description (String, max 1000 chars, required)\n- salary (BigDecimal, >= 0, optional)\n- location.latitude (double, -90 to 90)\n- location.longitude (double, -180 to 180)\n- serviceCategories (Set<String>, max 5 items)\n  Allowed values: HOME_SERVICES, AUTOMOTIVE, BEAUTY_WELLNESS,\n  EDUCATION, TECH_SUPPORT, DELIVERY, CLEANING, REPAIR, GARDENING, PET_SERVICES"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"offerId\": \"00000000-0000-0000-0000-000000000001\",\n  \"title\": \"Computer Repair\",\n  \"description\": \"Professional repair service for desktop computers and laptops. Fast diagnostics and component replacement.\",\n  \"status\": \"ACTIVE\",\n  \"location\": {\n    \"latitude\": 52.2297,\n    \"longitude\": 21.0122\n  },\n  \"serviceCategories\": [\"TECH_SUPPORT\", \"REPAIR\"],\n  \"salary\": 150.00,\n  \"createdAt\": \"2026-02-28T10:00:00\"\n}"
+						},
+						{
+							"name": "400 Bad Request – validation error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Computer Repair\",\n  \"description\": \"Professional repair service for desktop computers and laptops. Fast diagnostics and component replacement.\",\n  \"salary\": 150.00,\n  \"location\": {\n    \"latitude\": 52.2297,\n    \"longitude\": 21.0122\n  },\n  \"serviceCategories\": [\"TECH_SUPPORT\", \"REPAIR\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{gateway_url}}/offer-service/create",
+									"host": [
+										"{{gateway_url}}"
+									],
+									"path": [
+										"offer-service",
+										"create"
+									]
+								},
+								"description": "Creates a new service offer.\n\nRequires a JWT token.\nReturns HTTP 201 with the created offer data.\n\nFields:\n- title (String, max 100 chars, required)\n- description (String, max 1000 chars, required)\n- salary (BigDecimal, >= 0, optional)\n- location.latitude (double, -90 to 90)\n- location.longitude (double, -180 to 180)\n- serviceCategories (Set<String>, max 5 items)\n  Allowed values: HOME_SERVICES, AUTOMOTIVE, BEAUTY_WELLNESS,\n  EDUCATION, TECH_SUPPORT, DELIVERY, CLEANING, REPAIR, GARDENING, PET_SERVICES"
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": 400,\n  \"message\": \"Title cannot be blank\",\n  \"timestamp\": \"2026-02-28T10:00:00\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Offer – validation (title too long)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n  \"description\": \"Valid description\",\n  \"salary\": 100.00,\n  \"location\": {\n    \"latitude\": 50.0,\n    \"longitude\": 20.0\n  },\n  \"serviceCategories\": [\"CLEANING\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/offer-service/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"offer-service",
+								"create"
+							]
+						},
+						"description": "Tests the case where the title exceeds 100 characters. Expected HTTP 400."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Offer – validation (negative salary)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Valid title\",\n  \"description\": \"Valid description\",\n  \"salary\": -100.00,\n  \"location\": {\n    \"latitude\": 50.0,\n    \"longitude\": 20.0\n  },\n  \"serviceCategories\": [\"CLEANING\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/offer-service/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"offer-service",
+								"create"
+							]
+						},
+						"description": "Tests the case with a negative salary. Expected HTTP 400."
+					},
+					"response": []
+				},
+				{
+					"name": "[INTERNAL] Check Offer Ownership",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_url}}/offer-service/internal/check-ownership?userId={{user_id}}&offerId={{offer_id}}",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"offer-service",
+								"internal",
+								"check-ownership"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{user_id}}",
+									"description": "UUID of the user (offer owner)"
+								},
+								{
+									"key": "offerId",
+									"value": "{{offer_id}}",
+									"description": "UUID of the offer to check"
+								}
+							]
+						},
+						"description": "Internal endpoint used by booking-service to verify whether a given user is the owner of an offer.\n\nQuery parameters:\n- userId (UUID, required)\n- offerId (UUID, required)\n\nThis endpoint is called by booking-service, not directly by the client."
+					},
+					"response": []
+				}
+			],
+			"description": "Offer Service endpoints (port 9000). Path via gateway: /offer-service/...\n\nAll endpoints require a JWT Bearer token."
+		},
+		{
+			"name": "Booking Service",
+			"item": [
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"offerId\": \"{{offer_id}}\",\n  \"salary\": 120.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"create"
+							]
+						},
+						"description": "Creates a new booking for the specified offer.\n\nRequires a JWT token (logged-in user = candidate executor).\nReturns HTTP 200 (no response body).\n\nFields:\n- offerId (UUID, required) – identifier of the offer to book\n- salary (BigDecimal, > 0, optional) – proposed rate\n\nErrors:\n- 400 – validation error (e.g. offerId = null, salary <= 0)\n- 409 – booking for this offer already exists (conflict)"
+					},
+					"response": [
+						{
+							"name": "200 OK – booking created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"offerId\": \"{{offer_id}}\",\n  \"salary\": 120.00\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{gateway_url}}/booking-service/bookings/create",
+									"host": [
+										"{{gateway_url}}"
+									],
+									"path": [
+										"booking-service",
+										"bookings",
+										"create"
+									]
+								},
+								"description": "Creates a new booking for the specified offer.\n\nRequires a JWT token (logged-in user = candidate executor).\nReturns HTTP 200 (no response body).\n\nFields:\n- offerId (UUID, required) – identifier of the offer to book\n- salary (BigDecimal, > 0, optional) – proposed rate\n\nErrors:\n- 400 – validation error (e.g. offerId = null, salary <= 0)\n- 409 – booking for this offer already exists (conflict)"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "409 Conflict – booking already exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"offerId\": \"{{offer_id}}\",\n  \"salary\": 120.00\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{gateway_url}}/booking-service/bookings/create",
+									"host": [
+										"{{gateway_url}}"
+									],
+									"path": [
+										"booking-service",
+										"bookings",
+										"create"
+									]
+								},
+								"description": "Creates a new booking for the specified offer.\n\nRequires a JWT token (logged-in user = candidate executor).\nReturns HTTP 200 (no response body).\n\nFields:\n- offerId (UUID, required) – identifier of the offer to book\n- salary (BigDecimal, > 0, optional) – proposed rate\n\nErrors:\n- 400 – validation error (e.g. offerId = null, salary <= 0)\n- 409 – booking for this offer already exists (conflict)"
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": 409,\n  \"message\": \"Booking already exists for this offer\",\n  \"timestamp\": \"2026-02-28T10:00:00\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Booking – validation (missing offerId)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"offerId\": null,\n  \"salary\": 120.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"create"
+							]
+						},
+						"description": "Tests the case without offerId. Expected HTTP 400."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking – validation (negative salary)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"offerId\": \"{{offer_id}}\",\n  \"salary\": -1.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/create",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"create"
+							]
+						},
+						"description": "Tests the case with a negative salary. Expected HTTP 400."
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve Booking Decision – ACCEPTED",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"ACCEPTED\",\n  \"salary\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/{{booking_id}}/decision",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"{{booking_id}}",
+								"decision"
+							]
+						},
+						"description": "Makes a decision on a booking (accept, reject, or negotiate).\n\nRequires a JWT token (logged-in user = offer owner).\nReturns HTTP 202 Accepted.\n\nFields:\n- status (enum, required): ACCEPTED | REJECTED | NEGOTIATE\n- salary (BigDecimal, > 0, optional) – required only when status = NEGOTIATE\n\nCase: ACCEPTED – acceptance without negotiation."
+					},
+					"response": [
+						{
+							"name": "202 Accepted",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"ACCEPTED\",\n  \"salary\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{gateway_url}}/booking-service/bookings/{{booking_id}}/decision",
+									"host": [
+										"{{gateway_url}}"
+									],
+									"path": [
+										"booking-service",
+										"bookings",
+										"{{booking_id}}",
+										"decision"
+									]
+								},
+								"description": "Makes a decision on a booking (accept, reject, or negotiate).\n\nRequires a JWT token (logged-in user = offer owner).\nReturns HTTP 202 Accepted.\n\nFields:\n- status (enum, required): ACCEPTED | REJECTED | NEGOTIATE\n- salary (BigDecimal, > 0, optional) – required only when status = NEGOTIATE\n\nCase: ACCEPTED – acceptance without negotiation."
+							},
+							"status": "Accepted",
+							"code": 202,
+							"_postman_previewlanguage": "Text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": 202,\n  \"message\": \"Booking decision for offerId {{booking_id}} is being processed\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Resolve Booking Decision – REJECTED",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"REJECTED\",\n  \"salary\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/{{booking_id}}/decision",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"{{booking_id}}",
+								"decision"
+							]
+						},
+						"description": "Rejects the booking. Expected HTTP 202."
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve Booking Decision – NEGOTIATE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"NEGOTIATE\",\n  \"salary\": 200.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/{{booking_id}}/decision",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"{{booking_id}}",
+								"decision"
+							]
+						},
+						"description": "Proposes negotiation with a new rate. The salary field is required when status = NEGOTIATE. Expected HTTP 202."
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve Booking Decision – NEGOTIATE without salary (error)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"NEGOTIATE\",\n  \"salary\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_url}}/booking-service/bookings/{{booking_id}}/decision",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"booking-service",
+								"bookings",
+								"{{booking_id}}",
+								"decision"
+							]
+						},
+						"description": "Attempts negotiation without providing a salary. Expected HTTP 400 or 409."
+					},
+					"response": []
+				}
+			],
+			"description": "Booking Service endpoints (port 8090). Path via gateway: /booking-service/...\n\nAll endpoints require a JWT Bearer token."
+		},
+		{
+			"name": "Keycloak (Auth Token)",
+			"item": [
+				{
+					"name": "Get Access Token (password grant)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const authHeader = pm.request.headers.get(\"Authorization\");\r",
+									"\r",
+									"if (authHeader) {\r",
+									"    const token = authHeader.replace(\"Bearer \", \"\");\r",
+									"    pm.environment.set(\"access_token\", token);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "authUrl",
+									"value": "{{keycloak_server}}/realms/{{realm}}/protocol/openid-connect/auth",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "{{keycloak_server}}/realms/{{realm}}/protocol/openid-connect/token",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "body",
+									"type": "string"
+								},
+								{
+									"key": "state",
+									"value": "wf214d2-fa8233-dklal2s",
+									"type": "string"
+								},
+								{
+									"key": "scope",
+									"value": "openid email profile",
+									"type": "string"
+								},
+								{
+									"key": "useBrowser",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "access_token",
+									"type": "string"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://{{keycloak_server}}/test/callback",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:7080/realms/local-services-platform/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "7080",
+							"path": [
+								"realms",
+								"local-services-platform",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						},
+						"description": "Retrieves an access token from Keycloak using Resource Owner Password Credentials.\n\nThe test script automatically saves the access_token to the collection variable.\n\nUpdate: client_id, username, password to match your Keycloak environment."
+					},
+					"response": []
+				}
+			],
+			"description": "Helper request to obtain a JWT token from Keycloak (realm: local-services-platform).\nUse it to populate the {{access_token}} collection variable."
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:8072",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "<YOUR_JWT_TOKEN>",
+			"type": "string"
+		},
+		{
+			"key": "keycloak_api_key",
+			"value": "<YOUR_API_KEY>",
+			"type": "string"
+		},
+		{
+			"key": "offer_id",
+			"value": "00000000-0000-0000-0000-000000000001",
+			"type": "string"
+		},
+		{
+			"key": "booking_id",
+			"value": "00000000-0000-0000-0000-000000000002",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "00000000-0000-0000-0000-000000000003",
+			"type": "string"
+		}
+	]
+}

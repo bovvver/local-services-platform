@@ -64,8 +64,7 @@ public class BookingEntity {
     private UUID offerId;
 
     @Setter
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "negotiation_id", referencedColumnName = "id", unique = true)
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private NegotiationEntity negotiation;
 
     @Column(nullable = false)

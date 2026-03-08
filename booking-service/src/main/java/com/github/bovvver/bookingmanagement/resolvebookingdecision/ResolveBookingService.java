@@ -29,17 +29,16 @@ class ResolveBookingService {
             @Valid BookingDecisionRequest request
     ) {
         validateRequest(request);
-        offerOwnershipValidator.validate(currentUser.getId().value() ,bookingId);
-        handleBookingDecision(bookingId, request);
+        Booking booking = BookingMapper.toDomain(bookingReadRepository.findById(bookingId));
+        offerOwnershipValidator.validate(currentUser.getId().value(), booking.getOfferId().value());
+        handleBookingDecision(booking, request);
     }
 
-    private void handleBookingDecision(UUID bookingId, @Valid BookingDecisionRequest request) {
-
-        Booking booking = BookingMapper.toDomain(bookingReadRepository.findById(bookingId));
+    private void handleBookingDecision(Booking booking, @Valid BookingDecisionRequest request) {
 
         BookingDecisionStatus status = request.status();
         if (status == BookingDecisionStatus.NEGOTIATE) {
-            negotiationFacade.beginNegotiation(bookingId, request.salary());
+            negotiationFacade.beginNegotiation(booking.getId().value(), request.salary());
         } else if (status == BookingDecisionStatus.ACCEPTED) {
             acceptBooking(booking);
         } else {

@@ -1,6 +1,7 @@
 package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.vo.BookingId;
+import com.github.bovvver.bookingmanagement.vo.BookingStatus;
 import com.github.bovvver.bookingmanagement.vo.NegotiationId;
 import org.junit.jupiter.api.Test;
 
@@ -13,13 +14,19 @@ class NegotiationMapperTest {
 
     @Test
     void shouldMapNegotiationToEntityCorrectly() {
+        UUID bookingId = UUID.randomUUID();
         Negotiation negotiation = new Negotiation(
                 NegotiationId.of(UUID.randomUUID()),
-                BookingId.of(UUID.randomUUID()),
+                BookingId.of(bookingId),
                 List.of()
         );
 
-        NegotiationEntity entity = NegotiationMapper.toEntity(negotiation);
+        BookingEntity bookingEntity = new BookingEntity(
+                bookingId, UUID.randomUUID(), UUID.randomUUID(),
+                null, BookingStatus.PENDING, null, null, null
+        );
+
+        NegotiationEntity entity = NegotiationMapper.toEntity(negotiation, bookingEntity);
 
         assertThat(entity).isNotNull();
         assertThat(entity.getId()).isEqualTo(negotiation.getId().value());

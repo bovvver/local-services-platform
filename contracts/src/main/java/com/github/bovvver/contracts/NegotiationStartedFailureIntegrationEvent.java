@@ -7,7 +7,7 @@ public record NegotiationStartedFailureIntegrationEvent(
         String message,
         UUID bookingId,
         LocalDateTime timestamp
-) {
+) implements IntegrationEvent {
     private static final String EVENT_MESSAGE = "Failed to start negotiation due to invalid offer state.";
 
     public NegotiationStartedFailureIntegrationEvent(final UUID bookingId) {
