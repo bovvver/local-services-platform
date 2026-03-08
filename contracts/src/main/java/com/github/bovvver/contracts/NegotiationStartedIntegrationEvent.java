@@ -8,5 +8,5 @@ public record NegotiationStartedIntegrationEvent(
         UUID offerId,
         UUID bookingId,
         LocalDateTime timestamp
-) {
+) implements IntegrationEvent {
 }

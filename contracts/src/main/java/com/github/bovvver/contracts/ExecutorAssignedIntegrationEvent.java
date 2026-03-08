@@ -6,7 +6,7 @@ public record ExecutorAssignedIntegrationEvent(
         String message,
         UUID offerId,
         UUID executorId
-) {
+) implements IntegrationEvent {
     private static final String EVENT_MESSAGE = "Executor assigned to offer. Offer cannot accept more bookings.";
 
     public ExecutorAssignedIntegrationEvent(final UUID offerId, final UUID executorId) {

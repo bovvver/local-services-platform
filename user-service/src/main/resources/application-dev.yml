@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${USER_POSTGRES_URL}:5432/${USER_POSTGRES_DB}
+    url: jdbc:postgresql://${USER_POSTGRES_URL:localhost}:5432/${USER_POSTGRES_DB:postgresdb}
     driver-class-name: org.postgresql.Driver
-    username: ${USER_POSTGRES_USER}
-    password: ${USER_POSTGRES_PASSWORD}
+    username: ${USER_POSTGRES_USER:user}
+    password: ${USER_POSTGRES_PASSWORD:password}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

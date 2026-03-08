@@ -1,9 +1,14 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.*;
+import com.github.bovvver.bookingmanagement.vo.BookingId;
+import com.github.bovvver.bookingmanagement.vo.OfferId;
+import com.github.bovvver.bookingmanagement.vo.Salary;
+import com.github.bovvver.bookingmanagement.vo.UserId;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookingMapper {
 
@@ -22,9 +27,8 @@ public class BookingMapper {
 
         if (booking.getNegotiation() != null) {
             NegotiationEntity negotiationEntity =
-                    NegotiationMapper.toEntity(booking.getNegotiation());
+                    NegotiationMapper.toEntity(booking.getNegotiation(), bookingEntity);
 
-            negotiationEntity.setBooking(bookingEntity);
             bookingEntity.setNegotiation(negotiationEntity);
         }
 
@@ -51,7 +55,7 @@ public class BookingMapper {
     public static List<Booking> toDomainList(List<BookingEntity> bookingEntities) {
         return bookingEntities.stream()
                 .map(BookingMapper::toDomain)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     static Iterable<BookingEntity> toEntityList(final Iterable<Booking> bookings) {

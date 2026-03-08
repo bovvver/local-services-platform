@@ -9,13 +9,14 @@ import java.util.UUID;
 
 class NegotiationMapper {
 
-    static NegotiationEntity toEntity(Negotiation negotiation) {
+    static NegotiationEntity toEntity(Negotiation negotiation, BookingEntity bookingEntity) {
         if (negotiation == null) {
             return null;
         }
 
         NegotiationEntity entity = new NegotiationEntity();
         entity.setId(negotiation.getId().value());
+        entity.setBooking(bookingEntity);
         entity.setStatus(negotiation.getStatus());
         entity.setStartedAt(negotiation.getStartedAt());
         entity.setLastUpdatedAt(negotiation.getLastUpdatedAt());

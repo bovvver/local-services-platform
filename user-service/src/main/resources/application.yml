@@ -14,8 +14,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/master/protocol/openid-connect/certs
-          issuer-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/local-services-platform
+          jwk-set-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT_HOST:7080}/realms/master/protocol/openid-connect/certs
+          issuer-uri: http://${KEYCLOAK_HOST:localhost}:${KEYCLOAK_PORT_HOST:7080}/realms/local-services-platform
 
 management:
   endpoints:
@@ -33,7 +33,7 @@ eureka:
     fetchRegistry: true
     registerWithEureka: true
     serviceUrl:
-      defaultZone: http://${EUREKA_SERVER}:8761/eureka/
+      defaultZone: http://${EUREKA_SERVER:localhost}:8761/eureka/
 
 info:
   app:

@@ -7,7 +7,7 @@ public record BookingAcceptedFailureIntegrationEvent (
         String message,
         UUID bookingId,
         LocalDateTime timestamp
-) {
+) implements IntegrationEvent {
     private static final String EVENT_MESSAGE = "Failed to accept booking assignment due to invalid offer state.";
 
     public BookingAcceptedFailureIntegrationEvent(final UUID bookingId) {

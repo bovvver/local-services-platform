@@ -26,7 +26,8 @@ class NegotiationEntity {
     @Id
     private UUID id;
 
-    @OneToOne(mappedBy = "negotiation")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "booking_id", referencedColumnName = "id", unique = true)
     private BookingEntity booking;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "negotiation", orphanRemoval = true)

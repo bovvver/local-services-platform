@@ -9,5 +9,5 @@ public record BookingAcceptedIntegrationEvent(
         UUID userId,
         UUID bookingId,
         LocalDateTime timestamp
-) {
+) implements IntegrationEvent {
 }
