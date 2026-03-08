@@ -13,7 +13,7 @@ class BookingAcceptedFailureListener {
 
     private final BookingFailureService bookingFailureService;
 
-    @KafkaListener(topics = BOOKING_ACCEPTED_FAILURE_TOPIC, groupId = "booking-service", containerFactory = "bookingAcceptedFailureContainerFactory")
+    @KafkaListener(topics = BOOKING_ACCEPTED_FAILURE_TOPIC, groupId = "booking-service")
     public void onBookingAcceptedFailure(BookingAcceptedFailureIntegrationEvent event) {
         bookingFailureService.handleBookingAcceptedFailure(event.bookingId());
     }

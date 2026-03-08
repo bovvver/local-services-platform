@@ -17,7 +17,7 @@ class BookingAcceptedListener {
     private final ResolveBookingService resolveBookingService;
     private final OutboxService outboxService;
 
-    @KafkaListener(topics = OFFER_BOOKING_DECISION_TOPIC, groupId = "offer-service", containerFactory = "bookingAcceptedContainerFactory")
+    @KafkaListener(topics = OFFER_BOOKING_DECISION_TOPIC, groupId = "offer-service")
     public void onBookingAccepted(BookingAcceptedIntegrationEvent event) {
 
         try {
