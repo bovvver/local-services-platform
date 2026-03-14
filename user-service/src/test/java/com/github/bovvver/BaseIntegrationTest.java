@@ -38,3 +38,4 @@ abstract class BaseIntegrationTest {
         assertTrue(postgreSQLContainer.isCreated());
     }
 }
+
