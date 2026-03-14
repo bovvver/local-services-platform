@@ -9,9 +9,9 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-class ResolveBookingREST {
+class OfferOwnershipREST {
 
-    private static final String OFFER_OWNERSHIP_ENDPOINT = "/internal/check-ownership";
+    static final String OFFER_OWNERSHIP_ENDPOINT = "/internal/check-ownership";
 
     private final OfferOwnershipService offerOwnershipService;
 

@@ -3,7 +3,6 @@ package com.github.bovvver.offermanagment.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.contracts.IntegrationEvent;
-import com.github.bovvver.offermanagment.events.DomainEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

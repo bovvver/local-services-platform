@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class OfferManipulationFacade {
+class OfferManipulationFacade {
 
     private final CurrentUser currentUser;
     private final OfferWriteRepository offerWriteRepository;
 
-    public Offer createOffer(CreateOfferCommand createOfferCommand) {
+    Offer createOffer(CreateOfferCommand createOfferCommand) {
         Offer createdOffer = Offer.create(
                 Title.of(createOfferCommand.title()),
                 Description.of(createOfferCommand.description()),
