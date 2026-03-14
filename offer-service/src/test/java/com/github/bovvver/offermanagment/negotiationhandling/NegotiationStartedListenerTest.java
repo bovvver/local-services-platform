@@ -45,7 +45,6 @@ class NegotiationStartedListenerTest {
     @Test
     void onNegotiationStartedPassesFailureToOutboxWhenIllegalStateExceptionOccurs() {
         UUID offerId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
         UUID bookingId = UUID.randomUUID();
 
         var event = new NegotiationStartedIntegrationEvent(
