@@ -25,23 +25,24 @@ class BookingTest {
         assertThat(booking.getOfferId()).isEqualTo(offerId);
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.PENDING);
         assertThat(booking.getCreatedAt()).isNotNull();
-        assertThat(booking.getUpdatedAt()).isNotNull();
     }
 
     @Test
     void shouldThrowExceptionWhenUserIdIsNull() {
+        BookingId bookingId = BookingId.of(UUID.randomUUID());
         OfferId offerId = OfferId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
 
-        assertThrows(IllegalArgumentException.class, () -> Booking.create(null, offerId, salary));
+        assertThrows(IllegalArgumentException.class, () -> Booking.create(bookingId, null, offerId, salary));
     }
 
     @Test
     void shouldThrowExceptionWhenOfferIdIsNull() {
+        BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
         Salary salary = Salary.of(50000.0);
 
-        assertThrows(IllegalArgumentException.class, () -> Booking.create(userId, null, salary));
+        assertThrows(IllegalArgumentException.class, () -> Booking.create(bookingId, userId, null, salary));
     }
 
     @Test
@@ -53,7 +54,6 @@ class BookingTest {
 
         booking.beginNegotiation(salary);
 
-        assertThat(result).isNotNull();
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);
         assertThat(booking.getNegotiation()).isNotNull();
     }
@@ -124,5 +124,37 @@ class BookingTest {
         booking.accept();
 
         assertThrows(IllegalStateException.class, booking::reject);
+    }
+
+    @Test
+    void shouldCancelNegotiationWhenStatusIsInNegotiation() {
+        UserId userId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+        Salary salary = Salary.of(50000.0);
+        Booking booking = Booking.create(userId, offerId, salary);
+
+        booking.beginNegotiation(salary);
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);
+        assertThat(booking.getNegotiation()).isNotNull();
+
+        booking.cancelNegotiation();
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.PENDING);
+        assertThat(booking.getNegotiation()).isNull();
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCancelNegotiationWithInvalidStatus() {
+        UserId userId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+        Salary salary = Salary.of(50000.0);
+        Booking booking = Booking.create(userId, offerId, salary);
+
+        assertThrows(IllegalStateException.class, booking::cancelNegotiation);
+
+        booking.beginNegotiation(salary);
+        booking.accept();
+
+        assertThrows(IllegalStateException.class, booking::cancelNegotiation);
     }
 }

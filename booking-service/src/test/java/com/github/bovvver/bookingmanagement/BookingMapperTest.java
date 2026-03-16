@@ -36,7 +36,6 @@ class BookingMapperTest {
         assertThat(entity.getStatus()).isEqualTo(booking.getStatus());
         assertThat(entity.getSalary()).isEqualTo(booking.getSalary().value());
         assertThat(entity.getCreatedAt()).isEqualTo(booking.getCreatedAt());
-        assertThat(entity.getUpdatedAt()).isEqualTo(booking.getUpdatedAt());
     }
 
     @Test
@@ -68,7 +67,7 @@ class BookingMapperTest {
                 BookingStatus.IN_NEGOTIATION,
                 BigDecimal.valueOf(60000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                null
         );
 
         negotiationEntity.setBooking(entity);
@@ -87,7 +86,6 @@ class BookingMapperTest {
         assertThat(booking.getStatus()).isEqualTo(entity.getStatus());
         assertThat(booking.getSalary().value()).isEqualTo(entity.getSalary());
         assertThat(booking.getCreatedAt()).isEqualTo(entity.getCreatedAt());
-        assertThat(booking.getUpdatedAt()).isEqualTo(entity.getUpdatedAt());
     }
 
     @Test
@@ -100,7 +98,7 @@ class BookingMapperTest {
                 BookingStatus.PENDING,
                 BigDecimal.valueOf(50000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                null
         );
 
         UUID negotiationId = UUID.randomUUID();
@@ -119,7 +117,7 @@ class BookingMapperTest {
                 BookingStatus.IN_NEGOTIATION,
                 BigDecimal.valueOf(60000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                null
         );
 
         negotiationEntity.setBooking(entity2);
@@ -145,7 +143,6 @@ class BookingMapperTest {
                 null,
                 BookingStatus.PENDING,
                 Salary.of(50000.0),
-                LocalDateTime.now(),
                 LocalDateTime.now()
         );
 
@@ -169,7 +166,6 @@ class BookingMapperTest {
                 negotiation,
                 BookingStatus.IN_NEGOTIATION,
                 Salary.of(60000.0),
-                LocalDateTime.now(),
                 LocalDateTime.now()
         );
 

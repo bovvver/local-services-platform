@@ -1,10 +1,9 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.BookingId;
-import com.github.bovvver.bookingmanagement.vo.BookingStatus;
-import com.github.bovvver.bookingmanagement.vo.NegotiationId;
+import com.github.bovvver.bookingmanagement.vo.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,15 +14,12 @@ class NegotiationMapperTest {
     @Test
     void shouldMapNegotiationToEntityCorrectly() {
         UUID bookingId = UUID.randomUUID();
-        Negotiation negotiation = new Negotiation(
-                NegotiationId.of(UUID.randomUUID()),
-                BookingId.of(bookingId),
-                List.of()
-        );
+        Negotiation negotiation = Negotiation.create(BookingId.of(bookingId));
+        negotiation.addPosition(Salary.of(10_000.0), NegotiationParty.AUTHOR);
 
         BookingEntity bookingEntity = new BookingEntity(
                 bookingId, UUID.randomUUID(), UUID.randomUUID(),
-                null, BookingStatus.PENDING, null, null, null
+                null, BookingStatus.PENDING, null, LocalDateTime.now(), null
         );
 
         NegotiationEntity entity = NegotiationMapper.toEntity(negotiation, bookingEntity);
@@ -34,5 +30,60 @@ class NegotiationMapperTest {
         assertThat(entity.getStatus()).isEqualTo(negotiation.getStatus());
         assertThat(entity.getStartedAt()).isEqualTo(negotiation.getStartedAt());
         assertThat(entity.getLastUpdatedAt()).isEqualTo(negotiation.getLastUpdatedAt());
+        assertThat(entity.getPositions()).hasSize(1);
+        assertThat(entity.getPositions().getFirst().getProposedSalary())
+                .isEqualTo(negotiation.getPositions().getFirst().getProposedSalary().value());
+    }
+
+    @Test
+    void shouldMapEntityToNegotiationCorrectly() {
+        UUID bookingId = UUID.randomUUID();
+        UUID negotiationId = UUID.randomUUID();
+
+        NegotiationEntity negotiationEntity = new NegotiationEntity();
+        negotiationEntity.setId(negotiationId);
+        negotiationEntity.setStatus(NegotiationStatus.ACTIVE);
+        negotiationEntity.setStartedAt(LocalDateTime.now().minusHours(1));
+        negotiationEntity.setLastUpdatedAt(LocalDateTime.now());
+
+        NegotiationPositionEntity positionEntity = new NegotiationPositionEntity();
+        positionEntity.setId(UUID.randomUUID());
+        positionEntity.setNegotiation(negotiationEntity);
+        positionEntity.setProposedSalary(java.math.BigDecimal.valueOf(12_000));
+        positionEntity.setProposedBy(NegotiationParty.AUTHOR);
+        positionEntity.setProposedAt(LocalDateTime.now().minusMinutes(30));
+
+        negotiationEntity.setPositions(List.of(positionEntity));
+
+        Negotiation negotiation = NegotiationMapper.toDomain(negotiationEntity, bookingId);
+
+        assertThat(negotiation).isNotNull();
+        assertThat(negotiation.getId().value()).isEqualTo(negotiationId);
+        assertThat(negotiation.getBookingId().value()).isEqualTo(bookingId);
+        assertThat(negotiation.getStatus()).isEqualTo(negotiationEntity.getStatus());
+        assertThat(negotiation.getStartedAt()).isEqualTo(negotiationEntity.getStartedAt());
+        assertThat(negotiation.getLastUpdatedAt()).isEqualTo(negotiationEntity.getLastUpdatedAt());
+        assertThat(negotiation.getPositions()).hasSize(1);
+        assertThat(negotiation.getPositions().getFirst().getProposedSalary().value())
+                .isEqualTo(positionEntity.getProposedSalary());
+        assertThat(negotiation.getPositions().getFirst().getProposedBy())
+                .isEqualTo(positionEntity.getProposedBy());
+    }
+
+    @Test
+    void shouldReturnNullWhenNegotiationIsNull() {
+        BookingEntity bookingEntity = new BookingEntity(
+                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+                null, BookingStatus.PENDING, null, LocalDateTime.now(), null
+        );
+
+        NegotiationEntity entity = NegotiationMapper.toEntity(null, bookingEntity);
+        assertThat(entity).isNull();
+    }
+
+    @Test
+    void shouldReturnNullWhenNegotiationEntityIsNull() {
+        Negotiation negotiation = NegotiationMapper.toDomain(null, UUID.randomUUID());
+        assertThat(negotiation).isNull();
     }
 }
