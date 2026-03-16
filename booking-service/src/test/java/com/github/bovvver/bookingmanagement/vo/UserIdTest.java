@@ -21,4 +21,12 @@ class UserIdTest {
     void shouldThrowExceptionWhenUserIdIsNull() {
         assertThrows(IllegalArgumentException.class, () -> new UserId(null));
     }
+
+    @Test
+    void shouldCreateUserIdUsingFactoryMethod() {
+        UUID uuid = UUID.randomUUID();
+        UserId userId = UserId.of(uuid);
+
+        assertThat(userId.value()).isEqualTo(uuid);
+    }
 }

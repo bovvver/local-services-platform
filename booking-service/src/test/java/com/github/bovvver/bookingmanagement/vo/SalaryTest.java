@@ -38,4 +38,11 @@ class SalaryTest {
     void shouldThrowExceptionUsingFactoryMethodWhenValueIsNull() {
         assertThrows(IllegalArgumentException.class, () -> Salary.of(null));
     }
+
+    @Test
+    void shouldThrowExceptionWhenScaleGreaterThanTwo() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> new Salary(new BigDecimal("123.456")));
+        assertThat(exception.getMessage()).isEqualTo("Salary cannot have more than 2 decimal places");
+    }
 }

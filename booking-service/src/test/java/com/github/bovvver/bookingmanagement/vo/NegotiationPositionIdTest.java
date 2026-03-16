@@ -21,4 +21,22 @@ class NegotiationPositionIdTest {
     void shouldThrowExceptionWhenNegotiationPositionIdIsNull() {
         assertThrows(IllegalArgumentException.class, () -> new NegotiationPositionId(null));
     }
+
+    @Test
+    void shouldCreateNegotiationPositionIdUsingFactoryMethod() {
+        UUID uuid = UUID.randomUUID();
+        NegotiationPositionId negotiationPositionId = NegotiationPositionId.of(uuid);
+
+        assertThat(negotiationPositionId.value()).isEqualTo(uuid);
+    }
+
+    @Test
+    void shouldGenerateNewNegotiationPositionId() {
+        NegotiationPositionId first = NegotiationPositionId.generate();
+        NegotiationPositionId second = NegotiationPositionId.generate();
+
+        assertThat(first.value()).isNotNull();
+        assertThat(second.value()).isNotNull();
+        assertThat(first).isNotEqualTo(second);
+    }
 }

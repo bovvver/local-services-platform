@@ -32,4 +32,12 @@ class BookingIdTest {
         assertThat(bookingId1).isEqualTo(bookingId2);
         assertThat(bookingId1.hashCode()).isEqualTo(bookingId2.hashCode());
     }
+
+    @Test
+    void shouldCreateBookingIdUsingFactoryMethod() {
+        UUID uuid = UUID.randomUUID();
+        BookingId bookingId = BookingId.of(uuid);
+
+        assertThat(bookingId.value()).isEqualTo(uuid);
+    }
 }

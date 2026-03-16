@@ -21,4 +21,12 @@ class OfferIdTest {
     void shouldThrowExceptionWhenOfferIdIsNull() {
         assertThrows(IllegalArgumentException.class, () -> new OfferId(null));
     }
+
+    @Test
+    void shouldCreateOfferIdUsingFactoryMethod() {
+        UUID uuid = UUID.randomUUID();
+        OfferId offerId = OfferId.of(uuid);
+
+        assertThat(offerId.value()).isEqualTo(uuid);
+    }
 }
