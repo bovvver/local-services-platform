@@ -3,6 +3,9 @@ package com.github.bovvver.bookingmanagement.bookingcreation;
 import com.github.bovvver.bookingmanagement.Booking;
 import com.github.bovvver.bookingmanagement.BookingReadRepository;
 import com.github.bovvver.bookingmanagement.BookingRepository;
+import com.github.bovvver.bookingmanagement.event.DomainEvent;
+import com.github.bovvver.bookingmanagement.outbox.OutboxEvent;
+import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.OfferId;
 import com.github.bovvver.bookingmanagement.vo.UserId;
 import com.github.bovvver.shared.CurrentUser;
@@ -20,7 +23,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +40,10 @@ class BookingCreationServiceTest {
     private BookingRepository bookingRepository;
 
     @Mock
-    private OfferAvailabilityClient offerAvailabilityClient;
+    private OutboxRepository outboxRepository;
+
+    @Mock
+    private BookingEventMapper bookingEventMapper;
 
     @InjectMocks
     private BookingCreationService bookingCreationService;
@@ -45,7 +52,7 @@ class BookingCreationServiceTest {
     private final UUID userId = UUID.randomUUID();
 
     @Test
-    void shouldThrowConflictWhenBookingAlreadyExistsForOfferAndUser() {
+    void processBookingCreation_shouldThrowConflictWhenBookingAlreadyExistsForOfferAndUser() {
         BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(10_000.0));
         when(currentUser.getId()).thenReturn(UserId.of(userId));
         when(bookingReadRepository.existsByOfferIdAndUserId(offerId, userId)).thenReturn(true);
@@ -55,16 +62,15 @@ class BookingCreationServiceTest {
                 .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
                 .isEqualTo(HttpStatus.CONFLICT);
 
-        verify(offerAvailabilityClient, never()).isOfferAvailable(any(), any(), any());
         verify(bookingRepository, never()).save(any());
+        verify(outboxRepository, never()).save(any());
     }
 
     @Test
-    void shouldCheckConflictsUsingCurrentUserId() {
+    void processBookingCreation_shouldUseCurrentUserIdWhenCheckingConflicts() {
         BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(5_000.0));
         when(currentUser.getId()).thenReturn(UserId.of(userId));
         when(bookingReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
-        when(offerAvailabilityClient.isOfferAvailable(any(), any(), any())).thenReturn(true);
 
         bookingCreationService.processBookingCreation(request);
 
@@ -74,45 +80,44 @@ class BookingCreationServiceTest {
     }
 
     @Test
-    void shouldCreateBookingWhenOfferIsAvailable() {
+    void processBookingCreation_shouldCreateBookingAndPersistOutboxEventsWhenNoConflict() {
         BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(5_000.0));
         when(currentUser.getId()).thenReturn(UserId.of(userId));
         when(bookingReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
-        when(offerAvailabilityClient.isOfferAvailable(any(), eq(offerId), eq(userId))).thenReturn(true);
+
+        OutboxEvent outboxEvent = mock(OutboxEvent.class);
+        when(bookingEventMapper.toOutboxEvent(any(DomainEvent.class))).thenReturn(outboxEvent);
 
         bookingCreationService.processBookingCreation(request);
 
-        ArgumentCaptor<UUID> bookingIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(offerAvailabilityClient).isOfferAvailable(bookingIdCaptor.capture(), eq(offerId), eq(userId));
         verify(bookingRepository).save(any(Booking.class));
+        verify(outboxRepository, atLeastOnce()).save(outboxEvent);
     }
 
     @Test
-    void shouldNotCreateBookingWhenOfferIsNotAvailable() {
-        BookOfferRequest request = new BookOfferRequest(offerId, BigDecimal.valueOf(5_000.0));
-        when(currentUser.getId()).thenReturn(UserId.of(userId));
-        when(bookingReadRepository.existsByOfferIdAndUserId(any(), any())).thenReturn(false);
-        when(offerAvailabilityClient.isOfferAvailable(any(), eq(offerId), eq(userId))).thenReturn(false);
-
-        bookingCreationService.processBookingCreation(request);
-
-        verify(offerAvailabilityClient).isOfferAvailable(any(), eq(offerId), eq(userId));
-        verify(bookingRepository, never()).save(any());
-    }
-
-    @Test
-    void shouldCreateBookingWithCorrectData() {
+    void createBooking_shouldCreateBookingWithCorrectDataAndPersistOutboxEvents() {
         UUID bookingId = UUID.randomUUID();
-        UUID acceptedUserId = UUID.randomUUID();
-        UUID eventOfferId = UUID.randomUUID();
+        BigDecimal salaryValue = BigDecimal.valueOf(7_500.0);
+        BookOfferCommand command = new BookOfferCommand(
+                offerId,
+                userId,
+                bookingId,
+                salaryValue
+        );
 
-        bookingCreationService.createBooking(bookingId, acceptedUserId, eventOfferId);
+        OutboxEvent outboxEvent = mock(OutboxEvent.class);
+        when(bookingEventMapper.toOutboxEvent(any(DomainEvent.class))).thenReturn(outboxEvent);
+
+        bookingCreationService.createBooking(command);
 
         ArgumentCaptor<Booking> bookingCaptor = ArgumentCaptor.forClass(Booking.class);
         verify(bookingRepository).save(bookingCaptor.capture());
         Booking savedBooking = bookingCaptor.getValue();
 
-        assertThat(savedBooking.getUserId()).isEqualTo(UserId.of(acceptedUserId));
-        assertThat(savedBooking.getOfferId()).isEqualTo(OfferId.of(eventOfferId));
+        assertThat(savedBooking.getUserId()).isEqualTo(UserId.of(userId));
+        assertThat(savedBooking.getOfferId()).isEqualTo(OfferId.of(offerId));
+        assertThat(savedBooking).isNotNull();
+
+        verify(outboxRepository, atLeastOnce()).save(outboxEvent);
     }
 }
