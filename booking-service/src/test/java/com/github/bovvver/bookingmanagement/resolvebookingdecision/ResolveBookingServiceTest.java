@@ -1,151 +1,230 @@
 package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
 import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingDecisionValidationException;
+import com.github.bovvver.bookingmanagement.outbox.OutboxEvent;
 import com.github.bovvver.bookingmanagement.vo.*;
-import com.github.bovvver.contracts.AssignExecutorCommand;
+import com.github.bovvver.shared.CurrentUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.StreamSupport;
 
-import static com.github.bovvver.bookingmanagement.resolvebookingdecision.ResolveBookingService.OFFER_BOOKING_DECISION_RESPONSE;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ResolveBookingServiceTest {
 
     @Mock
-    private KafkaTemplate<String, AssignExecutorCommand> kafka;
-
-    @Mock
     private BookingRepository bookingRepository;
-
     @Mock
     private BookingReadRepository bookingReadRepository;
+    @Mock
+    private com.github.bovvver.bookingmanagement.outbox.OutboxRepository outboxRepository;
+    @Mock
+    private BookingDecisionMapper bookingDecisionMapper;
+    @Mock
+    private com.github.bovvver.bookingmanagement.negotiation.NegotiationFacade negotiationFacade;
+    @Mock
+    private OfferOwnershipValidator offerOwnershipValidator;
+    @Mock
+    private CurrentUser currentUser;
 
     @InjectMocks
     private ResolveBookingService resolveBookingService;
 
-    private final UUID offerId = UUID.randomUUID();
-    private final UUID bookingId = UUID.randomUUID();
-
     @Test
-    void shouldNotSendAnEventWhenStatusRejected() {
+    void shouldAcceptBookingAndRejectOthers_andPersistAndPublishOutboxEvents() {
+        UUID bookingId = UUID.randomUUID();
+        UUID offerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
-        BookingDecisionMadeEvent command = new BookingDecisionMadeEvent(
+        BookingEntity mainEntity = new BookingEntity(
                 bookingId,
+                userId,
                 offerId,
-                BookingDecisionStatus.REJECTED,
-                null
+                null,
+                BookingStatus.PENDING,
+                BigDecimal.valueOf(1000),
+                LocalDateTime.now(),
+                LocalDateTime.now()
         );
-        BookingEntity bookingEntity = getTestBookingEntity();
-        when(bookingReadRepository.findById(command.bookingId()))
-                .thenReturn(bookingEntity);
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(mainEntity));
 
-        resolveBookingService.resolveBooking(command);
+        UserId currentUserId = new UserId(userId);
+        when(currentUser.getId()).thenReturn(currentUserId);
 
-        verify(bookingRepository).save(any(Booking.class));
-        verifyNoInteractions(kafka);
-    }
-
-    @Test
-    void shouldSendAnEventWhenStatusAccepted() {
-
-        BookingDecisionMadeEvent command = new BookingDecisionMadeEvent(
-                bookingId,
+        BookingEntity otherEntity = new BookingEntity(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
                 offerId,
+                null,
+                BookingStatus.PENDING,
+                BigDecimal.valueOf(900),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        when(bookingReadRepository.findAllByOfferIdAndIdIsNot(offerId, bookingId)).thenReturn(List.of(otherEntity));
+
+        BookingDecisionRequest request = new BookingDecisionRequest(
                 BookingDecisionStatus.ACCEPTED,
                 null
         );
-        BookingEntity bookingEntity = getTestBookingEntity();
-        when(bookingReadRepository.findById(command.bookingId()))
-                .thenReturn(bookingEntity);
 
-        resolveBookingService.resolveBooking(command);
+        doNothing().when(offerOwnershipValidator).validate(userId, offerId);
+
+        OutboxEvent outboxEvent = OutboxEvent.create(
+                offerId,
+                "Booking",
+                "BookingAccepted",
+                new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode(),
+                LocalDateTime.now()
+        );
+        when(bookingDecisionMapper.toOutboxEvent(any())).thenReturn(outboxEvent);
+
+        resolveBookingService.processBookingDecision(bookingId, request);
+
+        verify(offerOwnershipValidator).validate(userId, offerId);
+        verify(bookingRepository).saveAll(anyIterable());
+        verify(outboxRepository, atLeastOnce()).save(any(OutboxEvent.class));
+        verify(negotiationFacade, never()).beginNegotiation(any(), any());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldBeginNegotiation_whenStatusIsNegotiate() {
+        UUID bookingId = UUID.randomUUID();
+        UUID offerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        BookingEntity entity = new BookingEntity(
+                bookingId,
+                userId,
+                offerId,
+                null,
+                BookingStatus.PENDING,
+                BigDecimal.valueOf(1000),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
+        when(currentUser.getId()).thenReturn(new UserId(userId));
+        doNothing().when(offerOwnershipValidator).validate(userId, offerId);
+
+        BigDecimal salary = BigDecimal.valueOf(1200);
+        BookingDecisionRequest request = new BookingDecisionRequest(
+            BookingDecisionStatus.NEGOTIATE,
+            salary
+        );
+
+        resolveBookingService.processBookingDecision(bookingId, request);
+
+        verify(negotiationFacade).beginNegotiation(bookingId, salary);
+        verifyNoInteractions(outboxRepository);
+        verify(bookingRepository, never()).save(any());
+        verify(bookingRepository, never()).saveAll(anyIterable());
+    }
+
+    @Test
+    void shouldRejectBooking_whenStatusIsRejected() {
+        UUID bookingId = UUID.randomUUID();
+        UUID offerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        BookingEntity entity = new BookingEntity(
+            bookingId,
+            userId,
+            offerId,
+            null,
+            BookingStatus.PENDING,
+            BigDecimal.valueOf(1000),
+            LocalDateTime.now(),
+            LocalDateTime.now()
+        );
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
+        when(currentUser.getId()).thenReturn(new UserId(userId));
+        doNothing().when(offerOwnershipValidator).validate(userId, offerId);
+
+        BookingDecisionRequest request = new BookingDecisionRequest(
+            BookingDecisionStatus.REJECTED,
+            null
+        );
+
+        resolveBookingService.processBookingDecision(bookingId, request);
 
         verify(bookingRepository).save(any(Booking.class));
-        verify(kafka).send(
-                eq(OFFER_BOOKING_DECISION_RESPONSE),
-                eq(bookingId.toString()),
-                argThat(event ->
-                        event.userId().equals(bookingEntity.getUserId()) &&
-                                event.offerId().equals(bookingEntity.getOfferId())
-                )
-        );
+        verifyNoInteractions(outboxRepository);
+        verify(negotiationFacade, never()).beginNegotiation(any(), any());
     }
 
     @Test
-    void shouldRejectAllPendingBookingsForOffer() {
-        UUID offerId = UUID.randomUUID();
-        OtherBookingsRejectedEvent event = new OtherBookingsRejectedEvent(offerId);
-
-        List<BookingEntity> pendingBookings = List.of(
-                getTestBookingEntity(),
-                getTestBookingEntity()
+    void shouldThrowWhenSalaryMissingForNegotiate() {
+        UUID bookingId = UUID.randomUUID();
+        BookingDecisionRequest request = new BookingDecisionRequest(
+            BookingDecisionStatus.NEGOTIATE,
+            null
         );
 
-        when(bookingReadRepository.findAllByOfferIdAndStatusNotIn(
-                offerId,
-                List.of(BookingStatus.ACCEPTED, BookingStatus.REJECTED)
-        )).thenReturn(pendingBookings);
+        assertThrows(BookingDecisionValidationException.class,
+            () -> resolveBookingService.processBookingDecision(bookingId, request));
 
-        resolveBookingService.rejectOtherBookings(event);
-
-        verify(bookingRepository).saveAll(argThat(bookings -> {
-            List<Booking> bookingList = StreamSupport.stream(bookings.spliterator(), false)
-                    .toList();
-            return bookingList.size() == 2 &&
-                    bookingList.stream().allMatch(b -> b.getStatus().equals(BookingStatus.REJECTED));
-        }));
+        verifyNoInteractions(bookingReadRepository, offerOwnershipValidator, negotiationFacade, bookingRepository, outboxRepository);
     }
 
     @Test
-    void shouldNotRejectAlreadyAcceptedOrRejectedBookings() {
-        UUID offerId = UUID.randomUUID();
-        OtherBookingsRejectedEvent event = new OtherBookingsRejectedEvent(offerId);
+    void shouldThrowWhenSalaryProvidedForNonNegotiate() {
+        UUID bookingId = UUID.randomUUID();
+        BookingDecisionRequest request = new BookingDecisionRequest(
+            BookingDecisionStatus.ACCEPTED,
+            BigDecimal.TEN
+        );
 
-        when(bookingReadRepository.findAllByOfferIdAndStatusNotIn(
-                offerId,
-                List.of(BookingStatus.ACCEPTED, BookingStatus.REJECTED)
-        )).thenReturn(List.of());
+        assertThrows(BookingDecisionValidationException.class,
+            () -> resolveBookingService.processBookingDecision(bookingId, request));
 
-        resolveBookingService.rejectOtherBookings(event);
-
-        verify(bookingRepository).saveAll(argThat(bookings ->
-                !bookings.iterator().hasNext()
-        ));
+        verifyNoInteractions(bookingReadRepository, offerOwnershipValidator, negotiationFacade, bookingRepository, outboxRepository);
     }
 
     @Test
-    void shouldHandleEmptyBookingsList() {
+    void shouldPropagateWhenOfferOwnershipInvalid() {
+        UUID bookingId = UUID.randomUUID();
         UUID offerId = UUID.randomUUID();
-        OtherBookingsRejectedEvent event = new OtherBookingsRejectedEvent(offerId);
+        UUID userId = UUID.randomUUID();
 
-        when(bookingReadRepository.findAllByOfferIdAndStatusNotIn(
-                offerId,
-                List.of(BookingStatus.ACCEPTED, BookingStatus.REJECTED)
-        )).thenReturn(List.of());
-
-        resolveBookingService.rejectOtherBookings(event);
-
-        verify(bookingRepository).saveAll(argThat(bookings ->
-                !bookings.iterator().hasNext()
-        ));
-    }
-
-    private BookingEntity getTestBookingEntity() {
-        Booking booking = Booking.create(
-                UserId.of(UUID.randomUUID()),
-                OfferId.of(offerId),
-                Salary.of(60000.0)
+        BookingEntity entity = new BookingEntity(
+            bookingId,
+            userId,
+            offerId,
+            null,
+            BookingStatus.PENDING,
+            BigDecimal.valueOf(1000),
+            LocalDateTime.now(),
+            LocalDateTime.now()
         );
-        booking.beginNegotiation(Salary.of(65000.0));
-        return BookingMapper.toEntity(booking);
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
+        when(currentUser.getId()).thenReturn(new UserId(userId));
+
+        doThrow(new IllegalStateException("Current user is not the owner of the offer"))
+            .when(offerOwnershipValidator).validate(userId, offerId);
+
+        BookingDecisionRequest request = new BookingDecisionRequest(
+            BookingDecisionStatus.ACCEPTED,
+            null
+        );
+
+        assertThrows(IllegalStateException.class,
+            () -> resolveBookingService.processBookingDecision(bookingId, request));
+
+        verify(bookingRepository, never()).save(any());
+        verify(bookingRepository, never()).saveAll(anyIterable());
+        verifyNoInteractions(outboxRepository, negotiationFacade);
     }
 }

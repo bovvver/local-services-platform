@@ -1,6 +1,7 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
 import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingNotFoundException;
 import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.Salary;
 import jakarta.transaction.Transactional;
@@ -23,7 +24,8 @@ class ResolveNegotiationDecisionService {
     @Transactional
     void beginNegotiation(UUID bookingId, BigDecimal salary) {
 
-        BookingEntity bookingEntity = bookingReadRepository.findById(bookingId);
+        BookingEntity bookingEntity = bookingReadRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
         Booking booking = BookingMapper.toDomain(bookingEntity);
 
         booking.beginNegotiation(new Salary(salary));
