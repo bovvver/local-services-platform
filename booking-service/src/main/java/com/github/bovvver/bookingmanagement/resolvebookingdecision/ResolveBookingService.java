@@ -1,6 +1,8 @@
 package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
 import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingDecisionValidationException;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingNotFoundException;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationFacade;
 import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.shared.CurrentUser;
@@ -29,7 +31,10 @@ class ResolveBookingService {
             @Valid BookingDecisionRequest request
     ) {
         validateRequest(request);
-        Booking booking = BookingMapper.toDomain(bookingReadRepository.findById(bookingId));
+        BookingEntity entity = bookingReadRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+
+        Booking booking = BookingMapper.toDomain(entity);
         offerOwnershipValidator.validate(currentUser.getId().value(), booking.getOfferId().value());
         handleBookingDecision(booking, request);
     }
@@ -68,10 +73,10 @@ class ResolveBookingService {
 
     private void validateRequest(@Valid BookingDecisionRequest request) {
         if (request.status() == BookingDecisionStatus.NEGOTIATE && request.salary() == null) {
-            throw new IllegalArgumentException("Salary must be provided when status is NEGOTIATE");
+            throw new BookingDecisionValidationException("Salary must be provided when status is NEGOTIATE");
         }
         if (request.status() != BookingDecisionStatus.NEGOTIATE && request.salary() != null) {
-            throw new IllegalArgumentException("Salary can't be provided when status is not NEGOTIATE");
+            throw new BookingDecisionValidationException("Salary can't be provided when status is not NEGOTIATE");
         }
     }
 }

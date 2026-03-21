@@ -13,7 +13,7 @@ class OfferOwnershipValidator {
 
     void validate(UUID userId, UUID offerId) {
         if (!offerOwnershipClient.isUserAnOwner(userId, offerId)) {
-            throw new IllegalStateException("Current user is not the owner of the offer");
+            throw new OfferOwnershipException("Current user is not the owner of the offer");
         }
     }
 }

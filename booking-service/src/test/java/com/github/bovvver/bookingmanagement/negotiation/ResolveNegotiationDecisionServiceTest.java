@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +59,7 @@ class ResolveNegotiationDecisionServiceTest {
 
     @Test
     void beginNegotiation_shouldBeginNegotiationAndPersistBookingAndOutboxEvents() {
-        when(bookingReadRepository.findById(bookingId)).thenReturn(bookingEntity);
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.ofNullable(bookingEntity));
 
         Salary proposedSalary = new Salary(BigDecimal.valueOf(1000));
 
@@ -86,7 +87,7 @@ class ResolveNegotiationDecisionServiceTest {
 
     @Test
     void beginNegotiation_shouldNotSaveOutboxEventsWhenMapperReturnsNull() {
-        when(bookingReadRepository.findById(bookingId)).thenReturn(bookingEntity);
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.ofNullable(bookingEntity));
 
         Salary proposedSalary = new Salary(BigDecimal.valueOf(1000));
 

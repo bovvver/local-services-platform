@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class ResolveBookingREST {
 
-    private static final String RESOLVE_BOOKING_ENDPOINT = "/bookings/{bookingId}/decision";
+    static final String RESOLVE_BOOKING_ENDPOINT = "/bookings/{bookingId}/decision";
 
     private final ResolveBookingService resolveBookingService;
 

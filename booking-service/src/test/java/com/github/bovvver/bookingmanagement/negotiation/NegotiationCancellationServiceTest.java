@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +53,7 @@ class NegotiationCancellationServiceTest {
 
     @Test
     void cancelNegotiation_shouldCancelNegotiationAndPersistBooking() {
-        when(bookingReadRepository.findById(bookingId)).thenReturn(bookingEntityInNegotiation);
+        when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.ofNullable(bookingEntityInNegotiation));
 
         Booking booking = BookingMapper.toDomain(bookingEntityInNegotiation);
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);

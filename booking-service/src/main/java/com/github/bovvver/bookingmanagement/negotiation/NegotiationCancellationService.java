@@ -1,9 +1,7 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
-import com.github.bovvver.bookingmanagement.Booking;
-import com.github.bovvver.bookingmanagement.BookingMapper;
-import com.github.bovvver.bookingmanagement.BookingReadRepository;
-import com.github.bovvver.bookingmanagement.BookingRepository;
+import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +17,10 @@ class NegotiationCancellationService {
 
     @Transactional
     void cancelNegotiation(UUID bookingId) {
-        Booking booking = BookingMapper.toDomain(bookingReadRepository.findById(bookingId));
+        BookingEntity bookingEntity = bookingReadRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+
+        Booking booking = BookingMapper.toDomain(bookingEntity);
         booking.cancelNegotiation();
         bookingWriteRepository.save(booking);
     }
