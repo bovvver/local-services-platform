@@ -15,12 +15,14 @@ class NegotiationTest {
     @Test
     void shouldCreateNegotiationWithDefaultValues() {
         BookingId bookingId = BookingId.of(UUID.randomUUID());
+        UserId offerAuthorId = UserId.of(UUID.randomUUID());
 
-        Negotiation negotiation = Negotiation.create(bookingId);
+        Negotiation negotiation = Negotiation.create(bookingId, offerAuthorId);
 
         assertThat(negotiation).isNotNull();
         assertThat(negotiation.getId()).isNotNull();
         assertThat(negotiation.getBookingId()).isEqualTo(bookingId);
+        assertThat(negotiation.getOfferAuthorId()).isEqualTo(offerAuthorId);
         assertThat(negotiation.getPositions()).isEmpty();
         assertThat(negotiation.getStatus()).isEqualTo(NegotiationStatus.ACTIVE);
         assertThat(negotiation.getStartedAt()).isNotNull();
@@ -30,7 +32,8 @@ class NegotiationTest {
     @Test
     void shouldAddPositionWhenNegotiationIsActive() {
         BookingId bookingId = BookingId.of(UUID.randomUUID());
-        Negotiation negotiation = Negotiation.create(bookingId);
+        UserId offerAuthorId = UserId.of(UUID.randomUUID());
+        Negotiation negotiation = Negotiation.create(bookingId, offerAuthorId);
 
         Salary proposedSalary = Salary.of(50000.0);
         negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
@@ -46,7 +49,8 @@ class NegotiationTest {
     @Test
     void shouldReturnUnmodifiablePositionsList() {
         BookingId bookingId = BookingId.of(UUID.randomUUID());
-        Negotiation negotiation = Negotiation.create(bookingId);
+        UserId offerAuthorId = UserId.of(UUID.randomUUID());
+        Negotiation negotiation = Negotiation.create(bookingId, offerAuthorId);
 
         negotiation.addPosition(Salary.of(50000.0), NegotiationParty.AUTHOR);
         List<NegotiationPosition> positions = negotiation.getPositions();
@@ -59,11 +63,13 @@ class NegotiationTest {
     @Test
     void shouldThrowExceptionWhenAddingPositionToNonActiveNegotiation() {
         BookingId bookingId = BookingId.of(UUID.randomUUID());
-        Negotiation negotiation = Negotiation.create(bookingId);
+        UserId offerAuthorId = UserId.of(UUID.randomUUID());
+        Negotiation negotiation = Negotiation.create(bookingId, offerAuthorId);
 
         Negotiation nonActiveNegotiation = new Negotiation(
                 negotiation.getId(),
                 negotiation.getBookingId(),
+                negotiation.getOfferAuthorId(),
                 negotiation.getPositions(),
                 NegotiationStatus.REJECTED,
                 negotiation.getStartedAt(),

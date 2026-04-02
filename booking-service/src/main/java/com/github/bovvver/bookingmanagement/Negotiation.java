@@ -10,6 +10,7 @@ public class Negotiation {
 
     private final NegotiationId id;
     private final BookingId bookingId;
+    private final UserId offerAuthorId;
     private final List<NegotiationPosition> positions;
     private NegotiationStatus status;
     private final LocalDateTime startedAt;
@@ -17,12 +18,14 @@ public class Negotiation {
 
     Negotiation(final NegotiationId id,
                 final BookingId bookingId,
+                final UserId offerAuthorId,
                 final List<NegotiationPosition> positions,
                 final NegotiationStatus status,
                 final LocalDateTime startedAt,
                 final LocalDateTime lastUpdatedAt) {
         this.id = id;
         this.bookingId = bookingId;
+        this.offerAuthorId = offerAuthorId;
         this.positions = positions;
         this.status = status;
         this.startedAt = startedAt;
@@ -31,14 +34,16 @@ public class Negotiation {
 
     Negotiation(final NegotiationId id,
                 final BookingId bookingId,
+                final UserId offerAuthorId,
                 final List<NegotiationPosition> positions) {
-        this(id, bookingId, positions, NegotiationStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        this(id, bookingId, offerAuthorId, positions, NegotiationStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
     }
 
     static Negotiation create(
-            final BookingId bookingId
+            final BookingId bookingId,
+            final UserId offerAuthorId
     ) {
-        return new Negotiation(NegotiationId.generate(), bookingId, new ArrayList<>());
+        return new Negotiation(NegotiationId.generate(), bookingId, offerAuthorId, new ArrayList<>());
     }
 
     void addPosition(Salary proposedSalary, final NegotiationParty proposedBy) {
@@ -55,6 +60,10 @@ public class Negotiation {
 
     BookingId getBookingId() {
         return bookingId;
+    }
+
+    UserId getOfferAuthorId() {
+        return offerAuthorId;
     }
 
     List<NegotiationPosition> getPositions() {

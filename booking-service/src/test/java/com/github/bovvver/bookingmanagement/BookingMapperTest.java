@@ -15,13 +15,13 @@ class BookingMapperTest {
 
     @Test
     void shouldMapBookingToEntityCorrectly() {
-
+        UserId offerAuthorId = UserId.of(UUID.randomUUID());
         Booking booking = Booking.create(
                 UserId.of(UUID.randomUUID()),
                 OfferId.of(UUID.randomUUID()),
                 Salary.of(50000.0)
         );
-        booking.beginNegotiation(Salary.of(55000.0));
+        booking.beginNegotiation(Salary.of(55000.0), offerAuthorId);
 
         BookingEntity entity = BookingMapper.toEntity(booking);
 
@@ -31,6 +31,7 @@ class BookingMapperTest {
         assertThat(entity.getOfferId()).isEqualTo(booking.getOfferId().value());
         assertThat(entity.getNegotiation()).isNotNull();
         assertThat(entity.getNegotiation().getId()).isEqualTo(booking.getNegotiation().getId().value());
+        assertThat(entity.getNegotiation().getOfferAuthorId()).isEqualTo(booking.getNegotiation().getOfferAuthorId().value());
         assertThat(entity.getNegotiation().getPositions()).hasSize(1);
         assertThat(entity.getNegotiation().getPositions().getFirst().getProposedSalary()).isEqualTo(BigDecimal.valueOf(55000.0));
         assertThat(entity.getStatus()).isEqualTo(booking.getStatus());
@@ -43,9 +44,11 @@ class BookingMapperTest {
         UUID bookingId = UUID.randomUUID();
         UUID negotiationId = UUID.randomUUID();
         UUID positionId = UUID.randomUUID();
+        UUID offerAuthorId = UUID.randomUUID();
 
         NegotiationEntity negotiationEntity = new NegotiationEntity();
         negotiationEntity.setId(negotiationId);
+        negotiationEntity.setOfferAuthorId(offerAuthorId);
         negotiationEntity.setStatus(NegotiationStatus.ACTIVE);
         negotiationEntity.setStartedAt(LocalDateTime.now());
         negotiationEntity.setLastUpdatedAt(LocalDateTime.now());
@@ -80,6 +83,7 @@ class BookingMapperTest {
         assertThat(booking.getOfferId().value()).isEqualTo(entity.getOfferId());
         assertThat(booking.getNegotiation()).isNotNull();
         assertThat(booking.getNegotiation().getId().value()).isEqualTo(negotiationId);
+        assertThat(booking.getNegotiation().getOfferAuthorId().value()).isEqualTo(offerAuthorId);
         assertThat(booking.getNegotiation().getPositions()).hasSize(1);
         assertThat(booking.getNegotiation().getPositions().getFirst().getProposedSalary().value())
                 .isEqualTo(BigDecimal.valueOf(55000));
@@ -102,8 +106,10 @@ class BookingMapperTest {
         );
 
         UUID negotiationId = UUID.randomUUID();
+        UUID offerAuthorId = UUID.randomUUID();
         NegotiationEntity negotiationEntity = new NegotiationEntity();
         negotiationEntity.setId(negotiationId);
+        negotiationEntity.setOfferAuthorId(offerAuthorId);
         negotiationEntity.setStatus(NegotiationStatus.ACTIVE);
         negotiationEntity.setStartedAt(LocalDateTime.now());
         negotiationEntity.setLastUpdatedAt(LocalDateTime.now());
@@ -132,6 +138,7 @@ class BookingMapperTest {
         assertThat(bookings.getFirst().getNegotiation()).isNull();
         assertThat(bookings.get(1).getNegotiation()).isNotNull();
         assertThat(bookings.get(1).getNegotiation().getId().value()).isEqualTo(negotiationId);
+        assertThat(bookings.get(1).getNegotiation().getOfferAuthorId().value()).isEqualTo(offerAuthorId);
     }
 
     @Test
@@ -153,9 +160,11 @@ class BookingMapperTest {
                 Salary.of(55000.0),
                 NegotiationParty.AUTHOR
         );
+        UserId offerAuthorId = new UserId(UUID.randomUUID());
         Negotiation negotiation = new Negotiation(
                 negotiationId,
                 bookingId2,
+                offerAuthorId,
                 List.of(position)
         );
 

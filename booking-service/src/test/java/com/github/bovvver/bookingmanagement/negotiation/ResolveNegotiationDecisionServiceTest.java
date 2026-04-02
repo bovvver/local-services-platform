@@ -62,13 +62,14 @@ class ResolveNegotiationDecisionServiceTest {
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.ofNullable(bookingEntity));
 
         Salary proposedSalary = new Salary(BigDecimal.valueOf(1000));
+        UUID offerAuthorId = UUID.randomUUID();
 
         Booking bookingFromMapper = BookingMapper.toDomain(bookingEntity);
         assertThat(bookingFromMapper.getStatus()).isEqualTo(BookingStatus.PENDING);
 
         when(negotiationEventMapper.toOutboxEvent(any(DomainEvent.class))).thenReturn(mock(OutboxEvent.class));
 
-        resolveNegotiationDecisionService.beginNegotiation(bookingId, proposedSalary.value());
+        resolveNegotiationDecisionService.beginNegotiation(bookingId, offerAuthorId, proposedSalary.value());
         verify(bookingReadRepository).findById(bookingId);
         verify(bookingRepository).save(any(Booking.class));
         verify(negotiationEventMapper, atLeastOnce()).toOutboxEvent(any(DomainEvent.class));
@@ -79,7 +80,9 @@ class ResolveNegotiationDecisionServiceTest {
     void beginNegotiation_shouldPropagateExceptionWhenBookingNotFound() {
         when(bookingReadRepository.findById(bookingId)).thenReturn(null);
 
-        assertThatThrownBy(() -> resolveNegotiationDecisionService.beginNegotiation(bookingId, BigDecimal.valueOf(1000)))
+        UUID offerAuthorId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> resolveNegotiationDecisionService.beginNegotiation(bookingId, offerAuthorId, BigDecimal.valueOf(1000)))
                 .isInstanceOf(NullPointerException.class);
         verify(bookingRepository, never()).save(any());
         verify(outboxRepository, never()).save(any());
@@ -90,10 +93,11 @@ class ResolveNegotiationDecisionServiceTest {
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.ofNullable(bookingEntity));
 
         Salary proposedSalary = new Salary(BigDecimal.valueOf(1000));
+        UUID offerAuthorId = UUID.randomUUID();
 
         when(negotiationEventMapper.toOutboxEvent(any(DomainEvent.class))).thenReturn(null);
 
-        resolveNegotiationDecisionService.beginNegotiation(bookingId, proposedSalary.value());
+        resolveNegotiationDecisionService.beginNegotiation(bookingId, offerAuthorId, proposedSalary.value());
         verify(bookingRepository).save(any(Booking.class));
         verify(outboxRepository, never()).save(any());
     }

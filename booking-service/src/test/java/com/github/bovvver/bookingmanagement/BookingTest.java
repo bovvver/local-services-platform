@@ -52,7 +52,7 @@ class BookingTest {
         Salary salary = Salary.of(50000.0);
         Booking booking = Booking.create(userId, offerId, salary);
 
-        booking.beginNegotiation(salary);
+        booking.beginNegotiation(salary, userId);
 
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);
         assertThat(booking.getNegotiation()).isNotNull();
@@ -66,7 +66,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
-        assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(salary));
+        assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(salary, userId));
     }
 
     @Test
@@ -77,7 +77,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
-        assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(null));
+        assertThrows(IllegalStateException.class, () -> booking.beginNegotiation(null, userId));
     }
 
     @Test
@@ -133,7 +133,7 @@ class BookingTest {
         Salary salary = Salary.of(50000.0);
         Booking booking = Booking.create(userId, offerId, salary);
 
-        booking.beginNegotiation(salary);
+        booking.beginNegotiation(salary, userId);
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);
         assertThat(booking.getNegotiation()).isNotNull();
 
@@ -152,7 +152,7 @@ class BookingTest {
 
         assertThrows(IllegalStateException.class, booking::cancelNegotiation);
 
-        booking.beginNegotiation(salary);
+        booking.beginNegotiation(salary, userId);
         booking.accept();
 
         assertThrows(IllegalStateException.class, booking::cancelNegotiation);

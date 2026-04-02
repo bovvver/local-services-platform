@@ -12,7 +12,7 @@ public class NegotiationFacade {
 
     private final ResolveNegotiationDecisionService resolveNegotiationDecisionService;
 
-    public void beginNegotiation(UUID bookingId, BigDecimal salary) {
-        resolveNegotiationDecisionService.beginNegotiation(bookingId, salary);
+    public void beginNegotiation(UUID bookingId, UUID offerAuthorId, BigDecimal salary) {
+        resolveNegotiationDecisionService.beginNegotiation(bookingId, offerAuthorId, salary);
     }
 }

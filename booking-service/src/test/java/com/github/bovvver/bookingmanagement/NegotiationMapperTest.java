@@ -14,7 +14,8 @@ class NegotiationMapperTest {
     @Test
     void shouldMapNegotiationToEntityCorrectly() {
         UUID bookingId = UUID.randomUUID();
-        Negotiation negotiation = Negotiation.create(BookingId.of(bookingId));
+        UUID offerAuthorId = UUID.randomUUID();
+        Negotiation negotiation = Negotiation.create(BookingId.of(bookingId), UserId.of(offerAuthorId));
         negotiation.addPosition(Salary.of(10_000.0), NegotiationParty.AUTHOR);
 
         BookingEntity bookingEntity = new BookingEntity(
@@ -27,6 +28,7 @@ class NegotiationMapperTest {
         assertThat(entity).isNotNull();
         assertThat(entity.getId()).isEqualTo(negotiation.getId().value());
         assertThat(entity.getBooking().getId()).isEqualTo(negotiation.getBookingId().value());
+        assertThat(entity.getOfferAuthorId()).isEqualTo(negotiation.getOfferAuthorId().value());
         assertThat(entity.getStatus()).isEqualTo(negotiation.getStatus());
         assertThat(entity.getStartedAt()).isEqualTo(negotiation.getStartedAt());
         assertThat(entity.getLastUpdatedAt()).isEqualTo(negotiation.getLastUpdatedAt());
@@ -39,9 +41,11 @@ class NegotiationMapperTest {
     void shouldMapEntityToNegotiationCorrectly() {
         UUID bookingId = UUID.randomUUID();
         UUID negotiationId = UUID.randomUUID();
+        UUID offerAuthorId = UUID.randomUUID();
 
         NegotiationEntity negotiationEntity = new NegotiationEntity();
         negotiationEntity.setId(negotiationId);
+        negotiationEntity.setOfferAuthorId(offerAuthorId);
         negotiationEntity.setStatus(NegotiationStatus.ACTIVE);
         negotiationEntity.setStartedAt(LocalDateTime.now().minusHours(1));
         negotiationEntity.setLastUpdatedAt(LocalDateTime.now());
@@ -60,6 +64,7 @@ class NegotiationMapperTest {
         assertThat(negotiation).isNotNull();
         assertThat(negotiation.getId().value()).isEqualTo(negotiationId);
         assertThat(negotiation.getBookingId().value()).isEqualTo(bookingId);
+        assertThat(negotiation.getOfferAuthorId().value()).isEqualTo(offerAuthorId);
         assertThat(negotiation.getStatus()).isEqualTo(negotiationEntity.getStatus());
         assertThat(negotiation.getStartedAt()).isEqualTo(negotiationEntity.getStartedAt());
         assertThat(negotiation.getLastUpdatedAt()).isEqualTo(negotiationEntity.getLastUpdatedAt());
