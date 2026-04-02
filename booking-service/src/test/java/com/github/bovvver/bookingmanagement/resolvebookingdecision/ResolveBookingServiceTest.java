@@ -95,7 +95,7 @@ class ResolveBookingServiceTest {
         verify(offerOwnershipValidator).validate(userId, offerId);
         verify(bookingRepository).saveAll(anyIterable());
         verify(outboxRepository, atLeastOnce()).save(any(OutboxEvent.class));
-        verify(negotiationFacade, never()).beginNegotiation(any(), any());
+        verify(negotiationFacade, never()).beginNegotiation(any(), any(), any());
         verify(bookingRepository, never()).save(any());
     }
 
@@ -127,7 +127,7 @@ class ResolveBookingServiceTest {
 
         resolveBookingService.processBookingDecision(bookingId, request);
 
-        verify(negotiationFacade).beginNegotiation(bookingId, salary);
+        verify(negotiationFacade).beginNegotiation(bookingId, userId, salary);
         verifyNoInteractions(outboxRepository);
         verify(bookingRepository, never()).save(any());
         verify(bookingRepository, never()).saveAll(anyIterable());
@@ -162,7 +162,7 @@ class ResolveBookingServiceTest {
 
         verify(bookingRepository).save(any(Booking.class));
         verifyNoInteractions(outboxRepository);
-        verify(negotiationFacade, never()).beginNegotiation(any(), any());
+        verify(negotiationFacade, never()).beginNegotiation(any(), any(), any());
     }
 
     @Test

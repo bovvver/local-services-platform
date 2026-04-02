@@ -4,6 +4,7 @@ import com.github.bovvver.bookingmanagement.*;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingNotFoundException;
 import com.github.bovvver.bookingmanagement.outbox.OutboxRepository;
 import com.github.bovvver.bookingmanagement.vo.Salary;
+import com.github.bovvver.bookingmanagement.vo.UserId;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,13 @@ class ResolveNegotiationDecisionService {
     private final NegotiationEventMapper negotiationEventMapper;
 
     @Transactional
-    void beginNegotiation(UUID bookingId, BigDecimal salary) {
+    void beginNegotiation(UUID bookingId, UUID offerAuthorId, BigDecimal salary) {
 
         BookingEntity bookingEntity = bookingReadRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
         Booking booking = BookingMapper.toDomain(bookingEntity);
 
-        booking.beginNegotiation(new Salary(salary));
+        booking.beginNegotiation(new Salary(salary), UserId.of(offerAuthorId));
         bookingRepository.save(booking);
 
         booking.pullDomainEvents().stream()

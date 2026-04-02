@@ -108,7 +108,7 @@ public class Booking {
         return create(BookingId.of(UUID.randomUUID()), userId, offerId, proposedSalary);
     }
 
-    public void beginNegotiation(Salary proposedSalary) {
+    public void beginNegotiation(Salary proposedSalary, UserId offerAuthorId) {
         if (this.status != BookingStatus.PENDING) {
             throw new IllegalStateException(
                     "Cannot begin negotiation for booking with status %s".formatted(this.status)
@@ -116,7 +116,7 @@ public class Booking {
         }
         updateStatus(BookingStatus.IN_NEGOTIATION);
 
-        Negotiation negotiation = Negotiation.create(this.id);
+        Negotiation negotiation = Negotiation.create(this.id, offerAuthorId);
         negotiation.addPosition(proposedSalary, NegotiationParty.AUTHOR);
 
         this.negotiation = negotiation;

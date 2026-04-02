@@ -2,6 +2,7 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.vo.BookingId;
 import com.github.bovvver.bookingmanagement.vo.NegotiationId;
+import com.github.bovvver.bookingmanagement.vo.UserId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ class NegotiationMapper {
         NegotiationEntity entity = new NegotiationEntity();
         entity.setId(negotiation.getId().value());
         entity.setBooking(bookingEntity);
+        entity.setOfferAuthorId(negotiation.getOfferAuthorId() != null ? negotiation.getOfferAuthorId().value() : null);
         entity.setStatus(negotiation.getStatus());
         entity.setStartedAt(negotiation.getStartedAt());
         entity.setLastUpdatedAt(negotiation.getLastUpdatedAt());
@@ -41,6 +43,7 @@ class NegotiationMapper {
         return new Negotiation(
                 new NegotiationId(entity.getId()),
                 BookingId.of(bookingId),
+                UserId.of(entity.getOfferAuthorId()),
                 entity.getPositions().stream()
                         .map(NegotiationPositionMapper::toDomain)
                         .toList(),

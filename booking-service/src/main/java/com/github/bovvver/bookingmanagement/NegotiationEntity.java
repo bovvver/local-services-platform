@@ -30,6 +30,9 @@ class NegotiationEntity {
     @JoinColumn(name = "booking_id", referencedColumnName = "id", unique = true)
     private BookingEntity booking;
 
+    @Column(name="offer_author_id", nullable = false)
+    private UUID offerAuthorId;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "negotiation", orphanRemoval = true)
     private List<NegotiationPositionEntity> positions;
 

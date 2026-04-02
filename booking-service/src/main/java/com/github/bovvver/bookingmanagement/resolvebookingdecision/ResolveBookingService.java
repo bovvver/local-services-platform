@@ -43,7 +43,7 @@ class ResolveBookingService {
 
         BookingDecisionStatus status = request.status();
         if (status == BookingDecisionStatus.NEGOTIATE) {
-            negotiationFacade.beginNegotiation(booking.getId().value(), request.salary());
+            negotiationFacade.beginNegotiation(booking.getId().value(), currentUser.getId().value(), request.salary());
         } else if (status == BookingDecisionStatus.ACCEPTED) {
             acceptBooking(booking);
         } else {
