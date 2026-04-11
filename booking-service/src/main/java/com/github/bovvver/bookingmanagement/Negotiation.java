@@ -39,7 +39,7 @@ public class Negotiation {
         this(id, bookingId, offerAuthorId, positions, NegotiationStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
     }
 
-    static Negotiation create(
+     static Negotiation create(
             final BookingId bookingId,
             final UserId offerAuthorId
     ) {

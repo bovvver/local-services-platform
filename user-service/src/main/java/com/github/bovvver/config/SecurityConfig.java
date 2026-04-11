@@ -21,7 +21,7 @@ class SecurityConfig {
     private String issuerUri;
 
     private static final String ACTUATOR_PATH = "/actuator/health";
-    static final String KEYCLOAK_AUTH_PATH = "/user-service/keycloak/auth/";
+    static final String KEYCLOAK_AUTH_PATH = "/keycloak/auth/";
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, KeycloakApiKeyFilter keycloakApiKeyFilter) throws Exception {

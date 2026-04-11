@@ -21,12 +21,12 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 @NoArgsConstructor
-class NegotiationEntity {
+public class NegotiationEntity {
 
     @Id
     private UUID id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "booking_id", referencedColumnName = "id", unique = true)
     private BookingEntity booking;
 

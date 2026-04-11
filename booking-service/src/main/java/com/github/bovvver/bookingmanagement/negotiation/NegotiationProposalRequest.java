@@ -1,11 +1,10 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
-import com.github.bovvver.bookingmanagement.vo.NegotiationParty;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 
 record NegotiationProposalRequest(
-        NegotiationParty proposedBy,
-        BigDecimal proposedSalary
+        @PositiveOrZero BigDecimal proposedSalary
 ) {
 }

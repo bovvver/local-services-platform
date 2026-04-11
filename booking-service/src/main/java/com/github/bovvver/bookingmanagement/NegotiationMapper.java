@@ -7,6 +7,7 @@ import com.github.bovvver.bookingmanagement.vo.UserId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 class NegotiationMapper {
 
@@ -46,7 +47,7 @@ class NegotiationMapper {
                 UserId.of(entity.getOfferAuthorId()),
                 entity.getPositions().stream()
                         .map(NegotiationPositionMapper::toDomain)
-                        .toList(),
+                        .collect(Collectors.toCollection(ArrayList::new)),
                 entity.getStatus(),
                 entity.getStartedAt(),
                 entity.getLastUpdatedAt()
