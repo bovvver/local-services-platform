@@ -39,3 +39,7 @@ info:
   app:
     name: user-service
     description: User Service for Local Services Platform
+
+app:
+  keycloak:
+    api-key: ${KEYCLOAK_API_KEY:}

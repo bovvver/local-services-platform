@@ -2,6 +2,8 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
+import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccepted;
 import com.github.bovvver.bookingmanagement.vo.*;
@@ -62,10 +64,10 @@ public class Booking {
      *     <li>{@link #createdAt} = current timestamp</li>
      * </ul>
      *
-     * @param id          unique identifier of the booking
-     * @param userId      identifier of the user making the booking
-     * @param offerId     identifier of the offer being booked
-     * @param salary final salary for the booking, if any
+     * @param id      unique identifier of the booking
+     * @param userId  identifier of the user making the booking
+     * @param offerId identifier of the offer being booked
+     * @param salary  final salary for the booking, if any
      */
     Booking(BookingId id,
             UserId userId,
@@ -109,11 +111,7 @@ public class Booking {
     }
 
     public void beginNegotiation(Salary proposedSalary, UserId offerAuthorId) {
-        if (this.status != BookingStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Cannot begin negotiation for booking with status %s".formatted(this.status)
-            );
-        }
+        validateStatus(BookingStatus.PENDING);
         updateStatus(BookingStatus.IN_NEGOTIATION);
 
         Negotiation negotiation = Negotiation.create(this.id, offerAuthorId);
@@ -123,31 +121,50 @@ public class Booking {
         registerEvent(new NegotiationStarted(this.getOfferId(), this.getId()));
     }
 
-    public void cancelNegotiation() {
-        if (this.status != BookingStatus.IN_NEGOTIATION) {
-            throw new IllegalStateException(
-                    "Cannot cancel negotiation for booking with status %s".formatted(this.status)
-            );
+    public void addPositionToNegotiation(Salary proposedSalary, NegotiationParty proposedBy) {
+        validateStatus(BookingStatus.IN_NEGOTIATION);
+        this.negotiation.addPosition(proposedSalary, proposedBy);
+    }
+
+    /**
+     * Returns negotiation party (AUTHOR/EXECUTOR) for a given user.
+     * <p>
+     * Domain invariant: this method can be used only when booking is in negotiation.
+     * </p>
+     */
+    public NegotiationParty negotiationPartyFor(UserId currentUserId) {
+        validateStatus(BookingStatus.IN_NEGOTIATION);
+
+        if (this.userId.equals(currentUserId)) {
+            return NegotiationParty.EXECUTOR;
         }
+        if (this.negotiation.getOfferAuthorId().equals(currentUserId)) {
+            return NegotiationParty.AUTHOR;
+        }
+        throw new BookingOwnershipException("Current user is not a party of the negotiation");
+    }
+
+    public void cancelNegotiation() {
+        validateStatus(BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.PENDING);
         this.negotiation = null;
     }
 
     public void accept() {
-        validateStatusForAction("accept", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.ACCEPTED);
         registerEvent(new BookingAccepted(this.getOfferId(), this.getUserId(), this.getId()));
     }
 
     public void reject() {
-        validateStatusForAction("reject", BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.REJECTED);
     }
 
-    private void validateStatusForAction(String action, BookingStatus... validStatuses) {
+    private void validateStatus(BookingStatus... validStatuses) {
         if (Stream.of(validStatuses).noneMatch(status -> status == this.status)) {
-            throw new IllegalStateException(
-                    "Cannot %s booking with status %s".formatted(action, this.status)
+            throw new InvalidBookingStatusException(
+                    "Cannot perform this action on booking with status %s".formatted(this.status)
             );
         }
     }

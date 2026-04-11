@@ -1,5 +1,6 @@
 package com.github.bovvver.bookingmanagement.resolvebookingdecision;
 
+import com.github.bovvver.bookingmanagement.infrastructure.OfferOwnershipException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

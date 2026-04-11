@@ -1,6 +1,5 @@
 package com.github.bovvver.bookingmanagement.infrastructure;
 
-import com.github.bovvver.bookingmanagement.resolvebookingdecision.OfferOwnershipException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -19,8 +18,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidBookingStatusException.class)
+    public ResponseEntity<String> handleInvalidBookingStatus(InvalidBookingStatusException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
     @ExceptionHandler(OfferOwnershipException.class)
     public ResponseEntity<String> handleOfferOwnership(OfferOwnershipException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(BookingOwnershipException.class)
+    public ResponseEntity<String> handleBookingOwnership(BookingOwnershipException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }

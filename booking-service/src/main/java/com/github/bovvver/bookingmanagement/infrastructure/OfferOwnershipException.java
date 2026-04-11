@@ -1,4 +1,4 @@
-package com.github.bovvver.bookingmanagement.resolvebookingdecision;
+package com.github.bovvver.bookingmanagement.infrastructure;
 
 public class OfferOwnershipException extends RuntimeException {
 
