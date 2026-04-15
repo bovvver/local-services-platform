@@ -151,13 +151,13 @@ public class Booking {
     }
 
     public void accept() {
-        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+        validateStatus(BookingStatus.PENDING);
         updateStatus(BookingStatus.ACCEPTED);
         registerEvent(new BookingAccepted(this.getOfferId(), this.getUserId(), this.getId()));
     }
 
     public void reject() {
-        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+        validateStatus(BookingStatus.PENDING);
         updateStatus(BookingStatus.REJECTED);
     }
 

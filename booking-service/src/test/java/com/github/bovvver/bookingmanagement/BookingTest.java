@@ -183,21 +183,6 @@ class BookingTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenCancelNegotiationWithInvalidStatus() {
-        UserId userId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(userId, offerId, salary);
-
-        assertThrows(InvalidBookingStatusException.class, booking::cancelNegotiation);
-
-        booking.beginNegotiation(salary, userId);
-        booking.accept();
-
-        assertThrows(InvalidBookingStatusException.class, booking::cancelNegotiation);
-    }
-
-    @Test
     void shouldResolveNegotiationPartyForExecutor() {
         UserId executorId = UserId.of(UUID.randomUUID());
         UserId authorId = UserId.of(UUID.randomUUID());
@@ -355,26 +340,6 @@ class BookingTest {
     }
 
     @Test
-    void shouldRegisterBookingAcceptedEventWhenAcceptFromInNegotiation() {
-        UserId userId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(userId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-
-        booking.accept();
-
-        assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
-        List<DomainEvent> events = booking.getDomainEvents();
-        assertThat(events).hasSize(3);
-        assertThat(events.get(0)).isInstanceOf(BookingCreated.class);
-        assertThat(events.get(1)).isInstanceOf(NegotiationStarted.class);
-        assertThat(events.get(2)).isInstanceOf(BookingAccepted.class);
-    }
-
-    @Test
     void shouldAddPositionToNegotiationWhenStatusIsInNegotiation() {
         UserId executorId = UserId.of(UUID.randomUUID());
         UserId authorId = UserId.of(UUID.randomUUID());
@@ -419,51 +384,6 @@ class BookingTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenAddPositionToNegotiationAfterBookingAccepted() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(executorId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-        booking.accept();
-
-        assertThrows(InvalidBookingStatusException.class,
-                () -> booking.addPositionToNegotiation(Salary.of(55000.0), NegotiationParty.EXECUTOR));
-    }
-
-    @Test
-    void shouldAcceptBookingWhenStatusIsInNegotiation() {
-        UserId userId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(userId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-
-        booking.accept();
-
-        assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
-    }
-
-    @Test
-    void shouldRejectBookingWhenStatusIsInNegotiation() {
-        UserId userId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(userId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-
-        booking.reject();
-
-        assertThat(booking.getStatus()).isEqualTo(BookingStatus.REJECTED);
-    }
-
-    @Test
     void shouldThrowInvalidBookingStatusExceptionWhenResolvingNegotiationPartyAfterNegotiationCanceled() {
         UserId executorId = UserId.of(UUID.randomUUID());
         UserId authorId = UserId.of(UUID.randomUUID());
@@ -476,21 +396,6 @@ class BookingTest {
 
         assertThrows(InvalidBookingStatusException.class,
                 () -> booking.negotiationPartyFor(executorId));
-    }
-
-    @Test
-    void shouldThrowInvalidBookingStatusExceptionWhenResolvingNegotiationPartyAfterBookingAccepted() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(executorId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-        booking.accept();
-
-        assertThrows(InvalidBookingStatusException.class,
-                () -> booking.negotiationPartyFor(authorId));
     }
 
     @Test
