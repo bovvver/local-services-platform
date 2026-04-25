@@ -39,7 +39,7 @@ public class Negotiation {
         this(id, bookingId, offerAuthorId, positions, NegotiationStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
     }
 
-     static Negotiation create(
+    static Negotiation create(
             final BookingId bookingId,
             final UserId offerAuthorId
     ) {
@@ -47,11 +47,27 @@ public class Negotiation {
     }
 
     void addPosition(Salary proposedSalary, final NegotiationParty proposedBy) {
-        if(this.status != NegotiationStatus.ACTIVE) {
+        if (this.status != NegotiationStatus.ACTIVE) {
             throw new IllegalStateException("Cannot add position to a non-active negotiation.");
         }
         NegotiationPosition position = NegotiationPosition.create(this.id, proposedSalary, proposedBy);
         this.positions.add(position);
+    }
+
+    void acceptNegotiation() {
+        updateStatus(NegotiationStatus.ACCEPTED);
+    }
+
+    void rejectNegotiation() {
+        updateStatus(NegotiationStatus.REJECTED);
+    }
+
+    private void updateStatus(NegotiationStatus newStatus) {
+        if (this.status != NegotiationStatus.ACTIVE) {
+            throw new IllegalStateException("Cannot change status of a non active negotiation.");
+        }
+        this.status = newStatus;
+        this.lastUpdatedAt = LocalDateTime.now();
     }
 
     NegotiationId getId() {
@@ -66,7 +82,7 @@ public class Negotiation {
         return offerAuthorId;
     }
 
-    List<NegotiationPosition> getPositions() {
+    public List<NegotiationPosition> getPositions() {
         return List.copyOf(positions);
     }
 

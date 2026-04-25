@@ -2,8 +2,9 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
-import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
 import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
+import com.github.bovvver.bookingmanagement.infrastructure.OutdatedNegotiationPositionException;
+import com.github.bovvver.bookingmanagement.infrastructure.OwnNegotiationProposalDecisionException;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccepted;
 import com.github.bovvver.bookingmanagement.vo.*;
@@ -183,56 +184,6 @@ class BookingTest {
     }
 
     @Test
-    void shouldResolveNegotiationPartyForExecutor() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(executorId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-
-        assertThat(booking.negotiationPartyFor(executorId)).isEqualTo(NegotiationParty.EXECUTOR);
-    }
-
-    @Test
-    void shouldResolveNegotiationPartyForAuthor() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(executorId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-
-        assertThat(booking.negotiationPartyFor(authorId)).isEqualTo(NegotiationParty.AUTHOR);
-    }
-
-    @Test
-    void shouldThrowWhenResolvingNegotiationPartyIfNotInNegotiation() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-        Booking booking = Booking.create(executorId, offerId, salary);
-
-        assertThrows(InvalidBookingStatusException.class, () -> booking.negotiationPartyFor(executorId));
-    }
-
-    @Test
-    void shouldThrowWhenResolvingNegotiationPartyForNonPartyUser() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        UserId strangerId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(executorId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-
-        assertThrows(BookingOwnershipException.class, () -> booking.negotiationPartyFor(strangerId));
-    }
-
-    @Test
     void shouldRegisterBookingCreatedEventOnCreation() {
         BookingId bookingId = BookingId.of(UUID.randomUUID());
         UserId userId = UserId.of(UUID.randomUUID());
@@ -243,8 +194,8 @@ class BookingTest {
 
         List<DomainEvent> events = booking.getDomainEvents();
         assertThat(events).hasSize(1);
-        assertThat(events.get(0)).isInstanceOf(BookingCreated.class);
-        BookingCreated created = (BookingCreated) events.get(0);
+        assertThat(events.getFirst()).isInstanceOf(BookingCreated.class);
+        BookingCreated created = (BookingCreated) events.getFirst();
         assertThat(created.bookingId()).isEqualTo(bookingId);
         assertThat(created.userId()).isEqualTo(userId);
         assertThat(created.offerId()).isEqualTo(offerId);
@@ -263,7 +214,7 @@ class BookingTest {
         List<DomainEvent> pulled = booking.pullDomainEvents();
 
         assertThat(pulled).hasSize(1);
-        assertThat(pulled.get(0)).isInstanceOf(BookingCreated.class);
+        assertThat(pulled.getFirst()).isInstanceOf(BookingCreated.class);
         assertThat(booking.getDomainEvents()).isEmpty();
     }
 
@@ -350,7 +301,7 @@ class BookingTest {
         Booking booking = Booking.create(executorId, offerId, initialSalary);
         booking.beginNegotiation(initialSalary, authorId);
 
-        booking.addPositionToNegotiation(counterSalary, NegotiationParty.EXECUTOR);
+        booking.addPositionToNegotiation(counterSalary, executorId);
 
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.IN_NEGOTIATION);
         assertThat(booking.getNegotiation()).isNotNull();
@@ -365,7 +316,7 @@ class BookingTest {
         Booking booking = Booking.create(executorId, offerId, salary);
 
         assertThrows(InvalidBookingStatusException.class,
-                () -> booking.addPositionToNegotiation(Salary.of(55000.0), NegotiationParty.EXECUTOR));
+                () -> booking.addPositionToNegotiation(Salary.of(55000.0), executorId));
     }
 
     @Test
@@ -380,22 +331,7 @@ class BookingTest {
         booking.cancelNegotiation();
 
         assertThrows(InvalidBookingStatusException.class,
-                () -> booking.addPositionToNegotiation(Salary.of(55000.0), NegotiationParty.EXECUTOR));
-    }
-
-    @Test
-    void shouldThrowInvalidBookingStatusExceptionWhenResolvingNegotiationPartyAfterNegotiationCanceled() {
-        UserId executorId = UserId.of(UUID.randomUUID());
-        UserId authorId = UserId.of(UUID.randomUUID());
-        OfferId offerId = OfferId.of(UUID.randomUUID());
-        Salary salary = Salary.of(50000.0);
-
-        Booking booking = Booking.create(executorId, offerId, salary);
-        booking.beginNegotiation(salary, authorId);
-        booking.cancelNegotiation();
-
-        assertThrows(InvalidBookingStatusException.class,
-                () -> booking.negotiationPartyFor(executorId));
+                () -> booking.addPositionToNegotiation(Salary.of(55000.0), executorId));
     }
 
     @Test
@@ -442,10 +378,112 @@ class BookingTest {
         booking.accept();
         List<DomainEvent> eventsAfterAccept = booking.pullDomainEvents();
         assertThat(eventsAfterAccept).hasSize(1);
-        assertThat(eventsAfterAccept.get(0)).isInstanceOf(BookingAccepted.class);
+        assertThat(eventsAfterAccept.getFirst()).isInstanceOf(BookingAccepted.class);
 
         assertThrows(InvalidBookingStatusException.class, booking::reject);
 
         assertThat(booking.getDomainEvents()).isEmpty();
+    }
+
+    @Test
+    void shouldAcceptLatestNegotiationProposalWhenDecidedByOtherParty() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        UserId authorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Salary initialSalary = Salary.of(50000.0);
+        Salary counterSalary = Salary.of(55000.0);
+
+        Booking booking = Booking.create(executorId, offerId, initialSalary);
+        booking.beginNegotiation(initialSalary, authorId);
+
+        sleepMillis(2);
+
+        booking.addPositionToNegotiation(counterSalary, authorId);
+
+        NegotiationPositionId latestPositionId = booking.getNegotiation().getPositions().getLast().getId();
+
+        booking.acceptNegotiationProposal(executorId, latestPositionId);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
+        assertThat(booking.getSalary()).isEqualTo(counterSalary);
+    }
+
+    @Test
+    void shouldRejectLatestNegotiationProposalWhenDecidedByOtherPartyAndReturnToPending() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        UserId authorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Salary initialSalary = Salary.of(50000.0);
+        Salary counterSalary = Salary.of(55000.0);
+
+        Booking booking = Booking.create(executorId, offerId, initialSalary);
+        booking.beginNegotiation(initialSalary, authorId);
+
+        sleepMillis(2);
+        booking.addPositionToNegotiation(counterSalary, authorId);
+
+        NegotiationPositionId latestPositionId = booking.getNegotiation().getPositions().getLast().getId();
+
+        booking.rejectNegotiationProposal(executorId, latestPositionId);
+
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.PENDING);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAcceptingOutdatedNegotiationProposal() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        UserId authorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Salary initialSalary = Salary.of(50000.0);
+        Salary counterSalary = Salary.of(55000.0);
+
+        Booking booking = Booking.create(executorId, offerId, initialSalary);
+        booking.beginNegotiation(initialSalary, authorId);
+
+        sleepMillis(2);
+
+        booking.addPositionToNegotiation(counterSalary, executorId);
+        NegotiationPositionId executorsPositionId = booking.getNegotiation().getPositions().get(1).getId();
+
+        sleepMillis(2);
+
+        booking.addPositionToNegotiation(Salary.of(60000.0), authorId);
+
+        assertThrows(OutdatedNegotiationPositionException.class,
+                () -> booking.acceptNegotiationProposal(authorId, executorsPositionId));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDecidingOnOwnLatestNegotiationProposal() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        UserId authorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Salary initialSalary = Salary.of(50000.0);
+        Salary counterSalary = Salary.of(55000.0);
+
+        Booking booking = Booking.create(executorId, offerId, initialSalary);
+        booking.beginNegotiation(initialSalary, authorId);
+
+        sleepMillis(2);
+
+        booking.addPositionToNegotiation(counterSalary, executorId);
+
+        NegotiationPositionId latestPositionId = booking.getNegotiation().getPositions().getLast().getId();
+
+        assertThrows(OwnNegotiationProposalDecisionException.class,
+                () -> booking.acceptNegotiationProposal(executorId, latestPositionId));
+    }
+
+    private static void sleepMillis(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -4,12 +4,16 @@ import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
 import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
+import com.github.bovvver.bookingmanagement.infrastructure.OwnNegotiationProposalDecisionException;
+import com.github.bovvver.bookingmanagement.infrastructure.OutdatedNegotiationPositionException;
+import com.github.bovvver.bookingmanagement.infrastructure.PositionNotFoundException;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccepted;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -35,7 +39,7 @@ public class Booking {
     private final OfferId offerId;
     private Negotiation negotiation;
     private BookingStatus status;
-    private final Salary salary;
+    private Salary salary;
     private final LocalDateTime createdAt;
     private final List<DomainEvent> domainEvents;
 
@@ -121,27 +125,49 @@ public class Booking {
         registerEvent(new NegotiationStarted(this.getOfferId(), this.getId()));
     }
 
-    public void addPositionToNegotiation(Salary proposedSalary, NegotiationParty proposedBy) {
+    public void addPositionToNegotiation(Salary proposedSalary, UserId proposedBy) {
+        NegotiationParty negotiationParty = negotiationPartyFor(proposedBy);
+
         validateStatus(BookingStatus.IN_NEGOTIATION);
-        this.negotiation.addPosition(proposedSalary, proposedBy);
+        this.negotiation.addPosition(proposedSalary, negotiationParty);
     }
 
-    /**
-     * Returns negotiation party (AUTHOR/EXECUTOR) for a given user.
-     * <p>
-     * Domain invariant: this method can be used only when booking is in negotiation.
-     * </p>
-     */
-    public NegotiationParty negotiationPartyFor(UserId currentUserId) {
-        validateStatus(BookingStatus.IN_NEGOTIATION);
+    public void acceptNegotiationProposal(UserId acceptedBy, NegotiationPositionId positionId) {
+        NegotiationPosition position = validatedLatestPositionProposedByOtherParty(acceptedBy, positionId);
+        this.salary = position.getProposedSalary();
+        this.negotiation.acceptNegotiation();
+        updateStatus(BookingStatus.ACCEPTED);
+    }
 
-        if (this.userId.equals(currentUserId)) {
-            return NegotiationParty.EXECUTOR;
+    public void rejectNegotiationProposal(UserId acceptedBy, NegotiationPositionId positionId) {
+        validatedLatestPositionProposedByOtherParty(acceptedBy, positionId);
+        this.negotiation.rejectNegotiation();
+        updateStatus(BookingStatus.PENDING);
+    }
+
+    private NegotiationPosition validatedLatestPositionProposedByOtherParty(
+            UserId decidedBy,
+            NegotiationPositionId positionId
+    ) {
+        NegotiationParty negotiationParty = negotiationPartyFor(decidedBy);
+        List<NegotiationPosition> positions = negotiation.getPositions();
+
+        NegotiationPosition position = positions.stream()
+                .filter(p -> p.getId().equals(positionId))
+                .findFirst()
+                .orElseThrow(() -> new PositionNotFoundException(positionId.value()));
+
+        NegotiationPosition latestPosition = positions.stream()
+                .max(Comparator.comparing(NegotiationPosition::getProposedAt))
+                .orElseThrow(() -> new PositionNotFoundException(positionId.value()));
+
+        if (!latestPosition.getId().equals(positionId)) {
+            throw new OutdatedNegotiationPositionException(positionId.value());
         }
-        if (this.negotiation.getOfferAuthorId().equals(currentUserId)) {
-            return NegotiationParty.AUTHOR;
+        if (negotiationParty == position.getProposedBy()) {
+            throw new OwnNegotiationProposalDecisionException();
         }
-        throw new BookingOwnershipException("Current user is not a party of the negotiation");
+        return position;
     }
 
     public void cancelNegotiation() {
@@ -159,6 +185,24 @@ public class Booking {
     public void reject() {
         validateStatus(BookingStatus.PENDING);
         updateStatus(BookingStatus.REJECTED);
+    }
+
+    /**
+     * Returns negotiation party (AUTHOR/EXECUTOR) for a given user.
+     * <p>
+     * Domain invariant: this method can be used only when booking is in negotiation.
+     * </p>
+     */
+    private NegotiationParty negotiationPartyFor(UserId currentUserId) {
+        validateStatus(BookingStatus.IN_NEGOTIATION);
+
+        if (this.userId.equals(currentUserId)) {
+            return NegotiationParty.EXECUTOR;
+        }
+        if (this.negotiation.getOfferAuthorId().equals(currentUserId)) {
+            return NegotiationParty.AUTHOR;
+        }
+        throw new BookingOwnershipException("Current user is not a party of the negotiation");
     }
 
     private void validateStatus(BookingStatus... validStatuses) {
@@ -195,7 +239,7 @@ public class Booking {
         return offerId;
     }
 
-    Negotiation getNegotiation() {
+    public Negotiation getNegotiation() {
         return negotiation;
     }
 
