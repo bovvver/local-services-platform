@@ -42,7 +42,7 @@ public class NegotiationPosition {
         return new NegotiationPosition(NegotiationPositionId.generate(), negotiation, proposedSalary, proposedBy);
     }
 
-    NegotiationPositionId getId() {
+    public NegotiationPositionId getId() {
         return id;
     }
 

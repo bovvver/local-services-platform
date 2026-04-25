@@ -18,6 +18,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(PositionNotFoundException.class)
+    public ResponseEntity<String> handlePositionNotFound(PositionNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidBookingStatusException.class)
     public ResponseEntity<String> handleInvalidBookingStatus(InvalidBookingStatusException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
@@ -31,5 +36,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BookingOwnershipException.class)
     public ResponseEntity<String> handleBookingOwnership(BookingOwnershipException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OutdatedNegotiationPositionException.class)
+    public ResponseEntity<String> handleOutdatedPosition(OutdatedNegotiationPositionException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }

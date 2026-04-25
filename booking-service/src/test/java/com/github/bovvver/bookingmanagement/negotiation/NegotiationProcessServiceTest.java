@@ -1,6 +1,10 @@
 package com.github.bovvver.bookingmanagement.negotiation;
 
-import com.github.bovvver.bookingmanagement.*;
+import com.github.bovvver.bookingmanagement.Booking;
+import com.github.bovvver.bookingmanagement.BookingEntity;
+import com.github.bovvver.bookingmanagement.BookingReadRepository;
+import com.github.bovvver.bookingmanagement.BookingRepository;
+import com.github.bovvver.bookingmanagement.NegotiationEntity;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingNotFoundException;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
 import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
@@ -84,6 +88,64 @@ class NegotiationProcessServiceTest {
         assertThrows(InvalidBookingStatusException.class, () ->
                 negotiationProcessService.makeProposal(BOOKING_ID, new NegotiationProposalRequest(new BigDecimal(50000)))
         );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAcceptProposalBookingNotFound() {
+        when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.empty());
+        assertThrows(BookingNotFoundException.class,
+                () -> negotiationProcessService.acceptProposal(BOOKING_ID, UUID.randomUUID()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRejectProposalBookingNotFound() {
+        when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.empty());
+        assertThrows(BookingNotFoundException.class,
+                () -> negotiationProcessService.rejectProposal(BOOKING_ID, UUID.randomUUID()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAcceptProposalWithInvalidStatus() {
+        BookingEntity booking = createBookingEntity(USER_ID, BookingStatus.PENDING);
+
+        when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
+        when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
+
+        assertThrows(InvalidBookingStatusException.class,
+                () -> negotiationProcessService.acceptProposal(BOOKING_ID, UUID.randomUUID()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRejectProposalWithInvalidStatus() {
+        BookingEntity booking = createBookingEntity(USER_ID, BookingStatus.PENDING);
+
+        when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
+        when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
+
+        assertThrows(InvalidBookingStatusException.class,
+                () -> negotiationProcessService.rejectProposal(BOOKING_ID, UUID.randomUUID()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAcceptProposalByUserNotInvolvedInBooking() {
+        BookingEntity booking = createBookingEntity(UUID.randomUUID(), BookingStatus.IN_NEGOTIATION);
+
+        when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
+        when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
+
+        assertThrows(BookingOwnershipException.class,
+                () -> negotiationProcessService.acceptProposal(BOOKING_ID, UUID.randomUUID()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRejectProposalByUserNotInvolvedInBooking() {
+        BookingEntity booking = createBookingEntity(UUID.randomUUID(), BookingStatus.IN_NEGOTIATION);
+
+        when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
+        when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
+
+        assertThrows(BookingOwnershipException.class,
+                () -> negotiationProcessService.rejectProposal(BOOKING_ID, UUID.randomUUID()));
     }
 
     private BookingEntity createBookingEntity(UUID userId, BookingStatus status) {
