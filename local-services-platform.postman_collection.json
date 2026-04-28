@@ -858,7 +858,6 @@
               ],
               "path": [
                 "booking-service",
-                "bookings",
                 "{{booking_id}}",
                 "negotiation",
                 "proposal"
@@ -898,7 +897,6 @@
               ],
               "path": [
                 "booking-service",
-                "bookings",
                 "{{booking_id}}",
                 "negotiation",
                 "proposal"
@@ -938,7 +936,6 @@
               ],
               "path": [
                 "booking-service",
-                "bookings",
                 "00000000-0000-0000-0000-000000000000",
                 "negotiation",
                 "proposal"
@@ -978,13 +975,66 @@
               ],
               "path": [
                 "booking-service",
-                "bookings",
                 "{{booking_id}}",
                 "negotiation",
                 "proposal"
               ]
             },
             "description": "Authorization scenario: when logged-in user isn't executor nor offer author, booking-service throws BookingOwnershipException. Expected HTTP 403 (or 409 depending on exception mapping)."
+          },
+          "response": []
+        },
+        {
+          "name": "Negotiation – Accept Proposal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/booking-service/{{booking_id}}/negotiation/{{position_id}}/accept",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "booking-service",
+                "{{booking_id}}",
+                "negotiation",
+                "{{position_id}}",
+                "accept"
+              ]
+            },
+            "description": "Accepts a specific negotiation proposal.\n\nEndpoint from NegotiationREST: POST /{bookingId}/negotiation/{positionId}/accept\n\nRequires JWT token. Caller must be a negotiation party (executor or offer author).\n\nExpected: HTTP 200/204 on success (empty body)."
+          },
+          "response": []
+        },
+        {
+          "name": "Negotiation – Reject Proposal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/booking-service/{{booking_id}}/negotiation/{{position_id}}/reject",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "booking-service",
+                "{{booking_id}}",
+                "negotiation",
+                "{{position_id}}",
+                "reject"
+              ]
+            },
+            "description": "Rejects a specific negotiation proposal.\n\nEndpoint from NegotiationREST: POST /{bookingId}/negotiation/{positionId}/reject\n\nRequires JWT token. Caller must be a negotiation party (executor or offer author).\n\nExpected: HTTP 200/204 on success (empty body)."
           },
           "response": []
         }
@@ -1157,6 +1207,11 @@
     {
       "key": "booking_id",
       "value": "00000000-0000-0000-0000-000000000002",
+      "type": "string"
+    },
+    {
+      "key": "position_id",
+      "value": "00000000-0000-0000-0000-000000000004",
       "type": "string"
     },
     {
