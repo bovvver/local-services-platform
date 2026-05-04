@@ -137,6 +137,7 @@ public class Booking {
         this.salary = position.getProposedSalary();
         this.negotiation.acceptNegotiation();
         updateStatus(BookingStatus.ACCEPTED);
+        registerEvent(new BookingAccepted(this.getOfferId(), this.getUserId(), this.getId()));
     }
 
     public void rejectNegotiationProposal(UserId acceptedBy, NegotiationPositionId positionId) {
@@ -183,7 +184,7 @@ public class Booking {
     }
 
     public void reject() {
-        validateStatus(BookingStatus.PENDING);
+        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
         updateStatus(BookingStatus.REJECTED);
     }
 
