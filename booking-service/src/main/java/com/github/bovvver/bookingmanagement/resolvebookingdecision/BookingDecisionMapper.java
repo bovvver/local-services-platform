@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-class BookingDecisionMapper {
+public class BookingDecisionMapper {
 
     private final ObjectMapper objectMapper;
 
