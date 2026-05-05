@@ -2,7 +2,7 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
-import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
+import com.github.bovvver.bookingmanagement.infrastructure.OperationNotAllowedInCurrentStateException;
 import com.github.bovvver.bookingmanagement.infrastructure.OutdatedNegotiationPositionException;
 import com.github.bovvver.bookingmanagement.infrastructure.OwnNegotiationProposalDecisionException;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
@@ -106,7 +106,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
-        assertThrows(InvalidBookingStatusException.class, () -> booking.beginNegotiation(salary, userId));
+        assertThrows(OperationNotAllowedInCurrentStateException.class, () -> booking.beginNegotiation(salary, userId));
     }
 
     @Test
@@ -117,7 +117,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
-        assertThrows(InvalidBookingStatusException.class, () -> booking.beginNegotiation(null, userId));
+        assertThrows(OperationNotAllowedInCurrentStateException.class, () -> booking.beginNegotiation(null, userId));
     }
 
     @Test
@@ -152,7 +152,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.reject();
 
-        assertThrows(InvalidBookingStatusException.class, booking::accept);
+        assertThrows(OperationNotAllowedInCurrentStateException.class, booking::accept);
     }
 
     @Test
@@ -163,7 +163,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
-        assertThrows(InvalidBookingStatusException.class, booking::reject);
+        assertThrows(OperationNotAllowedInCurrentStateException.class, booking::reject);
     }
 
     @Test
@@ -315,7 +315,7 @@ class BookingTest {
 
         Booking booking = Booking.create(executorId, offerId, salary);
 
-        assertThrows(InvalidBookingStatusException.class,
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
                 () -> booking.addPositionToNegotiation(Salary.of(55000.0), executorId));
     }
 
@@ -330,7 +330,7 @@ class BookingTest {
         booking.beginNegotiation(salary, authorId);
         booking.cancelNegotiation();
 
-        assertThrows(InvalidBookingStatusException.class,
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
                 () -> booking.addPositionToNegotiation(Salary.of(55000.0), executorId));
     }
 
@@ -343,7 +343,7 @@ class BookingTest {
         Booking booking = Booking.create(userId, offerId, salary);
         booking.accept();
 
-        assertThrows(InvalidBookingStatusException.class,
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
                 () -> booking.beginNegotiation(salary, UserId.of(UUID.randomUUID())));
 
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.ACCEPTED);
@@ -358,7 +358,7 @@ class BookingTest {
 
         Booking booking = Booking.create(userId, offerId, salary);
 
-        assertThrows(InvalidBookingStatusException.class, booking::cancelNegotiation);
+        assertThrows(OperationNotAllowedInCurrentStateException.class, booking::cancelNegotiation);
 
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.PENDING);
         assertThat(booking.getNegotiation()).isNull();
@@ -380,7 +380,7 @@ class BookingTest {
         assertThat(eventsAfterAccept).hasSize(1);
         assertThat(eventsAfterAccept.getFirst()).isInstanceOf(BookingAccepted.class);
 
-        assertThrows(InvalidBookingStatusException.class, booking::reject);
+        assertThrows(OperationNotAllowedInCurrentStateException.class, booking::reject);
 
         assertThat(booking.getDomainEvents()).isEmpty();
     }

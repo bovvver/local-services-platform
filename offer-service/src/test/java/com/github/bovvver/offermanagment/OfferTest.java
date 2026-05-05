@@ -3,6 +3,8 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.vo.*;
+import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
+import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -170,5 +172,38 @@ class OfferTest {
         List<?> events = offer.pullEvents();
 
         assertThat(events).hasSize(1);
+    }
+
+    @Test
+    void shouldStartExecutionAndChangeStatusToInProgressWhenExecutorIsAssigned() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+        offer.pullEvents();
+
+        offer.startExecution(executor);
+
+        assertThat(offer.getStatus()).isEqualTo(OfferStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void shouldThrowWhenStartingExecutionByNonExecutor() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+
+        assertThatThrownBy(() -> offer.startExecution(UserId.of(UUID.randomUUID())))
+                .isInstanceOf(UnauthorizedExecutorException.class);
+    }
+
+    @Test
+    void shouldThrowWhenStartingExecutionInStatusOtherThanAssigned() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+        offer.changeStatus(OfferStatus.IN_NEGOTIATION);
+
+        assertThatThrownBy(() -> offer.startExecution(executor))
+                .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
     }
 }
