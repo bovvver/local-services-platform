@@ -1,6 +1,10 @@
 package com.github.bovvver.offermanagment;
 
-import com.github.bovvver.offermanagment.events.*;
+import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
+import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
+import com.github.bovvver.offermanagment.events.DomainEvent;
+import com.github.bovvver.offermanagment.events.ExecutorAssigned;
+import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.vo.*;
 
 import java.time.LocalDateTime;
@@ -120,6 +124,16 @@ public class Offer {
 
     public boolean isOwnedBy(UserId userId) {
         return this.authorId.equals(userId);
+    }
+
+    public void startExecution(UserId userId) {
+        if (!userId.equals(this.executorId)) {
+            throw new UnauthorizedExecutorException();
+        }
+        if (this.status != OfferStatus.ASSIGNED) {
+            throw new OperationNotAllowedInCurrentStateException(this.status);
+        }
+        changeStatus(OfferStatus.IN_PROGRESS);
     }
 
     public void changeStatus(OfferStatus newStatus) {

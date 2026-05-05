@@ -7,7 +7,7 @@ import com.github.bovvver.bookingmanagement.BookingRepository;
 import com.github.bovvver.bookingmanagement.NegotiationEntity;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingNotFoundException;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
-import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
+import com.github.bovvver.bookingmanagement.infrastructure.OperationNotAllowedInCurrentStateException;
 import com.github.bovvver.bookingmanagement.vo.BookingStatus;
 import com.github.bovvver.bookingmanagement.vo.NegotiationStatus;
 import com.github.bovvver.bookingmanagement.vo.UserId;
@@ -85,7 +85,7 @@ class NegotiationProcessServiceTest {
         when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
 
-        assertThrows(InvalidBookingStatusException.class, () ->
+        assertThrows(OperationNotAllowedInCurrentStateException.class, () ->
                 negotiationProcessService.makeProposal(BOOKING_ID, new NegotiationProposalRequest(new BigDecimal(50000)))
         );
     }
@@ -111,7 +111,7 @@ class NegotiationProcessServiceTest {
         when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
 
-        assertThrows(InvalidBookingStatusException.class,
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
                 () -> negotiationProcessService.acceptProposal(BOOKING_ID, UUID.randomUUID()));
     }
 
@@ -122,7 +122,7 @@ class NegotiationProcessServiceTest {
         when(bookingReadRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
         when(currentUser.getId()).thenReturn(UserId.of(USER_ID));
 
-        assertThrows(InvalidBookingStatusException.class,
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
                 () -> negotiationProcessService.rejectProposal(BOOKING_ID, UUID.randomUUID()));
     }
 

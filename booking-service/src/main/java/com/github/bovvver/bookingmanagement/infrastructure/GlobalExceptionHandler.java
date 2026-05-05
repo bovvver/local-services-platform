@@ -23,8 +23,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(InvalidBookingStatusException.class)
-    public ResponseEntity<String> handleInvalidBookingStatus(InvalidBookingStatusException ex) {
+    @ExceptionHandler(OperationNotAllowedInCurrentStateException.class)
+    public ResponseEntity<String> handleOperationNotAllowedInCurrentStateException(OperationNotAllowedInCurrentStateException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 

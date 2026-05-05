@@ -3,7 +3,7 @@ package com.github.bovvver.bookingmanagement;
 import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
 import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
-import com.github.bovvver.bookingmanagement.infrastructure.InvalidBookingStatusException;
+import com.github.bovvver.bookingmanagement.infrastructure.OperationNotAllowedInCurrentStateException;
 import com.github.bovvver.bookingmanagement.infrastructure.OwnNegotiationProposalDecisionException;
 import com.github.bovvver.bookingmanagement.infrastructure.OutdatedNegotiationPositionException;
 import com.github.bovvver.bookingmanagement.infrastructure.PositionNotFoundException;
@@ -208,9 +208,7 @@ public class Booking {
 
     private void validateStatus(BookingStatus... validStatuses) {
         if (Stream.of(validStatuses).noneMatch(status -> status == this.status)) {
-            throw new InvalidBookingStatusException(
-                    "Cannot perform this action on booking with status %s".formatted(this.status)
-            );
+            throw new OperationNotAllowedInCurrentStateException(this.status);
         }
     }
 
