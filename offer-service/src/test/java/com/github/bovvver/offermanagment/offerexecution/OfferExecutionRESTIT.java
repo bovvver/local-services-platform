@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.github.bovvver.offermanagment.offerexecution.OfferExecutionREST.START_EXECUTION_URL;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,7 +51,7 @@ class OfferExecutionRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldStartExecution() throws Exception {
-        mockMvc.perform(post("/offers/{offerId}/start", OFFER_ID)
+        mockMvc.perform(post(START_EXECUTION_URL, OFFER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.offerStatus").value("IN_PROGRESS"))
@@ -59,7 +60,7 @@ class OfferExecutionRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldReturnNotFoundWhenOfferDoesNotExist() throws Exception {
-        mockMvc.perform(post("/offers/{offerId}/start", UUID.randomUUID())
+        mockMvc.perform(post(START_EXECUTION_URL, UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
