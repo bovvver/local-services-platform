@@ -12,7 +12,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class OfferExecutionREST {
 
-    private static final String START_EXECUTION_URL = "/offers/{offerId}/start";
+    static final String START_EXECUTION_URL = "/offers/{offerId}/start";
 
     private final OfferExecutionService offerExecutionService;
 
