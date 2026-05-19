@@ -1,10 +1,12 @@
 package com.github.bovvver.offermanagment;
 
+import com.github.bovvver.infrastructure.CompletionProofRequiredException;
+import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
+import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.vo.*;
-import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
-import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
+import com.github.bovvver.offermanagment.workproofupload.WorkProof;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -205,5 +207,43 @@ class OfferTest {
 
         assertThatThrownBy(() -> offer.startExecution(executor))
                 .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
+    }
+
+    @Test
+    void shouldRequestCompletionAndStoreProofs() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+        offer.startExecution(executor);
+
+        List<String> proofUrls = List.of("https://proofs.local/1", "https://proofs.local/2");
+        String completionDescription = "Job done";
+
+        offer.requestCompletion(completionDescription, proofUrls);
+
+        assertThat(offer.getStatus()).isEqualTo(OfferStatus.COMPLETED_REQUESTED);
+        assertThat(offer.getCompletionDescription().value()).isEqualTo(completionDescription);
+        assertThat(offer.getWorkProofs()).hasSize(2);
+        assertThat(offer.getWorkProofs().stream().map(WorkProof::url))
+                .containsExactlyInAnyOrderElementsOf(proofUrls);
+    }
+
+    @Test
+    void shouldThrowWhenRequestingCompletionInWrongStatus() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+
+        assertThatThrownBy(() -> offer.requestCompletion("Done", List.of("proof")))
+                .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
+    }
+
+    @Test
+    void shouldThrowWhenRequestingCompletionWithoutProofs() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+        offer.startExecution(executor);
+
+        assertThatThrownBy(() -> offer.requestCompletion("Done", List.of()))
+                .isInstanceOf(CompletionProofRequiredException.class);
     }
 }

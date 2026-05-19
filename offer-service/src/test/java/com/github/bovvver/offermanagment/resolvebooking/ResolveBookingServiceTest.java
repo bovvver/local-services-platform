@@ -61,6 +61,7 @@ class ResolveBookingServiceTest {
                 OFFER_ID,
                 "Test Offer",
                 "Test Description",
+                null,
                 USER_ID,
                 null,
                 new Location(
@@ -69,6 +70,7 @@ class ResolveBookingServiceTest {
                 ),
                 null,
                 new BigDecimal("1000.0"),
+                null,
                 null,
                 null,
                 null

@@ -1,13 +1,20 @@
 package com.github.bovvver.offermanagment.workproofupload;
 
+import com.github.bovvver.infrastructure.OfferNotFoundException;
+import com.github.bovvver.infrastructure.URLGenerationFailedException;
+import com.github.bovvver.offermanagment.Offer;
+import com.github.bovvver.offermanagment.OfferDocument;
+import com.github.bovvver.offermanagment.OfferMapper;
+import com.github.bovvver.offermanagment.OfferRepository;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.Http;
 import io.minio.MinioClient;
-import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -17,40 +24,64 @@ class WorkProofUploadService {
 
     private static final int URL_EXPIRY_MINUTES = 5;
     private static final String OBJECT_KEY_TEMPLATE = "offers/%s/%s-%s";
-    private static final String FILE_URL_TEMPLATE = "%s/%s/%s";
 
     @Value("${MINIO_BUCKET_NAME}")
     private String bucket;
 
-    @Value("${MINIO_URL}")
-    private String url;
-
     private final MinioClient minioClient;
+    private final OfferRepository offerRepository;
 
-    PresignedUrlResponse getPresignedURL(final PresignedUrlRequest request) {
+    PresignedUploadUrlResponse getPresignedUploadURL(final PresignedUploadUrlRequest request) {
+        String objectKey = getObjectKey(request);
+        String uploadUrl = getUploadUrl(objectKey);
+        return new PresignedUploadUrlResponse(uploadUrl, objectKey);
+    }
 
+    PresignedGetUrlResponse getPresignedGetURLs(final UUID offerId) {
+        OfferDocument offerDocument = offerRepository.findById(offerId)
+                .orElseThrow(() -> new OfferNotFoundException(offerId));
+        Offer offer = OfferMapper.toDomain(offerDocument);
+        Set<WorkProof> workProofs = offer.getWorkProofs();
+
+        List<String> getUrls = workProofs.stream()
+                .map(WorkProof::url)
+                .map(this::getGetUrl)
+                .toList();
+
+        return new PresignedGetUrlResponse(getUrls);
+    }
+
+    private String getGetUrl(String objectKey) {
         try {
-            String objectKey = getObjectKey(request);
-            String uploadUrl = getUploadUrl(objectKey);
-            String fileUrl = String.format(FILE_URL_TEMPLATE, url, bucket, objectKey);
-            return new PresignedUrlResponse(uploadUrl, fileUrl);
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Http.Method.GET)
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .expiry(URL_EXPIRY_MINUTES, TimeUnit.MINUTES)
+                            .build()
+            );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate presigned URL", e);
+            throw new URLGenerationFailedException();
         }
     }
 
-    private String getUploadUrl(String objectKey) throws MinioException {
-        return minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Http.Method.PUT)
-                        .bucket(bucket)
-                        .object(objectKey)
-                        .expiry(URL_EXPIRY_MINUTES, TimeUnit.MINUTES)
-                        .build()
-        );
+    private String getUploadUrl(String objectKey) {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Http.Method.PUT)
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .expiry(URL_EXPIRY_MINUTES, TimeUnit.MINUTES)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new URLGenerationFailedException();
+        }
     }
 
-    private String getObjectKey(PresignedUrlRequest request) {
+    private String getObjectKey(PresignedUploadUrlRequest request) {
         return String.format(
                 OBJECT_KEY_TEMPLATE,
                 request.offerId(),
