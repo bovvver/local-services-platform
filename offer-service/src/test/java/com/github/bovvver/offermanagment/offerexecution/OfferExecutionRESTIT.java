@@ -36,12 +36,14 @@ class OfferExecutionRESTIT extends BaseIntegrationTest {
                 OFFER_ID,
                 "Test Offer",
                 "Test Description",
+                null,
                 UUID.randomUUID(),
                 EXECUTOR_ID,
                 new Location(40.7128, -74.0060),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(1000.0),
                 OfferStatus.ASSIGNED,
+                null,
                 null,
                 null
         );

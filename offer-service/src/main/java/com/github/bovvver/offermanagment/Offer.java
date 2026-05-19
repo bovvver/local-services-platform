@@ -1,11 +1,13 @@
 package com.github.bovvver.offermanagment;
 
+import com.github.bovvver.infrastructure.CompletionProofRequiredException;
 import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
 import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
 import com.github.bovvver.offermanagment.events.DomainEvent;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.vo.*;
+import com.github.bovvver.offermanagment.workproofupload.WorkProof;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -23,36 +25,42 @@ public class Offer {
     private final OfferId id;
     private final Title title;
     private final Description description;
+    private Description completionDescription;
     private final UserId authorId;
     private UserId executorId;
     private final Location location;
     private final Set<ServiceCategory> serviceCategories;
     private final Salary salary;
     private OfferStatus status;
+    private final Set<WorkProof> workProofs;
     private final LocalDateTime createdAt;
     private final List<DomainEvent> domainEvents;
 
     Offer(final OfferId id,
           final Title title,
           final Description description,
+          final Description completionDescription,
           final UserId authorId,
           final UserId executorId,
           final Location location,
           final Set<ServiceCategory> serviceCategories,
           final Salary salary,
           final OfferStatus status,
+          final Set<WorkProof> workProofs,
           final LocalDateTime createdAt,
           final List<DomainEvent> domainEvents
     ) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.completionDescription = completionDescription;
         this.authorId = authorId;
         this.executorId = executorId;
         this.location = location;
         this.serviceCategories = serviceCategories;
         this.salary = salary;
         this.status = status;
+        this.workProofs = workProofs;
         this.createdAt = createdAt;
         this.domainEvents = domainEvents;
     }
@@ -81,9 +89,9 @@ public class Offer {
           Set<ServiceCategory> serviceCategories,
           Salary salary) {
 
-        this(id, title, description, authorId, null,
+        this(id, title, description, null, authorId, null,
                 location, serviceCategories, salary,
-                OfferStatus.OPEN, LocalDateTime.now(),
+                OfferStatus.OPEN, new HashSet<>(), LocalDateTime.now(),
                 new ArrayList<>());
     }
 
@@ -136,6 +144,19 @@ public class Offer {
         changeStatus(OfferStatus.IN_PROGRESS);
     }
 
+    public void requestCompletion(final String description, final List<String> proofUrls) {
+        if (this.status != OfferStatus.IN_PROGRESS) {
+            throw new OperationNotAllowedInCurrentStateException(this.status);
+        }
+        if (proofUrls.isEmpty()) {
+            throw new CompletionProofRequiredException();
+        }
+
+        this.completionDescription = Description.of(description);
+        this.workProofs.addAll(proofUrls.stream().map(el -> new WorkProof(el, LocalDateTime.now())).toList());
+        changeStatus(OfferStatus.COMPLETED_REQUESTED);
+    }
+
     public void changeStatus(OfferStatus newStatus) {
         if (this.status == newStatus) {
             return;
@@ -169,6 +190,10 @@ public class Offer {
         return description;
     }
 
+    public Description getCompletionDescription() {
+        return completionDescription;
+    }
+
     public UserId getAuthorId() {
         return authorId;
     }
@@ -191,6 +216,10 @@ public class Offer {
 
     public OfferStatus getStatus() {
         return status;
+    }
+
+    public Set<WorkProof> getWorkProofs() {
+        return workProofs;
     }
 
     public LocalDateTime getCreatedAt() {

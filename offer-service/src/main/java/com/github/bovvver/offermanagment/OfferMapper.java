@@ -16,6 +16,7 @@ public class OfferMapper {
                 OfferId.of(document.getId()),
                 Title.of(document.getTitle()),
                 Description.of(document.getDescription()),
+                document.getCompletionDescription() == null ? null : Description.of(document.getCompletionDescription()),
                 UserId.of(document.getAuthorId()),
                 document.getExecutorId() == null ? null : UserId.of(document.getExecutorId()),
                 Location.of(
@@ -25,6 +26,7 @@ public class OfferMapper {
                 document.getServiceCategories(),
                 new Salary(document.getSalary()),
                 document.getStatus(),
+                document.getWorkProofs(),
                 document.getCreatedAt(),
                 new ArrayList<>()
         );
@@ -35,12 +37,14 @@ public class OfferMapper {
                 offer.getId().value(),
                 offer.getTitle().value(),
                 offer.getDescription().value(),
+                offer.getCompletionDescription() == null ? null : offer.getCompletionDescription().value(),
                 offer.getAuthorId().value(),
                 offer.getExecutorId() != null ? offer.getExecutorId().value() : null,
                 offer.getLocation(),
                 offer.getServiceCategories(),
                 offer.getSalary().value(),
                 offer.getStatus(),
+                offer.getWorkProofs(),
                 offer.getCreatedAt(),
                 null    // managed by MongoDB
         );

@@ -65,7 +65,10 @@ public class OfferOwnershipServiceTest {
         when(offerRepository.findById(OFFER_ID)).thenReturn(Optional.empty());
 
         OfferOwnershipCheckResponse response = offerOwnershipService.checkOfferOwnership(USER_ID, OFFER_ID);
-        assertThat(response).isEqualTo(OfferOwnershipCheckResponse.notFound());
+        assertThat(response.isOwner()).isFalse();
+        assertThat(response.message()).isEqualTo("Offer not found.");
+        assertThat(response.httpStatusCode()).isEqualTo(404);
+        assertThat(response.checkedAt()).isNotNull();
     }
 
     private static OfferDocument createOfferDocument() {
@@ -73,6 +76,7 @@ public class OfferOwnershipServiceTest {
                 OFFER_ID,
                 "Test Offer",
                 "Test Description",
+                null,
                 USER_ID,
                 null,
                 new Location(
@@ -81,6 +85,7 @@ public class OfferOwnershipServiceTest {
                 ),
                 null,
                 new BigDecimal("1000.0"),
+                null,
                 null,
                 null,
                 null

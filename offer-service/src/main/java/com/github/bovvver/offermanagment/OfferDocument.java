@@ -3,6 +3,7 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
+import com.github.bovvver.offermanagment.workproofupload.WorkProof;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,6 +42,8 @@ public class OfferDocument {
 
     private String description;
 
+    private String completionDescription;
+
     private UUID authorId;
 
     private UUID executorId;
@@ -51,6 +55,8 @@ public class OfferDocument {
     private BigDecimal salary;
 
     private OfferStatus status;
+
+    private Set<WorkProof> workProofs;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -79,8 +85,8 @@ public class OfferDocument {
                   Location location,
                   Set<ServiceCategory> serviceCategories,
                   BigDecimal salary) {
-        this(UUID.randomUUID(), title, description, authorId, null,
+        this(UUID.randomUUID(), title, description, null, authorId, null,
                 location, serviceCategories, salary,
-                OfferStatus.OPEN, null, null);
+                OfferStatus.OPEN, new HashSet<>(), null, null);
     }
 }

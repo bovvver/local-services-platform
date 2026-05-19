@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yml")
 @Import({TestSecurityConfig.class, TestMongoConfig.class})
 public abstract class BaseIntegrationTest {
 
@@ -28,7 +30,8 @@ public abstract class BaseIntegrationTest {
     protected static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0");
 
     @Container
-    protected static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"));
+    protected static KafkaContainer kafka = new KafkaContainer(DockerImageName
+            .parse("apache/kafka:latest"));
 
     @Autowired
     protected MockMvc mockMvc;

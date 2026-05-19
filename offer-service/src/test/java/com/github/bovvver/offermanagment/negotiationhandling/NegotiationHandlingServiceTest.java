@@ -50,12 +50,14 @@ class NegotiationHandlingServiceTest {
                 offerId,
                 "Sample Title",
                 "Sample Description",
+                null,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 new Location(52.2297, 21.0122),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.OPEN,
+                null,
                 null,
                 null
         );

@@ -44,12 +44,14 @@ class OfferExecutionServiceTest {
                 offerId,
                 "Sample Title",
                 "Sample Description",
+                null,
                 authorId,
                 executorUuid,
                 new Location(52.2297, 21.0122),
                 Set.of(),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
+                null,
                 null,
                 null
         );

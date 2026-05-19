@@ -7,3 +7,8 @@ spring:
 
 KEYCLOAK_HOST: localhost
 KEYCLOAK_PORT_HOST: 7080
+
+MINIO_BUCKET_NAME: test-bucket
+MINIO_ROOT_USER: test-user
+MINIO_ROOT_PASSWORD: test-password
+MINIO_URL: http://localhost:9000
