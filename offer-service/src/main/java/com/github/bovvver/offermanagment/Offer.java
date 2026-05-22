@@ -2,7 +2,7 @@ package com.github.bovvver.offermanagment;
 
 import com.github.bovvver.infrastructure.CompletionProofRequiredException;
 import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
-import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
+import com.github.bovvver.infrastructure.UnauthorizedParticipantException;
 import com.github.bovvver.offermanagment.events.DomainEvent;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
@@ -134,9 +134,19 @@ public class Offer {
         return this.authorId.equals(userId);
     }
 
+    public boolean isExecutedBy(UserId userId) {
+        return this.executorId.equals(userId);
+    }
+
+    public void isParticipant(UserId userId) {
+        if (!isOwnedBy(userId) && !isExecutedBy(userId)) {
+            throw new UnauthorizedParticipantException();
+        }
+    }
+
     public void startExecution(UserId userId) {
-        if (!userId.equals(this.executorId)) {
-            throw new UnauthorizedExecutorException();
+        if (!isExecutedBy(userId)) {
+            throw new UnauthorizedParticipantException();
         }
         if (this.status != OfferStatus.ASSIGNED) {
             throw new OperationNotAllowedInCurrentStateException(this.status);
@@ -144,7 +154,10 @@ public class Offer {
         changeStatus(OfferStatus.IN_PROGRESS);
     }
 
-    public void requestCompletion(final String description, final List<String> proofUrls) {
+    public void requestCompletion(final String description, final List<String> proofUrls, UserId executorId) {
+        if (!isExecutedBy(executorId)) {
+            throw new UnauthorizedParticipantException();
+        }
         if (this.status != OfferStatus.IN_PROGRESS) {
             throw new OperationNotAllowedInCurrentStateException(this.status);
         }

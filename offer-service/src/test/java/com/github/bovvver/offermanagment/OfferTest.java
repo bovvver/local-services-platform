@@ -2,7 +2,7 @@ package com.github.bovvver.offermanagment;
 
 import com.github.bovvver.infrastructure.CompletionProofRequiredException;
 import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
-import com.github.bovvver.infrastructure.UnauthorizedExecutorException;
+import com.github.bovvver.infrastructure.UnauthorizedParticipantException;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.vo.*;
@@ -195,7 +195,7 @@ class OfferTest {
         offer.accept(executor);
 
         assertThatThrownBy(() -> offer.startExecution(UserId.of(UUID.randomUUID())))
-                .isInstanceOf(UnauthorizedExecutorException.class);
+                .isInstanceOf(UnauthorizedParticipantException.class);
     }
 
     @Test
@@ -219,7 +219,7 @@ class OfferTest {
         List<String> proofUrls = List.of("https://proofs.local/1", "https://proofs.local/2");
         String completionDescription = "Job done";
 
-        offer.requestCompletion(completionDescription, proofUrls);
+        offer.requestCompletion(completionDescription, proofUrls, executor);
 
         assertThat(offer.getStatus()).isEqualTo(OfferStatus.COMPLETED_REQUESTED);
         assertThat(offer.getCompletionDescription().value()).isEqualTo(completionDescription);
@@ -231,8 +231,10 @@ class OfferTest {
     @Test
     void shouldThrowWhenRequestingCompletionInWrongStatus() {
         Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
 
-        assertThatThrownBy(() -> offer.requestCompletion("Done", List.of("proof")))
+        assertThatThrownBy(() -> offer.requestCompletion("Done", List.of("proof"), executor))
                 .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
     }
 
@@ -243,7 +245,7 @@ class OfferTest {
         offer.accept(executor);
         offer.startExecution(executor);
 
-        assertThatThrownBy(() -> offer.requestCompletion("Done", List.of()))
+        assertThatThrownBy(() -> offer.requestCompletion("Done", List.of(), executor))
                 .isInstanceOf(CompletionProofRequiredException.class);
     }
 }
