@@ -6,6 +6,7 @@ import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferMapper;
 import com.github.bovvver.offermanagment.OfferRepository;
+import com.github.bovvver.shared.CurrentUser;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.Http;
 import io.minio.MinioClient;
@@ -28,34 +29,35 @@ class WorkProofUploadService {
     @Value("${MINIO_BUCKET_NAME}")
     private String bucket;
 
+    private final CurrentUser currentUser;
     private final MinioClient minioClient;
     private final OfferRepository offerRepository;
 
     PresignedUploadUrlResponse getPresignedUploadURL(final PresignedUploadUrlRequest request) {
+        loadOfferAndVerifyParticipant(request.offerId());
+
         String objectKey = getObjectKey(request);
-        String uploadUrl = getUploadUrl(objectKey);
+        String uploadUrl = getPresignedUrl(Http.Method.PUT, objectKey);
         return new PresignedUploadUrlResponse(uploadUrl, objectKey);
     }
 
     PresignedGetUrlResponse getPresignedGetURLs(final UUID offerId) {
-        OfferDocument offerDocument = offerRepository.findById(offerId)
-                .orElseThrow(() -> new OfferNotFoundException(offerId));
-        Offer offer = OfferMapper.toDomain(offerDocument);
+        Offer offer = loadOfferAndVerifyParticipant(offerId);
         Set<WorkProof> workProofs = offer.getWorkProofs();
 
         List<String> getUrls = workProofs.stream()
                 .map(WorkProof::url)
-                .map(this::getGetUrl)
+                .map(key -> getPresignedUrl(Http.Method.GET, key))
                 .toList();
 
         return new PresignedGetUrlResponse(getUrls);
     }
 
-    private String getGetUrl(String objectKey) {
+    private String getPresignedUrl(Http.Method method, String objectKey) {
         try {
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
-                            .method(Http.Method.GET)
+                            .method(method)
                             .bucket(bucket)
                             .object(objectKey)
                             .expiry(URL_EXPIRY_MINUTES, TimeUnit.MINUTES)
@@ -66,19 +68,12 @@ class WorkProofUploadService {
         }
     }
 
-    private String getUploadUrl(String objectKey) {
-        try {
-            return minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .method(Http.Method.PUT)
-                            .bucket(bucket)
-                            .object(objectKey)
-                            .expiry(URL_EXPIRY_MINUTES, TimeUnit.MINUTES)
-                            .build()
-            );
-        } catch (Exception e) {
-            throw new URLGenerationFailedException();
-        }
+    private Offer loadOfferAndVerifyParticipant(UUID offerId) {
+        OfferDocument offerDocument = offerRepository.findById(offerId)
+                .orElseThrow(() -> new OfferNotFoundException(offerId));
+        Offer offer = OfferMapper.toDomain(offerDocument);
+        offer.isParticipant(currentUser.getId());
+        return offer;
     }
 
     private String getObjectKey(PresignedUploadUrlRequest request) {

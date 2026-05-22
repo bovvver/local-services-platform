@@ -142,8 +142,10 @@ class OfferMapperTest {
                 Set.of(ServiceCategory.HOME_SERVICES),
                 Salary.of(5000.0)
         );
-        offer.changeStatus(OfferStatus.IN_PROGRESS);
-        offer.requestCompletion("Completion description", List.of("https://example.com/proof1", "https://example.com/proof2"));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.requestCompletion("Completion description", List.of("https://example.com/proof1", "https://example.com/proof2"), executor);
 
         OfferDocument document = OfferMapper.toDocument(offer);
 

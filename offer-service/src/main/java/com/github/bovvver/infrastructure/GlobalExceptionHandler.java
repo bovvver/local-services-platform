@@ -13,8 +13,8 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(UnauthorizedExecutorException.class)
-    public ResponseEntity<String> handleUnauthorizedExecutorException(UnauthorizedExecutorException ex) {
+    @ExceptionHandler(UnauthorizedParticipantException.class)
+    public ResponseEntity<String> handleUnauthorizedExecutorException(UnauthorizedParticipantException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 

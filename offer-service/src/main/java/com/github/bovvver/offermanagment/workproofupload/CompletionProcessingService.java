@@ -5,6 +5,7 @@ import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferMapper;
 import com.github.bovvver.offermanagment.OfferRepository;
+import com.github.bovvver.shared.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 class CompletionProcessingService {
 
+    private final CurrentUser currentUser;
     private final OfferRepository offerRepository;
 
     OfferExecutionResponse sendCompletionRequest(final CompletionRequest request) {
@@ -22,7 +24,7 @@ class CompletionProcessingService {
                 .orElseThrow(() -> new OfferNotFoundException(request.offerId()));
         Offer offer = OfferMapper.toDomain(offerDocument);
 
-        offer.requestCompletion(request.description(), request.proofUrls());
+        offer.requestCompletion(request.description(), request.proofUrls(), currentUser.getId());
 
         Offer saved = OfferMapper.toDomain(offerRepository.save(OfferMapper.toDocument(offer)));
 
