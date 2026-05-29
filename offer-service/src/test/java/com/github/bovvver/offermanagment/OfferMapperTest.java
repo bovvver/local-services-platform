@@ -64,7 +64,6 @@ class OfferMapperTest {
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
                 null,
-                null,
                 null
         );
 
@@ -90,7 +89,6 @@ class OfferMapperTest {
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
                 null,
-                null,
                 null
         );
 
@@ -107,28 +105,36 @@ class OfferMapperTest {
                 new WorkProof("https://example.com/proof1", LocalDateTime.now()),
                 new WorkProof("https://example.com/proof2", LocalDateTime.now())
         ));
+        LocalDateTime requestedAt = LocalDateTime.now().minusHours(2);
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                "Completion description",
+                "Needs fixes",
+                requestedAt,
+                workProofs
+        );
         OfferDocument document = new OfferDocument(
                 UUID.randomUUID(),
                 "Sample Title",
                 "Sample Description",
-                "Completion description",
+                executionDetails,
                 UUID.randomUUID(),
                 null,
                 new Location(52.2297, 21.0122),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.IN_PROGRESS,
-                workProofs,
                 null,
                 null
         );
 
         Offer offer = OfferMapper.toDomain(document);
 
-        assertThat(offer.getCompletionDescription()).isNotNull();
-        assertThat(offer.getCompletionDescription().value()).isEqualTo("Completion description");
-        assertThat(offer.getWorkProofs()).hasSize(2);
-        assertThat(offer.getWorkProofs().stream().map(WorkProof::url))
+        assertThat(offer.getExecutionDetails().getCompletionDescription()).isNotNull();
+        assertThat(offer.getExecutionDetails().getCompletionDescription().value()).isEqualTo("Completion description");
+        assertThat(offer.getExecutionDetails().getRejectionReason()).isEqualTo("Needs fixes");
+        assertThat(offer.getExecutionDetails().getCompletionRequestedAt()).isEqualTo(requestedAt);
+        assertThat(offer.getExecutionDetails().getWorkProofs()).hasSize(2);
+        assertThat(offer.getExecutionDetails().getWorkProofs().stream().map(WorkProof::url))
                 .containsExactlyInAnyOrder("https://example.com/proof1", "https://example.com/proof2");
     }
 
@@ -149,9 +155,9 @@ class OfferMapperTest {
 
         OfferDocument document = OfferMapper.toDocument(offer);
 
-        assertThat(document.getCompletionDescription()).isEqualTo("Completion description");
-        assertThat(document.getWorkProofs()).hasSize(2);
-        assertThat(document.getWorkProofs().stream().map(WorkProof::url))
+        assertThat(document.getExecutionDetails().getCompletionDescription()).isEqualTo("Completion description");
+        assertThat(document.getExecutionDetails().getWorkProofs()).hasSize(2);
+        assertThat(document.getExecutionDetails().getWorkProofs().stream().map(WorkProof::url))
                 .containsExactlyInAnyOrder("https://example.com/proof1", "https://example.com/proof2");
     }
 }

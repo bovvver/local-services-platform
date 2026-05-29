@@ -9,7 +9,7 @@ import com.github.bovvver.shared.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,20 +20,46 @@ class CompletionProcessingService {
 
     OfferExecutionResponse sendCompletionRequest(final CompletionRequest request) {
 
-        OfferDocument offerDocument = offerRepository.findById(request.offerId())
-                .orElseThrow(() -> new OfferNotFoundException(request.offerId()));
-        Offer offer = OfferMapper.toDomain(offerDocument);
-
+        Offer offer = getOfferById(request.offerId());
         offer.requestCompletion(request.description(), request.proofUrls(), currentUser.getId());
-
         Offer saved = OfferMapper.toDomain(offerRepository.save(OfferMapper.toDocument(offer)));
 
         return new OfferExecutionResponse(
                 saved.getId().value(),
                 saved.getStatus(),
-                saved.getCompletionDescription().value(),
-                saved.getWorkProofs().stream().toList(),
-                LocalDateTime.now()
+                saved.getExecutionDetails().getCompletionDescription().value(),
+                saved.getExecutionDetails().getWorkProofs().stream().toList(),
+                saved.getExecutionDetails().getCompletionRequestedAt()
         );
+    }
+
+    OfferCompletionResponse acceptCompletion(final UUID offerId) {
+
+        Offer offer = getOfferById(offerId);
+        offer.acceptCompletion(currentUser.getId());
+        Offer saved = OfferMapper.toDomain(offerRepository.save(OfferMapper.toDocument(offer)));
+
+        return new OfferCompletionResponse(
+                saved.getId().value(),
+                saved.getStatus()
+        );
+    }
+
+    OfferCompletionResponse rejectCompletion(final UUID offerId, final String reason) {
+
+        Offer offer = getOfferById(offerId);
+        offer.rejectCompletion(currentUser.getId(), reason);
+        Offer saved = OfferMapper.toDomain(offerRepository.save(OfferMapper.toDocument(offer)));
+
+        return new OfferCompletionResponse(
+                saved.getId().value(),
+                saved.getStatus()
+        );
+    }
+
+    private Offer getOfferById(final UUID offerId) {
+        OfferDocument offerDocument = offerRepository.findById(offerId)
+                .orElseThrow(() -> new OfferNotFoundException(offerId));
+        return OfferMapper.toDomain(offerDocument);
     }
 }

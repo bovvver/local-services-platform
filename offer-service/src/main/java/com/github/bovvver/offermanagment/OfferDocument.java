@@ -3,7 +3,6 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
-import com.github.bovvver.offermanagment.workproofupload.WorkProof;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,7 +41,7 @@ public class OfferDocument {
 
     private String description;
 
-    private String completionDescription;
+    private ExecutionDetailsDocument executionDetails;
 
     private UUID authorId;
 
@@ -55,8 +54,6 @@ public class OfferDocument {
     private BigDecimal salary;
 
     private OfferStatus status;
-
-    private Set<WorkProof> workProofs;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -85,8 +82,8 @@ public class OfferDocument {
                   Location location,
                   Set<ServiceCategory> serviceCategories,
                   BigDecimal salary) {
-        this(UUID.randomUUID(), title, description, null, authorId, null,
+        this(UUID.randomUUID(), title, description, new ExecutionDetailsDocument(null, null, null, new HashSet<>()), authorId, null,
                 location, serviceCategories, salary,
-                OfferStatus.OPEN, new HashSet<>(), null, null);
+                OfferStatus.OPEN, null, null);
     }
 }

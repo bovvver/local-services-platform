@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import static com.mongodb.client.model.Filters.exists;
 
 /**
- * Backwards-compatible migration: ensures field `completionDescription` exists in `offers` collection.
- *
+ * Backwards-compatible migration: ensures field `executionDetails.completionDescription` exists in `offers` collection.
+ * <p>
  * We keep it as null by default for existing offers.
  */
 @AllArgsConstructor
@@ -26,8 +26,8 @@ public class CompletionDescriptionFieldInitializer {
         // set to null for documents where the field does not exist
         mongoTemplate.getCollection("offers")
                 .updateMany(
-                        exists("completionDescription", false),
-                        Updates.set("completionDescription", null)
+                        exists("executionDetails.completionDescription", false),
+                        Updates.set("executionDetails.completionDescription", null)
                 );
     }
 
@@ -35,9 +35,8 @@ public class CompletionDescriptionFieldInitializer {
     public void rollback() {
         mongoTemplate.getCollection("offers")
                 .updateMany(
-                        exists("completionDescription", true),
-                        new Document("$unset", new Document("completionDescription", ""))
+                        exists("executionDetails.completionDescription", true),
+                        new Document("$unset", new Document("executionDetails.completionDescription", ""))
                 );
     }
 }
-

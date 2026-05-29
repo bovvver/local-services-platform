@@ -219,7 +219,6 @@ class NegotiationRESTIT extends BaseIntegrationTest {
     }
 
     private UUID proposeSalaryAsAuthor(BigDecimal proposedSalary) throws Exception {
-        // W testach CurrentUser jest stały (EXECUTOR_ID), więc propozycję AUTORA symulujemy na poziomie domeny.
         var bookingEntity = bookingReadRepository.findById(BOOKING_ID).orElseThrow();
         var booking = com.github.bovvver.bookingmanagement.BookingMapper.toDomain(bookingEntity);
         booking.addPositionToNegotiation(new Salary(proposedSalary), UserId.of(AUTHOR_ID));
@@ -230,7 +229,6 @@ class NegotiationRESTIT extends BaseIntegrationTest {
     }
 
     private UUID proposeSalaryAsExecutor(BigDecimal proposedSalary) throws Exception {
-        // Executor działa przez REST (CurrentUser = EXECUTOR_ID)
         return proposeSalary(BOOKING_ID, proposedSalary);
     }
 

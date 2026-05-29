@@ -46,18 +46,23 @@ class NegotiationHandlingServiceTest {
     @Test
     void shouldChangeOfferStatusToInNegotiation() {
         UUID offerId = UUID.randomUUID();
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                null,
+                null,
+                null,
+                null
+        );
         OfferDocument offerDocument = new OfferDocument(
                 offerId,
                 "Sample Title",
                 "Sample Description",
-                null,
+                executionDetails,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 new Location(52.2297, 21.0122),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.OPEN,
-                null,
                 null,
                 null
         );
