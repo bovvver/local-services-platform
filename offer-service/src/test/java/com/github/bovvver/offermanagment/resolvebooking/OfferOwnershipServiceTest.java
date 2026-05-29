@@ -1,5 +1,6 @@
 package com.github.bovvver.offermanagment.resolvebooking;
 
+import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.*;
@@ -72,11 +73,17 @@ public class OfferOwnershipServiceTest {
     }
 
     private static OfferDocument createOfferDocument() {
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                null,
+                null,
+                null,
+                null
+        );
         return new OfferDocument(
                 OFFER_ID,
                 "Test Offer",
                 "Test Description",
-                null,
+                executionDetails,
                 USER_ID,
                 null,
                 new Location(
@@ -85,7 +92,6 @@ public class OfferOwnershipServiceTest {
                 ),
                 null,
                 new BigDecimal("1000.0"),
-                null,
                 null,
                 null,
                 null

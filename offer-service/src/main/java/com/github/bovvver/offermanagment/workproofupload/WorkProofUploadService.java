@@ -43,7 +43,7 @@ class WorkProofUploadService {
 
     PresignedGetUrlResponse getPresignedGetURLs(final UUID offerId) {
         Offer offer = loadOfferAndVerifyParticipant(offerId);
-        Set<WorkProof> workProofs = offer.getWorkProofs();
+        Set<WorkProof> workProofs = offer.getExecutionDetails().getWorkProofs();
 
         List<String> getUrls = workProofs.stream()
                 .map(WorkProof::url)

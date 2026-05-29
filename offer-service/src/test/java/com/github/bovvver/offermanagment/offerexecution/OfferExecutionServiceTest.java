@@ -1,6 +1,7 @@
 package com.github.bovvver.offermanagment.offerexecution;
 
 import com.github.bovvver.infrastructure.OfferNotFoundException;
+import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
@@ -40,18 +41,23 @@ class OfferExecutionServiceTest {
         UUID authorId = UUID.randomUUID();
         UUID executorUuid = UUID.randomUUID();
 
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                null,
+                null,
+                null,
+                null
+        );
         OfferDocument offerDocument = new OfferDocument(
                 offerId,
                 "Sample Title",
                 "Sample Description",
-                null,
+                executionDetails,
                 authorId,
                 executorUuid,
                 new Location(52.2297, 21.0122),
                 Set.of(),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
-                null,
                 null,
                 null
         );

@@ -22,8 +22,8 @@ public class WorkProofsFieldInitializer {
     public void changeSet() {
         mongoTemplate.getCollection("offers")
                 .updateMany(
-                        or(exists("workProofs", false), eq("workProofs", null)),
-                        Updates.set("workProofs", Collections.emptyList())
+                        or(exists("executionDetails.workProofs", false), eq("executionDetails.workProofs", null)),
+                        Updates.set("executionDetails.workProofs", Collections.emptyList())
                 );
     }
 
@@ -31,9 +31,8 @@ public class WorkProofsFieldInitializer {
     public void rollback() {
         mongoTemplate.getCollection("offers")
                 .updateMany(
-                        eq("workProofs", Collections.emptyList()),
-                        new Document("$unset", new Document("workProofs", ""))
+                        eq("executionDetails.workProofs", Collections.emptyList()),
+                        new Document("$unset", new Document("executionDetails.workProofs", ""))
                 );
     }
 }
-

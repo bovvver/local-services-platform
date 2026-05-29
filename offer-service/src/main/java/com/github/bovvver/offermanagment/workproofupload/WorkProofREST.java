@@ -14,6 +14,8 @@ class WorkProofREST {
     static final String GET_PRESIGNED_UPLOAD_URL = "/files/presigned-upload";
     static final String GET_PRESIGNED_GET_URLS = "/files/{offerId}/urls";
     static final String REQUEST_COMPLETION_URL = "/offers/completion-request";
+    static final String ACCEPT_COMPLETION_URL = "/offers/{offerId}/accept-completion";
+    static final String REJECT_COMPLETION_URL = "/offers/{offerId}/reject-completion";
 
     private final WorkProofUploadService workProofUploadService;
     private final CompletionProcessingService completionProcessingService;
@@ -31,5 +33,15 @@ class WorkProofREST {
     @PostMapping(path = REQUEST_COMPLETION_URL)
     ResponseEntity<OfferExecutionResponse> sendCompletionRequest(@Valid @RequestBody CompletionRequest request) {
         return ResponseEntity.ok(completionProcessingService.sendCompletionRequest(request));
+    }
+
+    @PostMapping(path = ACCEPT_COMPLETION_URL)
+    ResponseEntity<OfferCompletionResponse> acceptCompletion(@PathVariable UUID offerId) {
+        return ResponseEntity.ok(completionProcessingService.acceptCompletion(offerId));
+    }
+
+    @PostMapping(path = REJECT_COMPLETION_URL)
+    ResponseEntity<OfferCompletionResponse> rejectCompletion(@PathVariable UUID offerId, @RequestBody RejectCompletionRequest request) {
+        return ResponseEntity.ok(completionProcessingService.rejectCompletion(offerId, request.reason()));
     }
 }

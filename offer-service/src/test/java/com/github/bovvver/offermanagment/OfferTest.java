@@ -222,9 +222,9 @@ class OfferTest {
         offer.requestCompletion(completionDescription, proofUrls, executor);
 
         assertThat(offer.getStatus()).isEqualTo(OfferStatus.COMPLETED_REQUESTED);
-        assertThat(offer.getCompletionDescription().value()).isEqualTo(completionDescription);
-        assertThat(offer.getWorkProofs()).hasSize(2);
-        assertThat(offer.getWorkProofs().stream().map(WorkProof::url))
+        assertThat(offer.getExecutionDetails().getCompletionDescription().value()).isEqualTo(completionDescription);
+        assertThat(offer.getExecutionDetails().getWorkProofs()).hasSize(2);
+        assertThat(offer.getExecutionDetails().getWorkProofs().stream().map(WorkProof::url))
                 .containsExactlyInAnyOrderElementsOf(proofUrls);
     }
 

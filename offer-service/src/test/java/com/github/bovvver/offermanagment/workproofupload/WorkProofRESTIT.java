@@ -2,6 +2,7 @@ package com.github.bovvver.offermanagment.workproofupload;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
+import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
@@ -32,6 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class WorkProofRESTIT extends BaseIntegrationTest {
 
+    private static final UUID OFFER_ID = UUID.randomUUID();
+    private static final UUID EXECUTOR_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
     @Autowired
     private OfferRepository offerRepository;
 
@@ -48,11 +52,12 @@ class WorkProofRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldReturnPresignedUploadUrl() throws Exception {
-        UUID offerId = UUID.randomUUID();
+        createOfferWithStatus(OfferStatus.ASSIGNED);
+
         PresignedUploadUrlRequest request = new PresignedUploadUrlRequest(
                 "proof.png",
                 "image/png",
-                offerId
+                OFFER_ID
         );
 
         doReturn("upload-url").when(minioClient).getPresignedObjectUrl(any());
@@ -62,38 +67,32 @@ class WorkProofRESTIT extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.uploadUrl").value("upload-url"))
-                .andExpect(jsonPath("$.fileId").value(startsWith("offers/" + offerId + "/")))
+                .andExpect(jsonPath("$.fileId").value(startsWith("offers/" + OFFER_ID + "/")))
                 .andExpect(jsonPath("$.fileId").value(endsWith("-proof.png")));
     }
 
     @Test
     void shouldReturnPresignedGetUrls() throws Exception {
-        UUID offerId = UUID.randomUUID();
         Set<WorkProof> workProofs = new LinkedHashSet<>(List.of(
-                new WorkProof("offers/%s/proof-1.png".formatted(offerId), LocalDateTime.now()),
-                new WorkProof("offers/%s/proof-2.png".formatted(offerId), LocalDateTime.now())
+                new WorkProof("offers/%s/proof-1.png".formatted(OFFER_ID), LocalDateTime.now()),
+                new WorkProof("offers/%s/proof-2.png".formatted(OFFER_ID), LocalDateTime.now())
         ));
 
-        OfferDocument offerDocument = new OfferDocument(
-                offerId,
-                "Sample Title",
-                "Sample Description",
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
                 "Completed",
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                new Location(52.2297, 21.0122),
-                Set.of(ServiceCategory.HOME_SERVICES),
-                BigDecimal.valueOf(5000.0),
-                OfferStatus.COMPLETED_REQUESTED,
-                workProofs,
+                null,
                 LocalDateTime.now().minusDays(1),
-                null
+                workProofs
+        );
+        OfferDocument offerDocument = createOfferWithExecutionDetails(
+                executionDetails,
+                OfferStatus.COMPLETED_REQUESTED
         );
         offerRepository.save(offerDocument);
 
         doReturn("get-url-1", "get-url-2").when(minioClient).getPresignedObjectUrl(any());
 
-        mockMvc.perform(get(GET_PRESIGNED_GET_URLS, offerId)
+        mockMvc.perform(get(GET_PRESIGNED_GET_URLS, OFFER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.proofUrls")
@@ -102,52 +101,42 @@ class WorkProofRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldReturnNotFoundWhenOfferMissingForGetUrls() throws Exception {
-        UUID offerId = UUID.randomUUID();
-
-        mockMvc.perform(get(GET_PRESIGNED_GET_URLS, offerId)
+        mockMvc.perform(get(GET_PRESIGNED_GET_URLS, OFFER_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldSendCompletionRequest() throws Exception {
-        UUID offerId = UUID.randomUUID();
-        UUID authorId = UUID.randomUUID();
-        UUID executorId = UUID.randomUUID();
-        OfferDocument offerDocument = new OfferDocument(
-                offerId,
-                "Sample Title",
-                "Sample Description",
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
                 null,
-                authorId,
-                executorId,
-                new Location(52.2297, 21.0122),
-                Set.of(ServiceCategory.HOME_SERVICES),
-                BigDecimal.valueOf(5000.0),
-                OfferStatus.IN_PROGRESS,
-                new LinkedHashSet<>(),
-                LocalDateTime.now().minusDays(1),
-                null
+                null,
+                null,
+                new LinkedHashSet<>()
+        );
+        OfferDocument offerDocument = createOfferWithExecutionDetails(
+                executionDetails,
+                OfferStatus.IN_PROGRESS
         );
         offerRepository.save(offerDocument);
 
         CompletionRequest request = new CompletionRequest(
                 "Job done",
-                List.of("offers/%s/proof-1.png".formatted(offerId), "offers/%s/proof-2.png".formatted(offerId)),
-                offerId
+                List.of("offers/%s/proof-1.png".formatted(OFFER_ID), "offers/%s/proof-2.png".formatted(OFFER_ID)),
+                OFFER_ID
         );
 
         mockMvc.perform(post(REQUEST_COMPLETION_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.offerId").value(offerId.toString()))
+                .andExpect(jsonPath("$.offerId").value(OFFER_ID.toString()))
                 .andExpect(jsonPath("$.status").value("COMPLETED_REQUESTED"))
                 .andExpect(jsonPath("$.completionDescription").value("Job done"))
                 .andExpect(jsonPath("$.proofs[*].url")
                         .value(containsInAnyOrder(
-                                "offers/%s/proof-1.png".formatted(offerId),
-                                "offers/%s/proof-2.png".formatted(offerId)
+                                "offers/%s/proof-1.png".formatted(OFFER_ID),
+                                "offers/%s/proof-2.png".formatted(OFFER_ID)
                         )));
     }
 
@@ -164,5 +153,34 @@ class WorkProofRESTIT extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
-}
 
+    private OfferDocument createOfferWithStatus(OfferStatus status) {
+        return createOfferWithExecutionDetails(
+                new ExecutionDetailsDocument(null, null, null, null),
+                status
+        );
+    }
+
+    private OfferDocument createOfferWithExecutionDetails(
+            ExecutionDetailsDocument executionDetails,
+            OfferStatus status
+    ) {
+        OfferDocument offer = new OfferDocument(
+                OFFER_ID,
+                "Test Offer",
+                "Test Description",
+                executionDetails,
+                UUID.randomUUID(),
+                EXECUTOR_ID,
+                new Location(40.7128, -74.0060),
+                Set.of(ServiceCategory.HOME_SERVICES),
+                BigDecimal.valueOf(1000.0),
+                status,
+                null,
+                null
+        );
+
+        offerRepository.save(offer);
+        return offer;
+    }
+}

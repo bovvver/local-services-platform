@@ -1,11 +1,14 @@
 package com.github.bovvver.offermanagment.workproofupload;
 
 import com.github.bovvver.infrastructure.OfferNotFoundException;
+import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
+import com.github.bovvver.offermanagment.vo.UserId;
+import com.github.bovvver.shared.CurrentUser;
 import io.minio.MinioClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +37,9 @@ class WorkProofUploadServiceTest {
     private MinioClient minioClient;
 
     @Mock
+    private CurrentUser currentUser;
+
+    @Mock
     private OfferRepository offerRepository;
 
     @InjectMocks
@@ -42,13 +48,38 @@ class WorkProofUploadServiceTest {
     @Test
     void shouldReturnPresignedUploadUrlAndFileId() throws Exception {
         UUID offerId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
         PresignedUploadUrlRequest request = new PresignedUploadUrlRequest(
                 "proof.png",
                 "image/png",
                 offerId
         );
 
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                null,
+                null,
+                null,
+                new LinkedHashSet<>()
+
+        );
+        OfferDocument offerDocument = new OfferDocument(
+                offerId,
+                "Sample Title",
+                "Sample Description",
+                executionDetails,
+                authorId,
+                null,
+                new Location(52.2297, 21.0122),
+                Set.of(ServiceCategory.HOME_SERVICES),
+                BigDecimal.valueOf(5000.0),
+                OfferStatus.OPEN,
+                LocalDateTime.now().minusDays(1),
+                null
+        );
+
         setBucket(workProofUploadService, "offer-bucket");
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
+        when(currentUser.getId()).thenReturn(UserId.of(authorId));
         doReturn("upload-url").when(minioClient).getPresignedObjectUrl(any());
 
         PresignedUploadUrlResponse response = workProofUploadService.getPresignedUploadURL(request);
@@ -62,29 +93,36 @@ class WorkProofUploadServiceTest {
     @Test
     void shouldReturnPresignedGetUrlsForWorkProofs() throws Exception {
         UUID offerId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
         Set<WorkProof> workProofs = new LinkedHashSet<>(List.of(
                 new WorkProof("offers/%s/proof-1.png".formatted(offerId), LocalDateTime.now()),
                 new WorkProof("offers/%s/proof-2.png".formatted(offerId), LocalDateTime.now())
         ));
 
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                "Completed",
+                null,
+                LocalDateTime.now().minusDays(1),
+                workProofs
+        );
         OfferDocument offerDocument = new OfferDocument(
                 offerId,
                 "Sample Title",
                 "Sample Description",
-                "Completed",
-                UUID.randomUUID(),
-                UUID.randomUUID(),
+                executionDetails,
+                authorId,
+                null,
                 new Location(52.2297, 21.0122),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.COMPLETED_REQUESTED,
-                workProofs,
                 LocalDateTime.now().minusDays(1),
                 null
         );
 
         setBucket(workProofUploadService, "offer-bucket");
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
+        when(currentUser.getId()).thenReturn(UserId.of(authorId));
         doReturn("get-url-1", "get-url-2").when(minioClient).getPresignedObjectUrl(any());
 
         PresignedGetUrlResponse response = workProofUploadService.getPresignedGetURLs(offerId);
@@ -114,6 +152,3 @@ class WorkProofUploadServiceTest {
         }
     }
 }
-
-
-

@@ -25,42 +25,39 @@ public class Offer {
     private final OfferId id;
     private final Title title;
     private final Description description;
-    private Description completionDescription;
+    private final OfferExecutionDetails executionDetails;
     private final UserId authorId;
     private UserId executorId;
     private final Location location;
     private final Set<ServiceCategory> serviceCategories;
     private final Salary salary;
     private OfferStatus status;
-    private final Set<WorkProof> workProofs;
     private final LocalDateTime createdAt;
     private final List<DomainEvent> domainEvents;
 
     Offer(final OfferId id,
           final Title title,
           final Description description,
-          final Description completionDescription,
+          final OfferExecutionDetails executionDetails,
           final UserId authorId,
           final UserId executorId,
           final Location location,
           final Set<ServiceCategory> serviceCategories,
           final Salary salary,
           final OfferStatus status,
-          final Set<WorkProof> workProofs,
           final LocalDateTime createdAt,
           final List<DomainEvent> domainEvents
     ) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.completionDescription = completionDescription;
+        this.executionDetails = executionDetails == null ? OfferExecutionDetails.empty() : executionDetails;
         this.authorId = authorId;
         this.executorId = executorId;
         this.location = location;
         this.serviceCategories = serviceCategories;
         this.salary = salary;
         this.status = status;
-        this.workProofs = workProofs;
         this.createdAt = createdAt;
         this.domainEvents = domainEvents;
     }
@@ -89,9 +86,9 @@ public class Offer {
           Set<ServiceCategory> serviceCategories,
           Salary salary) {
 
-        this(id, title, description, null, authorId, null,
+        this(id, title, description, OfferExecutionDetails.empty(), authorId, null,
                 location, serviceCategories, salary,
-                OfferStatus.OPEN, new HashSet<>(), LocalDateTime.now(),
+                OfferStatus.OPEN, LocalDateTime.now(),
                 new ArrayList<>());
     }
 
@@ -165,9 +162,32 @@ public class Offer {
             throw new CompletionProofRequiredException();
         }
 
-        this.completionDescription = Description.of(description);
-        this.workProofs.addAll(proofUrls.stream().map(el -> new WorkProof(el, LocalDateTime.now())).toList());
+        executionDetails.requestCompletion(Description.of(description));
+        executionDetails.addWorkProofs(
+                proofUrls.stream().map(el -> new WorkProof(el, LocalDateTime.now())).toList()
+        );
         changeStatus(OfferStatus.COMPLETED_REQUESTED);
+    }
+
+    public void rejectCompletion(final UserId id, final String reason) {
+        if (!isOwnedBy(id)) {
+            throw new UnauthorizedParticipantException();
+        }
+        if (this.status != OfferStatus.COMPLETED_REQUESTED) {
+            throw new OperationNotAllowedInCurrentStateException(this.status);
+        }
+        executionDetails.setRejectionReason(reason);
+        changeStatus(OfferStatus.IN_PROGRESS);
+    }
+
+    public void acceptCompletion(final UserId id) {
+        if (!isOwnedBy(id)) {
+            throw new UnauthorizedParticipantException();
+        }
+        if (this.status != OfferStatus.COMPLETED_REQUESTED) {
+            throw new OperationNotAllowedInCurrentStateException(this.status);
+        }
+        changeStatus(OfferStatus.COMPLETED);
     }
 
     public void changeStatus(OfferStatus newStatus) {
@@ -203,8 +223,8 @@ public class Offer {
         return description;
     }
 
-    public Description getCompletionDescription() {
-        return completionDescription;
+    public OfferExecutionDetails getExecutionDetails() {
+        return executionDetails;
     }
 
     public UserId getAuthorId() {
@@ -231,9 +251,6 @@ public class Offer {
         return status;
     }
 
-    public Set<WorkProof> getWorkProofs() {
-        return workProofs;
-    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

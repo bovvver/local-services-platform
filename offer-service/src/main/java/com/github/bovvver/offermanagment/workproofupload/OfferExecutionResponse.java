@@ -13,4 +13,7 @@ record OfferExecutionResponse(
         List<WorkProof> proofs,
         LocalDateTime completionRequestedAt
 ) {
+    OfferExecutionResponse(final UUID offerId, final OfferStatus status, final String completionDescription, final List<WorkProof> proofs) {
+        this(offerId, status, completionDescription, proofs, LocalDateTime.now());
+    }
 }

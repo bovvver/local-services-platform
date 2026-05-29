@@ -43,14 +43,13 @@ class OfferOwnershipRESTIT extends BaseIntegrationTest {
                 OFFER_ID,
                 testOffer.getTitle(),
                 testOffer.getDescription(),
-                testOffer.getCompletionDescription(),
+                testOffer.getExecutionDetails(),
                 testOffer.getAuthorId(),
                 testOffer.getExecutorId(),
                 testOffer.getLocation(),
                 testOffer.getServiceCategories(),
                 testOffer.getSalary(),
                 testOffer.getStatus(),
-                testOffer.getWorkProofs(),
                 testOffer.getCreatedAt(),
                 testOffer.getUpdatedAt()
         );

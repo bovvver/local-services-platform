@@ -1,6 +1,7 @@
 package com.github.bovvver.offermanagment.offerexecution;
 
 import com.github.bovvver.BaseIntegrationTest;
+import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
@@ -32,18 +33,23 @@ class OfferExecutionRESTIT extends BaseIntegrationTest {
     void setUp() {
         offerRepository.deleteAll();
 
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                null,
+                null,
+                null,
+                null
+        );
         OfferDocument offer = new OfferDocument(
                 OFFER_ID,
                 "Test Offer",
                 "Test Description",
-                null,
+                executionDetails,
                 UUID.randomUUID(),
                 EXECUTOR_ID,
                 new Location(40.7128, -74.0060),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(1000.0),
                 OfferStatus.ASSIGNED,
-                null,
                 null,
                 null
         );
@@ -67,4 +73,3 @@ class OfferExecutionRESTIT extends BaseIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 }
-

@@ -1,11 +1,14 @@
 package com.github.bovvver.offermanagment.workproofupload;
 
 import com.github.bovvver.infrastructure.OfferNotFoundException;
+import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
+import com.github.bovvver.offermanagment.vo.UserId;
+import com.github.bovvver.shared.CurrentUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,6 +33,9 @@ import static org.mockito.Mockito.when;
 class CompletionProcessingServiceTest {
 
     @Mock
+    private CurrentUser currentUser;
+
+    @Mock
     private OfferRepository offerRepository;
 
     @InjectMocks
@@ -43,18 +49,24 @@ class CompletionProcessingServiceTest {
         String description = "Job done";
         List<String> proofUrls = List.of("https://proofs.local/1", "https://proofs.local/2");
 
+        ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                null,
+                null,
+                null,
+                new HashSet<>()
+
+        );
         OfferDocument offerDocument = new OfferDocument(
                 offerId,
                 "Sample Title",
                 "Sample Description",
-                null,
+                executionDetails,
                 authorId,
                 executorId,
                 new Location(52.2297, 21.0122),
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.IN_PROGRESS,
-                new HashSet<>(),
                 LocalDateTime.now().minusDays(1),
                 null
         );
@@ -62,6 +74,7 @@ class CompletionProcessingServiceTest {
         CompletionRequest request = new CompletionRequest(description, proofUrls, offerId);
 
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
+        when(currentUser.getId()).thenReturn(UserId.of(executorId));
         when(offerRepository.save(any(OfferDocument.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, OfferDocument.class));
 
@@ -89,4 +102,3 @@ class CompletionProcessingServiceTest {
                 .isInstanceOf(OfferNotFoundException.class);
     }
 }
-

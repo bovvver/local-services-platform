@@ -1,5 +1,7 @@
 package com.github.bovvver.offermanagment.vo;
 
+import org.jspecify.annotations.NonNull;
+
 public record Description(String value) {
 
     public Description {
@@ -16,7 +18,7 @@ public record Description(String value) {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return value;
     }
 }
