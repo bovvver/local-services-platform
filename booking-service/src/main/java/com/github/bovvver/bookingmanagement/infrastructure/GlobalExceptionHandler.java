@@ -42,4 +42,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleOutdatedPosition(OutdatedNegotiationPositionException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+
+    @ExceptionHandler(EventPublicationFailedException.class)
+    public ResponseEntity<String> handleEventPublicationFailed(EventPublicationFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
 }

@@ -13,7 +13,11 @@ class NegotiationStartedFailureListener {
 
     private final NegotiationCancellationService negotiationCancellationService;
 
-    @KafkaListener(topics = NEGOTIATION_STARTED_FAILURE_TOPIC, groupId = "booking-service")
+    @KafkaListener(
+            topics = NEGOTIATION_STARTED_FAILURE_TOPIC,
+            groupId = "booking-service",
+            containerFactory = "negotiationStartedFailureFactory"
+    )
     public void onNegotiationStartedFailure(NegotiationStartedFailureIntegrationEvent event) {
         negotiationCancellationService.cancelNegotiation(event.bookingId());
     }
