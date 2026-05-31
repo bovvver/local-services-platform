@@ -2,6 +2,7 @@ package com.github.bovvver.bookingmanagement.outbox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.bovvver.bookingmanagement.infrastructure.EventPublicationFailedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.*;
 class KafkaEventBusTest {
 
     @Mock
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Mock
     private TopicResolver topicResolver;
@@ -40,13 +41,13 @@ class KafkaEventBusTest {
 
         ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Object> valueCaptor = ArgumentCaptor.forClass(Object.class);
 
         verify(kafkaTemplate).send(topicCaptor.capture(), keyCaptor.capture(), valueCaptor.capture());
 
         assertThat(topicCaptor.getValue()).isEqualTo(topic);
         assertThat(keyCaptor.getValue()).isEqualTo(event.getAggregateId().toString());
-        assertThat(valueCaptor.getValue()).isEqualTo(event.getPayload().toString());
+        assertThat(valueCaptor.getValue()).isEqualTo(event.getPayload());
     }
 
     @Test
@@ -55,15 +56,15 @@ class KafkaEventBusTest {
         String topic = "test.topic";
         given(topicResolver.resolve(event)).willReturn(topic);
         RuntimeException rootCause = new RuntimeException("boom");
-        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenThrow(rootCause);
+        when(kafkaTemplate.send(anyString(), anyString(), any())).thenThrow(rootCause);
 
         assertThatThrownBy(() -> kafkaEventBus.publish(event))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(EventPublicationFailedException.class)
                 .hasMessageContaining("Failed to publish event: " + event.getEventType())
                 .hasCause(rootCause);
 
         verify(topicResolver).resolve(event);
-        verify(kafkaTemplate).send(topic, event.getAggregateId().toString(), event.getPayload().toString());
+        verify(kafkaTemplate).send(topic, event.getAggregateId().toString(), event.getPayload());
     }
 
     @Test
@@ -73,11 +74,11 @@ class KafkaEventBusTest {
         given(topicResolver.resolve(event)).willThrow(rootCause);
 
         assertThatThrownBy(() -> kafkaEventBus.publish(event))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(EventPublicationFailedException.class)
                 .hasMessageContaining("Failed to publish event: " + event.getEventType())
                 .hasCause(rootCause);
 
-        verify(kafkaTemplate, never()).send(anyString(), anyString(), anyString());
+        verify(kafkaTemplate, never()).send(anyString(), anyString(), any());
     }
 
     private OutboxEvent createDummyOutboxEvent() throws Exception {
