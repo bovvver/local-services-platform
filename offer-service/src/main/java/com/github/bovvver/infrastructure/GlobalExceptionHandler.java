@@ -32,5 +32,10 @@ class GlobalExceptionHandler {
     public ResponseEntity<String> handleURLGenerationFailedException(URLGenerationFailedException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
+
+    @ExceptionHandler(EventPublicationFailedException.class)
+    public ResponseEntity<String> handleEventPublicationFailed(EventPublicationFailedException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
 }
 

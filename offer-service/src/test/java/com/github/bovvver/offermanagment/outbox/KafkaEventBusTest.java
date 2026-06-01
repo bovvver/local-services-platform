@@ -1,8 +1,7 @@
 package com.github.bovvver.offermanagment.outbox;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.contracts.IntegrationEvent;
+import com.github.bovvver.infrastructure.EventPublicationFailedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,40 +18,49 @@ import static org.mockito.Mockito.verify;
 class KafkaEventBusTest {
 
     @Mock
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Mock
     private TopicResolver topicResolver;
-
-    @Mock
-    private ObjectMapper objectMapper;
 
     @InjectMocks
     private KafkaEventBus kafkaEventBus;
 
     @Test
-    void shouldPublishEventToKafkaWhenSerializationSucceeds() throws Exception {
+    void shouldPublishEventToKafkaWhenPublishSucceeds() throws Exception {
         IntegrationEvent event = new DummyEvent();
         given(topicResolver.resolve(event)).willReturn("test.topic");
-        given(objectMapper.writeValueAsString(event)).willReturn("{ } ");
 
         kafkaEventBus.publish(event);
 
-        verify(kafkaTemplate).send("test.topic", "{ } ");
+        verify(kafkaTemplate).send("test.topic", event);
     }
 
     @Test
     void shouldThrowRuntimeExceptionWhenSerializationFails() throws Exception {
         IntegrationEvent event = new DummyEvent();
         given(topicResolver.resolve(event)).willReturn("test.topic");
-        given(objectMapper.writeValueAsString(event)).willThrow(new JsonProcessingException("boom") {
-        });
+        RuntimeException rootCause = new RuntimeException("boom");
+        org.mockito.Mockito.when(kafkaTemplate.send("test.topic", event)).thenThrow(rootCause);
 
         assertThatThrownBy(() -> kafkaEventBus.publish(event))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Failed to serialize event: " + DummyEvent.class.getSimpleName());
+                .isInstanceOf(EventPublicationFailedException.class)
+                .hasMessageContaining("Failed to publish event: " + DummyEvent.class.getSimpleName())
+                .hasCause(rootCause);
+    }
 
-        verify(kafkaTemplate, never()).send(org.mockito.Mockito.anyString(), org.mockito.Mockito.anyString());
+    @Test
+    void shouldNotSendMessageWhenTopicResolutionFails() throws Exception {
+        IntegrationEvent event = new DummyEvent();
+        IllegalStateException rootCause = new IllegalStateException("No topic configured");
+        given(topicResolver.resolve(event)).willThrow(rootCause);
+
+        assertThatThrownBy(() -> kafkaEventBus.publish(event))
+                .isInstanceOf(EventPublicationFailedException.class)
+                .hasMessageContaining("Failed to publish event: " + DummyEvent.class.getSimpleName())
+                .hasCause(rootCause);
+
+        verify(kafkaTemplate, never()).send(org.mockito.Mockito.anyString(), org.mockito.Mockito.any());
     }
 
     private static class DummyEvent implements IntegrationEvent {

@@ -1,8 +1,7 @@
 package com.github.bovvver.offermanagment.outbox;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.contracts.IntegrationEvent;
+import com.github.bovvver.infrastructure.EventPublicationFailedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -11,24 +10,23 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class KafkaEventBus implements EventBus {
 
-    private final KafkaTemplate<String, String> kafka;
+    private final KafkaTemplate<String, Object> kafka;
     private final TopicResolver topicResolver;
-    private final ObjectMapper objectMapper;
 
     /**
-     * Publishes the given integration event to the appropriate Kafka topic.
-     * The event is serialized to a raw JSON string, avoiding Jackson type header issues.
+     * Publishes the given outbox event to the appropriate Kafka topic.
+     * The payload is sent as a JSON.
      *
-     * @param integrationEvent The event to be published.
+     * @param integrationEvent The outbox event to be published. It contains the event type,
+     *                         aggregate ID, and payload to be sent to the Kafka topic.
      */
     @Override
     public void publish(IntegrationEvent integrationEvent) {
         try {
             String topic = topicResolver.resolve(integrationEvent);
-            String payload = objectMapper.writeValueAsString(integrationEvent);
-            kafka.send(topic, payload);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize event: " + integrationEvent.getClass().getSimpleName(), e);
+            kafka.send(topic, integrationEvent);
+        } catch (Exception e) {
+            throw new EventPublicationFailedException(integrationEvent.getClass().getSimpleName(), e);
         }
     }
 }

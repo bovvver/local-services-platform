@@ -17,7 +17,11 @@ class NegotiationStartedListener {
     private final NegotiationHandlingService negotiationHandlingService;
     private final OutboxService outboxService;
 
-    @KafkaListener(topics = NEGOTIATION_STARTED_TOPIC, groupId = "offer-service")
+    @KafkaListener(
+            topics = NEGOTIATION_STARTED_TOPIC,
+            groupId = "offer-service",
+            containerFactory = "negotiationStartedFactory"
+    )
     public void onNegotiationStarted(NegotiationStartedIntegrationEvent event) {
 
         try {
