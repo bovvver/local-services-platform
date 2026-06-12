@@ -1,6 +1,8 @@
 package com.github.bovvver.config;
 
 import com.github.bovvver.contracts.BookingAcceptedFailureIntegrationEvent;
+import com.github.bovvver.contracts.BookingCancelledByAuthorIntegrationEvent;
+import com.github.bovvver.contracts.BookingCancelledByExecutorIntegrationEvent;
 import com.github.bovvver.contracts.NegotiationStartedFailureIntegrationEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -31,6 +33,16 @@ class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, BookingAcceptedFailureIntegrationEvent> bookingAcceptedFailureFactory() {
         return buildFactory(BookingAcceptedFailureIntegrationEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, BookingCancelledByAuthorIntegrationEvent> bookingCancelledByAuthorFactory() {
+        return buildFactory(BookingCancelledByAuthorIntegrationEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, BookingCancelledByExecutorIntegrationEvent> bookingCancelledByExecutorFactory() {
+        return buildFactory(BookingCancelledByExecutorIntegrationEvent.class);
     }
 
     @Bean

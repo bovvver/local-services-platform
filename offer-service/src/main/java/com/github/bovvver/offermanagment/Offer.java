@@ -6,6 +6,8 @@ import com.github.bovvver.infrastructure.UnauthorizedParticipantException;
 import com.github.bovvver.offermanagment.events.DomainEvent;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
+import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByAuthor;
+import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByExecutor;
 import com.github.bovvver.offermanagment.vo.*;
 import com.github.bovvver.offermanagment.workproofupload.WorkProof;
 
@@ -190,6 +192,20 @@ public class Offer {
         changeStatus(OfferStatus.COMPLETED);
     }
 
+    public void cancel(final UserId userId) {
+        if (isClosedForCancellation()) {
+            throw new OperationNotAllowedInCurrentStateException(this.status);
+        } else if (isOwnedBy(userId)) {
+            changeStatus(OfferStatus.CANCELLED);
+            addIntegrationEvent(new OfferCancelledByAuthor(this.id.value()));
+        } else if (isExecutedBy(userId)) {
+            changeStatus(OfferStatus.OPEN);
+            addIntegrationEvent(new OfferCancelledByExecutor(this.id.value(), userId.value()));
+        } else {
+            throw new UnauthorizedParticipantException();
+        }
+    }
+
     public void changeStatus(OfferStatus newStatus) {
         if (this.status == newStatus) {
             return;
@@ -203,8 +219,16 @@ public class Offer {
         return copy;
     }
 
+    private boolean isClosedForCancellation() {
+        return isClosedForStatus(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION, OfferStatus.ASSIGNED);
+    }
+
     private boolean isClosedForBooking() {
-        return !Arrays.asList(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION).contains(status);
+        return isClosedForStatus(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION);
+    }
+
+    private boolean isClosedForStatus(OfferStatus... allowedStatuses) {
+        return !Arrays.asList(allowedStatuses).contains(this.status);
     }
 
     private void addIntegrationEvent(DomainEvent domainEvent) {
@@ -250,7 +274,6 @@ public class Offer {
     public OfferStatus getStatus() {
         return status;
     }
-
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
