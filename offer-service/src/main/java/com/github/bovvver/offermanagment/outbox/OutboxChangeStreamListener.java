@@ -7,6 +7,9 @@ import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentMapper;
 import com.github.bovvver.offermanagment.negotiationhandling.NegotiationFailureEventMapper;
 import com.github.bovvver.offermanagment.negotiationhandling.NegotiationStartedFailure;
+import com.github.bovvver.offermanagment.offercancellation.BookingCancelledEventMapper;
+import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByAuthor;
+import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByExecutor;
 import com.github.bovvver.offermanagment.resolvebooking.BookingAcceptedEventMapper;
 import com.github.bovvver.offermanagment.resolvebooking.BookingAcceptedFailure;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
@@ -78,6 +81,8 @@ class OutboxChangeStreamListener {
                 case "ExecutorAssignmentFailed" -> ExecutorAssignmentMapper.failureToIntegrationEvent(objectMapper.readValue(payload, ExecutorAssignmentFailed.class));
                 case "NegotiationStartedFailure" -> NegotiationFailureEventMapper.toIntegrationEvent(objectMapper.readValue(payload, NegotiationStartedFailure.class));
                 case "BookingAcceptedFailure" -> BookingAcceptedEventMapper.toIntegrationEvent(objectMapper.readValue(payload, BookingAcceptedFailure.class));
+                case "OfferCancelledByAuthor" -> BookingCancelledEventMapper.authorToIntegrationEvent(objectMapper.readValue(payload, OfferCancelledByAuthor.class));
+                case "OfferCancelledByExecutor" -> BookingCancelledEventMapper.executorToIntegrationEvent(objectMapper.readValue(payload, OfferCancelledByExecutor.class));
                 default -> {
                     log.warn("Unknown event type in outbox: {}", eventType);
                     yield null;

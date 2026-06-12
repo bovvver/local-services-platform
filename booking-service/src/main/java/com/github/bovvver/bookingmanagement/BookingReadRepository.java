@@ -13,4 +13,8 @@ public interface BookingReadRepository extends Repository<BookingEntity, UUID> {
     boolean existsByOfferIdAndUserId(UUID offerId, UUID userId);
 
     List<BookingEntity> findAllByOfferIdAndIdIsNot(UUID offerId, UUID bookingId);
+
+    List<BookingEntity> findAllByOfferId(UUID offerId);
+
+    Optional<BookingEntity> findByOfferIdAndUserId(UUID offerId, UUID userId);
 }

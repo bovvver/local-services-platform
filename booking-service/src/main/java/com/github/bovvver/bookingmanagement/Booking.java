@@ -2,21 +2,13 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
-import com.github.bovvver.bookingmanagement.infrastructure.BookingOwnershipException;
-import com.github.bovvver.bookingmanagement.infrastructure.OperationNotAllowedInCurrentStateException;
-import com.github.bovvver.bookingmanagement.infrastructure.OwnNegotiationProposalDecisionException;
-import com.github.bovvver.bookingmanagement.infrastructure.OutdatedNegotiationPositionException;
-import com.github.bovvver.bookingmanagement.infrastructure.PositionNotFoundException;
+import com.github.bovvver.bookingmanagement.infrastructure.*;
 import com.github.bovvver.bookingmanagement.negotiation.NegotiationStarted;
 import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccepted;
 import com.github.bovvver.bookingmanagement.vo.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
+import java.util.*;
 
 /**
  * Represents a booking made by a user for a specific offer.
@@ -177,6 +169,14 @@ public class Booking {
         this.negotiation = null;
     }
 
+    public void cancelByAuthor() {
+        cancel(BookingStatus.CANCELED_BY_AUTHOR);
+    }
+
+    public void cancelByExecutor() {
+        cancel(BookingStatus.CANCELED_BY_EXECUTOR);
+    }
+
     public void accept() {
         validateStatus(BookingStatus.PENDING);
         updateStatus(BookingStatus.ACCEPTED);
@@ -206,14 +206,20 @@ public class Booking {
         throw new BookingOwnershipException("Current user is not a party of the negotiation");
     }
 
-    private void validateStatus(BookingStatus... validStatuses) {
-        if (Stream.of(validStatuses).noneMatch(status -> status == this.status)) {
+    private void validateStatus(BookingStatus... allowedStatuses) {
+        if (!Arrays.asList(allowedStatuses).contains(this.status)) {
             throw new OperationNotAllowedInCurrentStateException(this.status);
         }
     }
 
     private void updateStatus(BookingStatus status) {
         this.status = status;
+    }
+
+    private void cancel(BookingStatus cancelStatus) {
+        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION, BookingStatus.ACCEPTED);
+        updateStatus(cancelStatus);
+        this.negotiation = null;
     }
 
     protected void registerEvent(DomainEvent event) {

@@ -20,17 +20,6 @@ class OfferTest {
 
     private static final Location LOCATION = new Location(40.7128, -74.0060);
 
-    private Offer createValidOffer(UserId authorId) {
-        return Offer.create(
-                Title.of("Sample Title"),
-                Description.of("Sample Description"),
-                authorId,
-                LOCATION,
-                Set.of(ServiceCategory.AUTOMOTIVE),
-                Salary.of(1000.0)
-        );
-    }
-
     @Test
     void shouldCreateOfferWithOpenStatus() {
         Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
@@ -247,5 +236,143 @@ class OfferTest {
 
         assertThatThrownBy(() -> offer.requestCompletion("Done", List.of(), executor))
                 .isInstanceOf(CompletionProofRequiredException.class);
+    }
+
+    @Test
+    void shouldAcceptCompletionRequest() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+
+        offer.acceptCompletion(author);
+
+        assertThat(offer.getStatus()).isEqualTo(OfferStatus.COMPLETED);
+    }
+
+    @Test
+    void shouldRejectCompletionRequest() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+
+        offer.rejectCompletion(author, "Work is not finished");
+
+        assertThat(offer.getStatus()).isEqualTo(OfferStatus.IN_PROGRESS);
+        assertThat(offer.getExecutionDetails().getRejectionReason())
+                .isEqualTo("Work is not finished");
+    }
+
+    @Test
+    void shouldThrowWhenNonOwnerAcceptsCompletion() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+
+        assertThatThrownBy(() -> offer.acceptCompletion(executor))
+                .isInstanceOf(UnauthorizedParticipantException.class);
+    }
+
+    @Test
+    void shouldThrowWhenNonOwnerRejectsCompletion() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+
+        assertThatThrownBy(() -> offer.rejectCompletion(executor, "Reason"))
+                .isInstanceOf(UnauthorizedParticipantException.class);
+    }
+
+    @Test
+    void shouldThrowWhenAcceptingCompletionInInvalidState() {
+        UserId author = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        assertThatThrownBy(() -> offer.acceptCompletion(author))
+                .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
+    }
+
+    @Test
+    void shouldThrowWhenRejectingCompletionInInvalidState() {
+        UserId author = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        assertThatThrownBy(() -> offer.rejectCompletion(author, "Reason"))
+                .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
+    }
+
+    @Test
+    void shouldCancelAnOfferByAuthor() {
+        UserId author = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.cancel(author);
+        assertThat(offer.getStatus()).isEqualTo(OfferStatus.CANCELLED);
+    }
+
+    @Test
+    void shouldCancelAnOfferByExecutor() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+
+        offer.changeStatus(OfferStatus.ASSIGNED);
+        offer.cancel(executor);
+
+        assertThat(offer.getStatus()).isEqualTo(OfferStatus.OPEN);
+    }
+
+    @Test
+    void shouldThrowWhenOfferIsClosedForCancellation() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.IN_PROGRESS);
+
+        assertThatThrownBy(() -> offer.cancel(author))
+                .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
+    }
+
+    @Test
+    void shouldThrowWhenUnauthorizedParticipant() {
+        Offer offer = createValidOffer(UserId.of(UUID.randomUUID()));
+        UserId executor = UserId.of(UUID.randomUUID());
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.OPEN);
+
+        assertThatThrownBy(() -> offer.cancel(UserId.of(UUID.randomUUID())))
+                .isInstanceOf(UnauthorizedParticipantException.class);
+    }
+
+    private Offer createValidOffer(UserId authorId) {
+        return Offer.create(
+                Title.of("Sample Title"),
+                Description.of("Sample Description"),
+                authorId,
+                LOCATION,
+                Set.of(ServiceCategory.AUTOMOTIVE),
+                Salary.of(1000.0)
+        );
     }
 }

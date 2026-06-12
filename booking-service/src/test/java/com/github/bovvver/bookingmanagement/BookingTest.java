@@ -478,6 +478,73 @@ class BookingTest {
                 () -> booking.acceptNegotiationProposal(executorId, latestPositionId));
     }
 
+    @Test
+    void shouldCancelBookingByAuthorFromPendingState() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+
+        booking.cancelByAuthor();
+
+        assertThat(booking.getStatus())
+                .isEqualTo(BookingStatus.CANCELED_BY_AUTHOR);
+    }
+
+    @Test
+    void shouldCancelBookingByExecutorFromPendingState() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+
+        booking.cancelByExecutor();
+
+        assertThat(booking.getStatus())
+                .isEqualTo(BookingStatus.CANCELED_BY_EXECUTOR);
+    }
+
+    @Test
+    void shouldCancelBookingWithActiveNegotiationAndClearIt() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        UserId authorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+        booking.beginNegotiation(Salary.of(50000.0), authorId);
+
+        booking.cancelByAuthor();
+
+        assertThat(booking.getStatus())
+                .isEqualTo(BookingStatus.CANCELED_BY_AUTHOR);
+
+        assertThat(booking.getNegotiation()).isNull();
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAuthorCancelsRejectedBooking() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+        booking.reject();
+
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
+                booking::cancelByAuthor);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenExecutorCancelsRejectedBooking() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+        booking.reject();
+
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
+                booking::cancelByExecutor);
+    }
+
     private static void sleepMillis(long millis) {
         try {
             Thread.sleep(millis);
