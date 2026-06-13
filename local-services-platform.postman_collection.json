@@ -1083,6 +1083,231 @@
               "body": "{\n  \"status\": 400,\n  \"message\": \"Reason cannot be blank\",\n  \"timestamp\": \"2026-05-18T12:12:00\"\n}"
             }
           ]
+        },
+        {
+          "name": "Cancel Offer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/offer-service/offers/{{offer_id}}/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "offer-service",
+                "offers",
+                "{{offer_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels an offer.\n\nRequires JWT token.\n\nPath params:\n- offerId (UUID, required)\n\nExpected outcomes depend on the current offer state and caller:\n- 200 – cancellation successful\n- 404 – offer not found\n- 409 – offer cannot be cancelled in the current state\n- 403 – caller is neither author nor executor"
+          },
+          "response": [
+            {
+              "name": "200 OK – cancelled by author",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"offerId\": \"{{offer_id}}\",\n  \"status\": \"CANCELLED\"\n    }"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Offer – executor path",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/offer-service/offers/{{offer_id}}/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "offer-service",
+                "offers",
+                "{{offer_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels an offer when the caller is the executor.\n\nIn the domain model this returns the offer back to OPEN."
+          },
+          "response": [
+            {
+              "name": "200 OK – cancelled by executor",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"offerId\": \"{{offer_id}}\",\n  \"status\": \"OPEN\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Offer – not found",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/offer-service/offers/00000000-0000-0000-0000-000000000000/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "offer-service",
+                "offers",
+                "00000000-0000-0000-0000-000000000000",
+                "cancel"
+              ]
+            },
+            "description": "Not-found scenario for cancellation. Expected HTTP 404."
+          },
+          "response": [
+            {
+              "name": "404 Not Found – offer missing",
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "Text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Offer not found\",\n  \"timestamp\": \"2026-05-18T12:10:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Offer – conflict (not cancellable state)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/offer-service/offers/{{offer_id}}/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "offer-service",
+                "offers",
+                "{{offer_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Conflict scenario for cancellation. Expected HTTP 409 when offer is not OPEN, IN_NEGOTIATION or ASSIGNED."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Offer – forbidden (not participant)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/offer-service/offers/{{offer_id}}/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "offer-service",
+                "offers",
+                "{{offer_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Forbidden scenario for cancellation. Expected HTTP 403 when caller is neither author nor executor."
+          },
+          "response": []
         }
       ],
       "description": "Offer Service endpoints (port 9000). Path via gateway: /offer-service/...\n\nAll endpoints require a JWT Bearer token."
