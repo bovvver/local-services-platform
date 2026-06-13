@@ -55,3 +55,5 @@ messaging:
     ExecutorAssignmentFailedIntegrationEvent: executor.assignment.failed
     NegotiationStartedFailureIntegrationEvent: negotiation.started.failure
     BookingAcceptedFailureIntegrationEvent: booking.accepted.failure
+    BookingCancelledByAuthorIntegrationEvent: booking.cancelled.by-author
+    BookingCancelledByExecutorIntegrationEvent: booking.cancelled.by-executor
