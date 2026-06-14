@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BookingDecisionValidationException.class)
-    public ResponseEntity<String> handleBookingDecisionValidation(BookingDecisionValidationException ex) {
+    public ResponseEntity<String> handleBookingDecisionValidationException(BookingDecisionValidationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(BookingNotFoundException.class)
-    public ResponseEntity<String> handleBookingNotFound(BookingNotFoundException ex) {
+    public ResponseEntity<String> handleBookingNotFoundException(BookingNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(PositionNotFoundException.class)
-    public ResponseEntity<String> handlePositionNotFound(PositionNotFoundException ex) {
+    public ResponseEntity<String> handlePositionNotFoundException(PositionNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
@@ -29,22 +29,27 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(OfferOwnershipException.class)
-    public ResponseEntity<String> handleOfferOwnership(OfferOwnershipException ex) {
+    public ResponseEntity<String> handleOfferOwnershipException(OfferOwnershipException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
     @ExceptionHandler(BookingOwnershipException.class)
-    public ResponseEntity<String> handleBookingOwnership(BookingOwnershipException ex) {
+    public ResponseEntity<String> handleBookingOwnershipException(BookingOwnershipException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 
     @ExceptionHandler(OutdatedNegotiationPositionException.class)
-    public ResponseEntity<String> handleOutdatedPosition(OutdatedNegotiationPositionException ex) {
+    public ResponseEntity<String> handleOutdatedPositionException(OutdatedNegotiationPositionException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
     @ExceptionHandler(EventPublicationFailedException.class)
-    public ResponseEntity<String> handleEventPublicationFailed(EventPublicationFailedException ex) {
+    public ResponseEntity<String> handleEventPublicationFailedException(EventPublicationFailedException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(BookingNotExpiredYetException.class)
+    public ResponseEntity<String> handleBookingNotExpiredYetException(BookingNotExpiredYetException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }

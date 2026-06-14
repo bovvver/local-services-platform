@@ -47,7 +47,8 @@ class NegotiationCancellationServiceTest {
                 BookingStatus.IN_NEGOTIATION,
                 null,
                 LocalDateTime.now(),
-                null
+                null,
+                LocalDateTime.now().plusDays(14)
         );
     }
 

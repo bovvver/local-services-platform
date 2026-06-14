@@ -2,6 +2,7 @@ package com.github.bovvver.bookingmanagement;
 
 import com.github.bovvver.bookingmanagement.bookingcreation.BookingCreated;
 import com.github.bovvver.bookingmanagement.event.DomainEvent;
+import com.github.bovvver.bookingmanagement.infrastructure.BookingNotExpiredYetException;
 import com.github.bovvver.bookingmanagement.infrastructure.OperationNotAllowedInCurrentStateException;
 import com.github.bovvver.bookingmanagement.infrastructure.OutdatedNegotiationPositionException;
 import com.github.bovvver.bookingmanagement.infrastructure.OwnNegotiationProposalDecisionException;
@@ -10,6 +11,7 @@ import com.github.bovvver.bookingmanagement.resolvebookingdecision.BookingAccept
 import com.github.bovvver.bookingmanagement.vo.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -543,6 +545,42 @@ class BookingTest {
 
         assertThrows(OperationNotAllowedInCurrentStateException.class,
                 booking::cancelByExecutor);
+    }
+
+    @Test
+    void shouldExpireBookingWhenExpireCalled() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+
+        booking.expire(booking.getExpiresAt().plusDays(1));
+
+        assertThat(booking.getStatus())
+                .isEqualTo(BookingStatus.EXPIRED);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTryingToExpireNonPendingOrInNegotiationBooking() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+        booking.accept();
+
+        assertThrows(OperationNotAllowedInCurrentStateException.class,
+                () -> booking.expire(LocalDateTime.now().plusDays(1)));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTryingToExpireBookingThatIsNotExpiredYet() {
+        UserId executorId = UserId.of(UUID.randomUUID());
+        OfferId offerId = OfferId.of(UUID.randomUUID());
+
+        Booking booking = Booking.create(executorId, offerId, Salary.of(50000.0));
+
+        assertThrows(BookingNotExpiredYetException.class,
+                () -> booking.expire(LocalDateTime.now().minusDays(1)));
     }
 
     private static void sleepMillis(long millis) {

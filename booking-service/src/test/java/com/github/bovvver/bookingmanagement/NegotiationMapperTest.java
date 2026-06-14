@@ -20,7 +20,8 @@ class NegotiationMapperTest {
 
         BookingEntity bookingEntity = new BookingEntity(
                 bookingId, UUID.randomUUID(), UUID.randomUUID(),
-                null, BookingStatus.PENDING, null, LocalDateTime.now(), null
+                null, BookingStatus.PENDING, null, LocalDateTime.now(), null,
+                LocalDateTime.now().plusDays(14)
         );
 
         NegotiationEntity entity = NegotiationMapper.toEntity(negotiation, bookingEntity);
@@ -79,7 +80,8 @@ class NegotiationMapperTest {
     void shouldReturnNullWhenNegotiationIsNull() {
         BookingEntity bookingEntity = new BookingEntity(
                 UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                null, BookingStatus.PENDING, null, LocalDateTime.now(), null
+                null, BookingStatus.PENDING, null, LocalDateTime.now(), null,
+                LocalDateTime.now().plusDays(14)
         );
 
         NegotiationEntity entity = NegotiationMapper.toEntity(null, bookingEntity);

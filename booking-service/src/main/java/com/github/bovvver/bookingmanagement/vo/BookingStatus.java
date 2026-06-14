@@ -7,4 +7,5 @@ public enum BookingStatus {
     REJECTED,
     CANCELED_BY_EXECUTOR,
     CANCELED_BY_AUTHOR,
+    EXPIRED,
 }

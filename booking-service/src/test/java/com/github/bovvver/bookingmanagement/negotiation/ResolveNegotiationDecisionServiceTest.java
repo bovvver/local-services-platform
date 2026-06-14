@@ -53,7 +53,8 @@ class ResolveNegotiationDecisionServiceTest {
                 BookingStatus.PENDING,
                 null,
                 LocalDateTime.now(),
-                null
+                null,
+                LocalDateTime.now().plusDays(14)
         );
     }
 

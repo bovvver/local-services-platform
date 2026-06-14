@@ -1,7 +1,9 @@
 package com.github.bovvver.bookingmanagement;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,4 +19,11 @@ public interface BookingReadRepository extends Repository<BookingEntity, UUID> {
     List<BookingEntity> findAllByOfferId(UUID offerId);
 
     Optional<BookingEntity> findByOfferIdAndUserId(UUID offerId, UUID userId);
+
+    @Query("""
+                SELECT b FROM BookingEntity b
+                WHERE b.status IN (BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION)
+                AND b.expiresAt <= :now
+            """)
+    List<BookingEntity> findExpiredBookings(LocalDateTime now);
 }

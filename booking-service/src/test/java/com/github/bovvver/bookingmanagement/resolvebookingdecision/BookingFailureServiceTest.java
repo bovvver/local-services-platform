@@ -42,7 +42,8 @@ class BookingFailureServiceTest {
                 BookingStatus.PENDING,
                 BigDecimal.valueOf(1000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
 
