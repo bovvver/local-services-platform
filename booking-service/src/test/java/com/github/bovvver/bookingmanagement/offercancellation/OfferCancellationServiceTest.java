@@ -112,7 +112,8 @@ class OfferCancellationServiceTest {
                 BookingStatus.PENDING,
                 null,
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
     }
 }

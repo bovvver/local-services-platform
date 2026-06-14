@@ -163,7 +163,8 @@ class NegotiationProcessServiceTest {
                 status,
                 new BigDecimal(1000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
     }
 }

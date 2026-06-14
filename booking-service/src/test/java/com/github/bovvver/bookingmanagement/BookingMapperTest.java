@@ -70,7 +70,8 @@ class BookingMapperTest {
                 BookingStatus.IN_NEGOTIATION,
                 BigDecimal.valueOf(60000),
                 LocalDateTime.now(),
-                null
+                null,
+                LocalDateTime.now().plusDays(14)
         );
 
         negotiationEntity.setBooking(entity);
@@ -102,7 +103,8 @@ class BookingMapperTest {
                 BookingStatus.PENDING,
                 BigDecimal.valueOf(50000),
                 LocalDateTime.now(),
-                null
+                null,
+                LocalDateTime.now().plusDays(14)
         );
 
         UUID negotiationId = UUID.randomUUID();
@@ -123,7 +125,8 @@ class BookingMapperTest {
                 BookingStatus.IN_NEGOTIATION,
                 BigDecimal.valueOf(60000),
                 LocalDateTime.now(),
-                null
+                null,
+                LocalDateTime.now().plusDays(14)
         );
 
         negotiationEntity.setBooking(entity2);
@@ -150,7 +153,8 @@ class BookingMapperTest {
                 null,
                 BookingStatus.PENDING,
                 Salary.of(50000.0),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
 
         BookingId bookingId2 = new BookingId(UUID.randomUUID());
@@ -175,7 +179,8 @@ class BookingMapperTest {
                 negotiation,
                 BookingStatus.IN_NEGOTIATION,
                 Salary.of(60000.0),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
 
         List<Booking> bookings = List.of(booking1, booking2);

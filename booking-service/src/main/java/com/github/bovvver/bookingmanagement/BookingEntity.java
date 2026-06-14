@@ -29,7 +29,9 @@ import java.util.UUID;
  *     <li>{@link #offerId} – identifier of the booked offer</li>
  *     <li>{@link #status} – current booking state</li>
  *     <li>{@link #salary} – final salary</li>
- *     <li>{@link #createdAt}, {@link #updatedAt} – managed automatically via auditing</li>
+ *     <li>{@link #createdAt}, {@link #createdAt} – managed automatically via auditing</li>
+ *     <li>{@link #updatedAt}, {@link #updatedAt} – managed automatically via auditing</li>
+ *     <li>{@link #expiresAt}, {@link #expiresAt} – date of potential booking expiration</li>
  * </ul>
  *
  * <p>Usage:</p>
@@ -81,4 +83,7 @@ public class BookingEntity {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "expires_at", nullable = false)
+    private LocalDateTime expiresAt;
 }

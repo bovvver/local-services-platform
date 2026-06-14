@@ -33,6 +33,7 @@ public class Booking {
     private BookingStatus status;
     private Salary salary;
     private final LocalDateTime createdAt;
+    private final LocalDateTime expiresAt;
     private final List<DomainEvent> domainEvents;
 
     Booking(final BookingId id,
@@ -41,7 +42,8 @@ public class Booking {
             final Negotiation negotiation,
             final BookingStatus status,
             final Salary salary,
-            final LocalDateTime createdAt) {
+            final LocalDateTime createdAt,
+            final LocalDateTime expiresAt) {
         this.id = id;
         this.userId = userId;
         this.offerId = offerId;
@@ -49,6 +51,7 @@ public class Booking {
         this.status = status;
         this.salary = salary;
         this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
         this.domainEvents = new ArrayList<>();
     }
 
@@ -70,7 +73,7 @@ public class Booking {
             OfferId offerId,
             Salary salary
     ) {
-        this(id, userId, offerId, null, BookingStatus.PENDING, salary, LocalDateTime.now());
+        this(id, userId, offerId, null, BookingStatus.PENDING, salary, LocalDateTime.now(), LocalDateTime.now().plusDays(14));
     }
 
     /**
@@ -188,6 +191,15 @@ public class Booking {
         updateStatus(BookingStatus.REJECTED);
     }
 
+    public void expire(LocalDateTime now) {
+        validateStatus(BookingStatus.PENDING, BookingStatus.IN_NEGOTIATION);
+
+        if (now.isBefore(expiresAt)) {
+            throw new BookingNotExpiredYetException(id.value());
+        }
+        updateStatus(BookingStatus.EXPIRED);
+    }
+
     /**
      * Returns negotiation party (AUTHOR/EXECUTOR) for a given user.
      * <p>
@@ -258,6 +270,10 @@ public class Booking {
 
     LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    LocalDateTime getExpiresAt() {
+        return expiresAt;
     }
 
     public List<DomainEvent> getDomainEvents() {

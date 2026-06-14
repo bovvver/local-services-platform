@@ -55,7 +55,8 @@ class ResolveBookingServiceTest {
                 BookingStatus.PENDING,
                 BigDecimal.valueOf(1000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(mainEntity));
 
@@ -70,7 +71,8 @@ class ResolveBookingServiceTest {
                 BookingStatus.PENDING,
                 BigDecimal.valueOf(900),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
         when(bookingReadRepository.findAllByOfferIdAndIdIsNot(offerId, bookingId)).thenReturn(List.of(otherEntity));
 
@@ -113,7 +115,8 @@ class ResolveBookingServiceTest {
                 BookingStatus.PENDING,
                 BigDecimal.valueOf(1000),
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
         when(currentUser.getId()).thenReturn(new UserId(userId));
@@ -121,8 +124,8 @@ class ResolveBookingServiceTest {
 
         BigDecimal salary = BigDecimal.valueOf(1200);
         BookingDecisionRequest request = new BookingDecisionRequest(
-            BookingDecisionStatus.NEGOTIATE,
-            salary
+                BookingDecisionStatus.NEGOTIATE,
+                salary
         );
 
         resolveBookingService.processBookingDecision(bookingId, request);
@@ -140,22 +143,23 @@ class ResolveBookingServiceTest {
         UUID userId = UUID.randomUUID();
 
         BookingEntity entity = new BookingEntity(
-            bookingId,
-            userId,
-            offerId,
-            null,
-            BookingStatus.PENDING,
-            BigDecimal.valueOf(1000),
-            LocalDateTime.now(),
-            LocalDateTime.now()
+                bookingId,
+                userId,
+                offerId,
+                null,
+                BookingStatus.PENDING,
+                BigDecimal.valueOf(1000),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
         when(currentUser.getId()).thenReturn(new UserId(userId));
         doNothing().when(offerOwnershipValidator).validate(userId, offerId);
 
         BookingDecisionRequest request = new BookingDecisionRequest(
-            BookingDecisionStatus.REJECTED,
-            null
+                BookingDecisionStatus.REJECTED,
+                null
         );
 
         resolveBookingService.processBookingDecision(bookingId, request);
@@ -169,12 +173,12 @@ class ResolveBookingServiceTest {
     void shouldThrowWhenSalaryMissingForNegotiate() {
         UUID bookingId = UUID.randomUUID();
         BookingDecisionRequest request = new BookingDecisionRequest(
-            BookingDecisionStatus.NEGOTIATE,
-            null
+                BookingDecisionStatus.NEGOTIATE,
+                null
         );
 
         assertThrows(BookingDecisionValidationException.class,
-            () -> resolveBookingService.processBookingDecision(bookingId, request));
+                () -> resolveBookingService.processBookingDecision(bookingId, request));
 
         verifyNoInteractions(bookingReadRepository, offerOwnershipValidator, negotiationFacade, bookingRepository, outboxRepository);
     }
@@ -183,12 +187,12 @@ class ResolveBookingServiceTest {
     void shouldThrowWhenSalaryProvidedForNonNegotiate() {
         UUID bookingId = UUID.randomUUID();
         BookingDecisionRequest request = new BookingDecisionRequest(
-            BookingDecisionStatus.ACCEPTED,
-            BigDecimal.TEN
+                BookingDecisionStatus.ACCEPTED,
+                BigDecimal.TEN
         );
 
         assertThrows(BookingDecisionValidationException.class,
-            () -> resolveBookingService.processBookingDecision(bookingId, request));
+                () -> resolveBookingService.processBookingDecision(bookingId, request));
 
         verifyNoInteractions(bookingReadRepository, offerOwnershipValidator, negotiationFacade, bookingRepository, outboxRepository);
     }
@@ -200,28 +204,29 @@ class ResolveBookingServiceTest {
         UUID userId = UUID.randomUUID();
 
         BookingEntity entity = new BookingEntity(
-            bookingId,
-            userId,
-            offerId,
-            null,
-            BookingStatus.PENDING,
-            BigDecimal.valueOf(1000),
-            LocalDateTime.now(),
-            LocalDateTime.now()
+                bookingId,
+                userId,
+                offerId,
+                null,
+                BookingStatus.PENDING,
+                BigDecimal.valueOf(1000),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(14)
         );
         when(bookingReadRepository.findById(bookingId)).thenReturn(Optional.of(entity));
         when(currentUser.getId()).thenReturn(new UserId(userId));
 
         doThrow(new IllegalStateException("Current user is not the owner of the offer"))
-            .when(offerOwnershipValidator).validate(userId, offerId);
+                .when(offerOwnershipValidator).validate(userId, offerId);
 
         BookingDecisionRequest request = new BookingDecisionRequest(
-            BookingDecisionStatus.ACCEPTED,
-            null
+                BookingDecisionStatus.ACCEPTED,
+                null
         );
 
         assertThrows(IllegalStateException.class,
-            () -> resolveBookingService.processBookingDecision(bookingId, request));
+                () -> resolveBookingService.processBookingDecision(bookingId, request));
 
         verify(bookingRepository, never()).save(any());
         verify(bookingRepository, never()).saveAll(anyIterable());

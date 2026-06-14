@@ -15,7 +15,8 @@ class BookingStatusTest {
                         BookingStatus.ACCEPTED,
                         BookingStatus.REJECTED,
                         BookingStatus.CANCELED_BY_EXECUTOR,
-                        BookingStatus.CANCELED_BY_AUTHOR
+                        BookingStatus.CANCELED_BY_AUTHOR,
+                        BookingStatus.EXPIRED
                 );
     }
 
