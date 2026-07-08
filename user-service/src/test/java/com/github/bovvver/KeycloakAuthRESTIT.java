@@ -30,6 +30,7 @@ class KeycloakAuthRESTIT extends BaseIntegrationTest {
         );
 
         mockMvc.perform(post(CREATE_USER_ENDPOINT)
+                        .header("X-Keycloak-API-Key", "test-api-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())

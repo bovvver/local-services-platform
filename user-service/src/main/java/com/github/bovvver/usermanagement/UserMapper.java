@@ -1,14 +1,18 @@
 package com.github.bovvver.usermanagement;
 
-import com.github.bovvver.usermanagement.vo.*;
+import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.UserId;
 
+/**
+ * Manual mapper between the {@link User} domain aggregate and the {@link UserEntity} JPA entity.
+ */
 class UserMapper {
 
     /**
-     * Maps a UserEntity object to a User domain object.
+     * Maps a {@link UserEntity} to the {@link User} domain aggregate.
      *
-     * @param entity the UserEntity object to be mapped
-     * @return a User domain object containing the mapped data
+     * @param entity the JPA entity to map
+     * @return the domain aggregate
      */
     static User toDomain(UserEntity entity) {
         return new User(
@@ -16,23 +20,15 @@ class UserMapper {
                 Email.of(entity.getEmail()),
                 entity.getFirstName(),
                 entity.getLastName(),
-                City.of(entity.getCity()),
-                Country.of(entity.getCountry()),
-                entity.getExperienceLevel(),
-                entity.getServiceCategories(),
-                entity.getAwardTags(),
-                entity.getStatus(),
-                OfferId.fromAll(entity.getMyOfferIds()),
-                OfferId.fromAll(entity.getAssignedOfferIds()),
-                BookingId.fromAll(entity.getSentBookingIds())
+                entity.getStatus()
         );
     }
 
     /**
-     * Maps a User domain object to a UserEntity database entity.
+     * Maps a {@link User} domain aggregate to a {@link UserEntity} for persistence.
      *
-     * @param user the User domain object to be mapped
-     * @return a UserEntity object containing the mapped data
+     * @param user the domain aggregate to map
+     * @return the JPA entity
      */
     static UserEntity toEntity(User user) {
         return new UserEntity(
@@ -40,15 +36,7 @@ class UserMapper {
                 user.getEmail().value(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getCity() == null ? null : user.getCity().value(),
-                user.getCountry() == null ? null : user.getCountry().code(),
-                user.getExperienceLevel(),
-                user.getServiceCategories(),
-                user.getAwardTags(),
-                user.getStatus(),
-                user.getMyOfferIds().stream().map(OfferId::value).toList(),
-                user.getAssignedOfferIds().stream().map(OfferId::value).toList(),
-                user.getSentBookingIds().stream().map(BookingId::value).toList()
+                user.getStatus()
         );
     }
 }

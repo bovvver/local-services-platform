@@ -1,8 +1,8 @@
 package com.github.bovvver.usermanagement.keycloakusercreation;
 
 import com.github.bovvver.usermanagement.User;
-import com.github.bovvver.usermanagement.vo.Email;
-import com.github.bovvver.usermanagement.vo.UserId;
+import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.UserId;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
