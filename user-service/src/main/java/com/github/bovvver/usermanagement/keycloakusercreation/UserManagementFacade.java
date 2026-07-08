@@ -1,36 +1,49 @@
 package com.github.bovvver.usermanagement.keycloakusercreation;
 
+import com.github.bovvver.event.DomainEventPublisher;
 import com.github.bovvver.usermanagement.User;
 import com.github.bovvver.usermanagement.UserRepository;
-import com.github.bovvver.usermanagement.vo.Email;
-import com.github.bovvver.usermanagement.vo.UserId;
+import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.UserId;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class that acts as a facade for user-related operations.
+ * Service facade for user-related operations.
+ *
+ * <p>On creation, persists the {@link User} aggregate then publishes its
+ * domain events via {@link com.github.bovvver.event.DomainEventPublisher}.
+ * Each aggregate's {@code UserCreatedListener} reacts via
+ * {@link org.springframework.transaction.event.TransactionalEventListener} after commit,
+ * initialising ProviderProfile, Reputation, Verification, and ExperienceSnapshot.</p>
  */
 @Service
 @RequiredArgsConstructor
 public class UserManagementFacade {
 
     private final UserRepository userRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
     /**
-     * Creates a new User entity based on the provided CreateUserCommand.
+     * Creates a new user from Keycloak registration data and publishes
+     * a {@link com.github.bovvver.usermanagement.keycloakusercreation.UserCreated} domain event
+     * to trigger initialisation of downstream aggregates.
      *
-     * @param createUserCommand the command object containing user details
-     * @return the saved User entity
+     * @param command the command carrying Keycloak user data
+     * @return the persisted {@link User} aggregate
      */
     @Transactional
-    User createUserFromKeycloak(CreateUserCommand createUserCommand) {
+    User createUserFromKeycloak(CreateUserCommand command) {
         User user = User.create(
-                UserId.from(createUserCommand.userId()),
-                new Email(createUserCommand.email()),
-                createUserCommand.firstName(),
-                createUserCommand.lastName()
+                UserId.from(command.userId()),
+                new Email(command.email()),
+                command.firstName(),
+                command.lastName()
         );
-        return userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+        domainEventPublisher.publish(user.pullDomainEvents());
+        return savedUser;
     }
 }

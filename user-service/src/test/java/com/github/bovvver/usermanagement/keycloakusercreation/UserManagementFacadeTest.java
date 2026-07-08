@@ -1,9 +1,10 @@
 package com.github.bovvver.usermanagement.keycloakusercreation;
 
+import com.github.bovvver.event.DomainEventPublisher;
 import com.github.bovvver.usermanagement.User;
 import com.github.bovvver.usermanagement.UserRepository;
-import com.github.bovvver.usermanagement.vo.Email;
-import com.github.bovvver.usermanagement.vo.UserId;
+import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,9 @@ class UserManagementFacadeTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private DomainEventPublisher domainEventPublisher;
 
     @InjectMocks
     private UserManagementFacade userManagementFacade;
@@ -48,6 +52,7 @@ class UserManagementFacadeTest {
         assertThat(result.getFirstName()).isEqualTo("John");
         assertThat(result.getLastName()).isEqualTo("Doe");
         verify(userRepository).save(any(User.class));
+        verify(domainEventPublisher).publish(anyList());
     }
 
     @Test
@@ -61,6 +66,7 @@ class UserManagementFacadeTest {
 
         assertThrows(IllegalArgumentException.class, () -> userManagementFacade.createUserFromKeycloak(command));
         verifyNoInteractions(userRepository);
+        verifyNoInteractions(domainEventPublisher);
     }
 
     @Test
@@ -74,5 +80,6 @@ class UserManagementFacadeTest {
 
         assertThrows(IllegalArgumentException.class, () -> userManagementFacade.createUserFromKeycloak(command));
         verifyNoInteractions(userRepository);
+        verifyNoInteractions(domainEventPublisher);
     }
 }

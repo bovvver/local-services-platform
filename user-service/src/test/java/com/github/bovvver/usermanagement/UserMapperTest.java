@@ -1,7 +1,7 @@
 package com.github.bovvver.usermanagement;
 
-import com.github.bovvver.usermanagement.vo.Email;
-import com.github.bovvver.usermanagement.vo.UserId;
+import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.UserId;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

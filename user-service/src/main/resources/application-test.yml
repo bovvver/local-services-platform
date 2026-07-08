@@ -7,3 +7,7 @@ spring:
 
 KEYCLOAK_HOST: localhost
 KEYCLOAK_PORT_HOST: 7080
+
+app:
+  keycloak:
+    api-key: test-api-key

@@ -1,20 +1,20 @@
 package com.github.bovvver.usermanagement;
 
-import com.github.bovvver.usermanagement.vo.*;
+import com.github.bovvver.event.DomainEvent;
+import com.github.bovvver.usermanagement.keycloakusercreation.UserCreated;
+import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.UserId;
+import com.github.bovvver.vo.UserStatus;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Represents a user in the system.
- * A user is identified by a unique {@link UserId} and has an associated {@link Email},
- * personal details (first name, last name), city, country, experience level,
- * service categories, award tags, and user status.
+ * User aggregate — responsible for identity and account lifecycle only.
  *
- * <p>Each user can own offers, be assigned to offers,
- * and send booking requests.</p>
+ * <p>Fields such as City, Country, ExperienceLevel, ServiceCategories, AwardTags,
+ * OfferIds, and BookingIds have been extracted to dedicated aggregates
+ * (ProviderProfile, ExperienceSnapshot, Badge, etc.).</p>
  */
 public class User {
 
@@ -22,79 +22,31 @@ public class User {
     private final Email email;
     private final String firstName;
     private final String lastName;
-    private final City city;
-    private final Country country;
-    private final ExperienceLevel experienceLevel;
-    private final Set<ServiceCategory> serviceCategories;
-    private final Set<AwardTag> awardTags;
-    private final UserStatus status;
+    private UserStatus status;
 
-    private final List<OfferId> myOfferIds;
-    private final List<OfferId> assignedOfferIds;
-    private final List<BookingId> sentBookingIds;
+    private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     User(final UserId id,
          final Email email,
          final String firstName,
          final String lastName,
-         final City city,
-         final Country country,
-         final ExperienceLevel experienceLevel,
-         final Set<ServiceCategory> serviceCategories,
-         final Set<AwardTag> awardTags,
-         final UserStatus status,
-         final List<OfferId> myOfferIds,
-         final List<OfferId> assignedOfferIds,
-         final List<BookingId> sentBookingIds) {
+         final UserStatus status) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.city = city;
-        this.country = country;
-        this.experienceLevel = experienceLevel;
-        this.serviceCategories = serviceCategories;
-        this.awardTags = awardTags;
         this.status = status;
-        this.myOfferIds = myOfferIds;
-        this.assignedOfferIds = assignedOfferIds;
-        this.sentBookingIds = sentBookingIds;
     }
 
     /**
-     * Creates a new user with minimal required information.
-     * <p>Default values:</p>
-     * <ul>
-     *     <li>{@link City} = {@code null}</li>
-     *     <li>{@link Country} = {@code null}</li>
-     *     <li>{@link ExperienceLevel} = {@link ExperienceLevel#BEGINNER}</li>
-     *     <li>{@link UserStatus} = {@link UserStatus#UNVERIFIED}</li>
-     *     <li>{@link #serviceCategories}, {@link #awardTags}, {@link #myOfferIds},
-     *         {@link #assignedOfferIds}, {@link #sentBookingIds} are initialized as empty collections</li>
-     * </ul>
+     * Factory method — creates a new user with UNVERIFIED status and registers
+     * a {@link UserCreated} domain event to trigger downstream aggregate initialisation.
      *
-     * @param id        unique user identifier
-     * @param email     email address
+     * @param id        unique identifier (from Keycloak)
+     * @param email     validated email address
      * @param firstName first name
      * @param lastName  last name
-     */
-    User(UserId id,
-         Email email,
-         String firstName,
-         String lastName) {
-        this(id, email, firstName, lastName, null, null,
-                ExperienceLevel.BEGINNER, new HashSet<>(), new HashSet<>(),
-                UserStatus.UNVERIFIED, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-    }
-
-    /**
-     * Factory method for creating a new {@code User} instance.
-     *
-     * @param id        unique user identifier
-     * @param email     email address
-     * @param firstName first name
-     * @param lastName  last name
-     * @return newly created {@code User}
+     * @return newly constructed {@code User} with a pending domain event
      */
     public static User create(
             UserId id,
@@ -102,7 +54,21 @@ public class User {
             String firstName,
             String lastName
     ) {
-        return new User(id, email, firstName, lastName);
+        User user = new User(id, email, firstName, lastName, UserStatus.UNVERIFIED);
+        user.domainEvents.add(new UserCreated(id, email, firstName, lastName));
+        return user;
+    }
+
+    /**
+     * Drains and returns all pending domain events. Called by the facade after
+     * persisting the aggregate so events can be published via {@link com.github.bovvver.event.DomainEventPublisher}.
+     *
+     * @return snapshot of pending events; list is cleared after call
+     */
+    public List<DomainEvent> pullDomainEvents() {
+        List<DomainEvent> events = List.copyOf(domainEvents);
+        domainEvents.clear();
+        return events;
     }
 
     public UserId getId() {
@@ -121,39 +87,7 @@ public class User {
         return lastName;
     }
 
-    City getCity() {
-        return city;
-    }
-
-    Country getCountry() {
-        return country;
-    }
-
-    ExperienceLevel getExperienceLevel() {
-        return experienceLevel;
-    }
-
-    Set<ServiceCategory> getServiceCategories() {
-        return serviceCategories;
-    }
-
-    Set<AwardTag> getAwardTags() {
-        return awardTags;
-    }
-
-    UserStatus getStatus() {
+    public UserStatus getStatus() {
         return status;
-    }
-
-    List<OfferId> getMyOfferIds() {
-        return myOfferIds;
-    }
-
-    List<OfferId> getAssignedOfferIds() {
-        return assignedOfferIds;
-    }
-
-    List<BookingId> getSentBookingIds() {
-        return sentBookingIds;
     }
 }
