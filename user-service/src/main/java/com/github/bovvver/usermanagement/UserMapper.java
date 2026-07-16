@@ -19,8 +19,7 @@ class UserMapper {
                 UserId.of(entity.getId()),
                 Email.of(entity.getEmail()),
                 entity.getFirstName(),
-                entity.getLastName(),
-                entity.getStatus()
+                entity.getLastName()
         );
     }
 
@@ -35,8 +34,7 @@ class UserMapper {
                 user.getId().value(),
                 user.getEmail().value(),
                 user.getFirstName(),
-                user.getLastName(),
-                user.getStatus()
+                user.getLastName()
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.github.bovvver.verificationmanagement;
 
+import com.github.bovvver.vo.VerificationStatus;
 import org.springframework.data.repository.Repository;
 
 import java.util.Optional;
@@ -12,4 +13,6 @@ import java.util.UUID;
 public interface VerificationReadRepository extends Repository<VerificationEntity, UUID> {
 
     Optional<VerificationEntity> findByUserId(UUID userId);
+
+    boolean existsByUserIdAndIdentityStatus(UUID userId, VerificationStatus identityStatus);
 }

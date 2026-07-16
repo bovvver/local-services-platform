@@ -18,7 +18,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-class VerificationEntity {
+public class VerificationEntity {
 
     @Id
     @Column(name = "user_id")
@@ -27,4 +27,10 @@ class VerificationEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "identity_status", nullable = false, length = 20)
     private VerificationStatus identityStatus;
+
+    @Column(name = "proof_url")
+    private String proofUrl;
+
+    @Column(name = "proof_uploaded_at")
+    private java.time.LocalDateTime proofUploadedAt;
 }

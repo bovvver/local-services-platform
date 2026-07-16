@@ -1,8 +1,13 @@
 package com.github.bovvver.bookingmanagement;
 
-import com.github.bovvver.bookingmanagement.vo.*;
+import com.github.bovvver.bookingmanagement.vo.NegotiationId;
+import com.github.bovvver.bookingmanagement.vo.NegotiationParty;
+import com.github.bovvver.bookingmanagement.vo.Salary;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,9 +42,9 @@ class NegotiationPositionMapperTest {
         NegotiationPositionEntity entity = new NegotiationPositionEntity();
         entity.setId(positionId);
         entity.setNegotiation(negotiationEntity);
-        entity.setProposedSalary(java.math.BigDecimal.valueOf(1000.0));
+        entity.setProposedSalary(BigDecimal.valueOf(1000.0));
         entity.setProposedBy(NegotiationParty.AUTHOR);
-        entity.setProposedAt(java.time.LocalDateTime.now());
+        entity.setProposedAt(LocalDateTime.now());
 
         NegotiationPosition position = NegotiationPositionMapper.toDomain(entity);
 
@@ -47,7 +52,7 @@ class NegotiationPositionMapperTest {
         assertThat(position.getId().value()).isEqualTo(positionId);
         assertThat(position.getNegotiationId().value()).isEqualTo(negotiationId);
         assertThat(position.getProposedSalary().value())
-                .isEqualTo(java.math.BigDecimal.valueOf(1000.0));
+                .isEqualTo(BigDecimal.valueOf(1000.0));
         assertThat(position.getProposedBy()).isEqualTo(NegotiationParty.AUTHOR);
         assertThat(position.getProposedAt()).isEqualTo(entity.getProposedAt());
     }
@@ -57,11 +62,11 @@ class NegotiationPositionMapperTest {
         NegotiationPositionEntity entity = new NegotiationPositionEntity();
         entity.setId(UUID.randomUUID());
         entity.setNegotiation(null);
-        entity.setProposedSalary(java.math.BigDecimal.valueOf(1000.0));
+        entity.setProposedSalary(BigDecimal.valueOf(1000.0));
         entity.setProposedBy(NegotiationParty.AUTHOR);
-        entity.setProposedAt(java.time.LocalDateTime.now());
+        entity.setProposedAt(LocalDateTime.now());
 
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(NullPointerException.class,
                 () -> NegotiationPositionMapper.toDomain(entity));
     }
 }
