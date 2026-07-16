@@ -3,6 +3,7 @@ package com.github.bovvver.verificationmanagement.upload;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -16,6 +17,7 @@ class VerificationProofREST {
     static final String SEND_VERIFICATION_DATA_URL = "/files/verify";
     static final String VERIFY_USER_URL = "/files/verify/{userId}";
     static final String REJECT_USER_URL = "/files/reject/{userId}";
+
 
     private final VerificationProofUploadService verificationProofUploadService;
     private final VerificationProcessingService verificationProcessingService;
@@ -35,12 +37,14 @@ class VerificationProofREST {
         return ResponseEntity.ok(verificationProcessingService.sendVerificationData(request));
     }
 
+    @PreAuthorize("hasRole('VERIFIER')")
     @PostMapping(path = VERIFY_USER_URL)
     ResponseEntity<Void> verify(@PathVariable UUID userId) {
         verificationProcessingService.verify(userId);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('VERIFIER')")
     @PostMapping(path = REJECT_USER_URL)
     ResponseEntity<Void> reject(@PathVariable UUID userId) {
         verificationProcessingService.reject(userId);

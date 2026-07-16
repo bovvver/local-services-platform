@@ -120,6 +120,210 @@
               "body": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000003\",\n  \"email\": \"john.doe@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
             }
           ]
+        },
+        {
+          "name": "Verification Proof – Get Presigned Upload URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"id-card.png\",\n  \"contentType\": \"image/png\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/presigned-upload",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "user-service",
+                "files",
+                "presigned-upload"
+              ]
+            },
+            "description": "Returns a presigned URL for uploading a verification proof file.\n\nRequires JWT token.\n\nFields:\n- fileName (String, max 255, required)\n- contentType (String, MIME type, required)\n\nExpected: HTTP 200 with { uploadUrl, fileId }."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Get Presigned GET URLs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/{{user_id}}/urls",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "user-service",
+                "files",
+                "{{user_id}}",
+                "urls"
+              ]
+            },
+            "description": "Returns presigned GET URLs for all verification proof files for the given user.\n\nRequires JWT token.\n\nPath params:\n- userId (UUID, required)\n\nExpected: HTTP 200 with { proofUrls: [ ... ] }."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Submit Verification Proof",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proofUrls\": [\n    \"verification/{{user_id}}/id-card.png\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "user-service",
+                "files",
+                "verify"
+              ]
+            },
+            "description": "Submits verification proof URLs for the current user.\n\nRequires JWT token.\n\nFields:\n- proofUrls (List<String>, max 10, required)\n\nExpected: HTTP 200 with verification data response."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification – Verify User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "user-service",
+                "files",
+                "verify",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Verifies the user's identity based on uploaded proof. Performs validations and updates verification status to VERIFIED.\n\nRequires JWT token.\n\nPath params:\n- userId (UUID, required)\n\nExpected: HTTP 200 OK."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification – Reject User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/reject/{{user_id}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "user-service",
+                "files",
+                "reject",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Rejects the user's verification. Updates verification status to REJECTED.\n\nRequires JWT token.\n\nPath params:\n- userId (UUID, required)\n\nExpected: HTTP 200 OK."
+          },
+          "response": []
         }
       ],
       "description": "User Service endpoints (port 8080). Path via gateway: /user-service/..."
