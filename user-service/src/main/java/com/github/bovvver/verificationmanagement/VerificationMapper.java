@@ -2,22 +2,32 @@ package com.github.bovvver.verificationmanagement;
 
 import com.github.bovvver.vo.UserId;
 
+import java.time.LocalDateTime;
+
 /**
  * Manual mapper between {@link Verification} and {@link VerificationEntity}.
  */
-class VerificationMapper {
+public class VerificationMapper {
 
-    static Verification toDomain(VerificationEntity entity) {
+    public static Verification toDomain(VerificationEntity entity) {
+        VerificationProof proof = entity.getProofUrl() == null ? null :
+                new VerificationProof(entity.getProofUrl(), entity.getProofUploadedAt());
         return new Verification(
                 UserId.of(entity.getUserId()),
-                entity.getIdentityStatus()
+                entity.getIdentityStatus(),
+                proof
         );
     }
 
-    static VerificationEntity toEntity(Verification verification) {
+    public static VerificationEntity toEntity(Verification verification) {
+        String proofUrl = verification.getVerificationProof() == null ? null : verification.getVerificationProof().url();
+        LocalDateTime proofUploadedAt = verification.getVerificationProof() == null ? null : verification.getVerificationProof().uploadedAt();
         return new VerificationEntity(
                 verification.getUserId().value(),
-                verification.getIdentityStatus()
+                verification.getIdentityStatus(),
+                proofUrl,
+                proofUploadedAt
         );
     }
+
 }

@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.yml")
 @Import(TestSecurityConfig.class)
-abstract class BaseIntegrationTest {
+public abstract class BaseIntegrationTest {
 
     @Container
     @ServiceConnection

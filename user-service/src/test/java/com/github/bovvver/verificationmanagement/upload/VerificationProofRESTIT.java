@@ -1,0 +1,150 @@
+package com.github.bovvver.verificationmanagement.upload;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.bovvver.BaseIntegrationTest;
+import com.github.bovvver.shared.CurrentUser;
+import com.github.bovvver.verificationmanagement.*;
+import com.github.bovvver.vo.UserId;
+import com.github.bovvver.vo.VerificationStatus;
+import io.minio.MinioClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+class VerificationProofRESTIT extends BaseIntegrationTest {
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private VerificationRepository verificationRepository;
+
+    @Autowired
+    private VerificationReadRepository verificationReadRepository;
+
+    @MockitoBean
+    private MinioClient minioClient;
+
+    @MockitoBean
+    private CurrentUser currentUser;
+
+    private static final UUID USER_UUID = UUID.randomUUID();
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.execute("TRUNCATE TABLE verification CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
+    }
+
+    private void createTestUserAndVerification(VerificationStatus status, String proofUrl) {
+        jdbcTemplate.update(
+                "INSERT INTO users (id, email, first_name, last_name) VALUES (?, ?, ?, ?)",
+                USER_UUID, "test@example.com", "John", "Doe"
+        );
+        Verification verification = Verification.initialize(UserId.of(USER_UUID));
+        if (proofUrl != null) {
+            verification.addVerificationProof(VerificationProof.of(proofUrl));
+        }
+        if (status == VerificationStatus.VERIFIED) {
+            verification.verify();
+        } else if (status == VerificationStatus.REJECTED) {
+            verification.reject();
+        }
+        verificationRepository.save(verification);
+    }
+
+    @Test
+    void shouldGetPresignedUploadUrlSuccessfully() throws Exception {
+        createTestUserAndVerification(VerificationStatus.PENDING, null);
+
+        when(currentUser.getId()).thenReturn(UserId.of(USER_UUID));
+        doReturn("http://minio/upload-url").when(minioClient).getPresignedObjectUrl(any());
+
+        PresignedUploadUrlRequest request = new PresignedUploadUrlRequest("proof.png", "image/png");
+
+        mockMvc.perform(post(VerificationProofREST.GET_PRESIGNED_UPLOAD_URL)
+                        .header("X-Keycloak-API-Key", "test-api-key")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.uploadUrl").value("http://minio/upload-url"))
+                .andExpect(jsonPath("$.fileId").value(org.hamcrest.Matchers.containsString("verification/" + USER_UUID)));
+    }
+
+    @Test
+    void shouldGetPresignedGetUrlsSuccessfully() throws Exception {
+        createTestUserAndVerification(VerificationStatus.PENDING, "verification/" + USER_UUID + "/proof.png");
+
+        doReturn("http://minio/get-url").when(minioClient).getPresignedObjectUrl(any());
+
+        mockMvc.perform(get(VerificationProofREST.GET_PRESIGNED_GET_URLS, USER_UUID)
+                        .header("X-Keycloak-API-Key", "test-api-key")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.proofUrls[0]").value("http://minio/get-url"));
+    }
+
+    @Test
+    void shouldSendVerificationDataSuccessfully() throws Exception {
+        createTestUserAndVerification(VerificationStatus.PENDING, null);
+
+        when(currentUser.getId()).thenReturn(UserId.of(USER_UUID));
+
+        VerificationDataRequest request = new VerificationDataRequest(List.of("http://example.com/proof"));
+
+        mockMvc.perform(post(VerificationProofREST.SEND_VERIFICATION_DATA_URL)
+                        .header("X-Keycloak-API-Key", "test-api-key")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(USER_UUID.toString()));
+
+        VerificationEntity updated = verificationReadRepository.findByUserId(USER_UUID).orElseThrow();
+        assertThat(updated.getProofUrl()).isEqualTo("http://example.com/proof");
+        assertThat(updated.getProofUploadedAt()).isNotNull();
+    }
+
+    @Test
+    void shouldVerifyUserSuccessfully() throws Exception {
+        createTestUserAndVerification(VerificationStatus.PENDING, "http://example.com/proof");
+
+        mockMvc.perform(post(VerificationProofREST.VERIFY_USER_URL, USER_UUID)
+                        .header("X-Keycloak-API-Key", "test-api-key")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        VerificationEntity updated = verificationReadRepository.findByUserId(USER_UUID).orElseThrow();
+        assertThat(updated.getIdentityStatus()).isEqualTo(VerificationStatus.VERIFIED);
+    }
+
+    @Test
+    void shouldRejectUserSuccessfully() throws Exception {
+        createTestUserAndVerification(VerificationStatus.PENDING, null);
+
+        mockMvc.perform(post(VerificationProofREST.REJECT_USER_URL, USER_UUID)
+                        .header("X-Keycloak-API-Key", "test-api-key")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        VerificationEntity updated = verificationReadRepository.findByUserId(USER_UUID).orElseThrow();
+        assertThat(updated.getIdentityStatus()).isEqualTo(VerificationStatus.REJECTED);
+    }
+}

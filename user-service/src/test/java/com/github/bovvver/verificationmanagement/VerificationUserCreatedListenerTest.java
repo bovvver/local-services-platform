@@ -58,7 +58,9 @@ class VerificationUserCreatedListenerTest {
 
         VerificationEntity existingEntity = new VerificationEntity(
                 USER_UUID,
-                VerificationStatus.PENDING
+                VerificationStatus.PENDING,
+                null,
+                null
         );
 
         when(readRepository.findByUserId(USER_UUID)).thenReturn(Optional.of(existingEntity));

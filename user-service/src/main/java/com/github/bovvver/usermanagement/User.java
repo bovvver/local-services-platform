@@ -4,7 +4,6 @@ import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.usermanagement.keycloakusercreation.UserCreated;
 import com.github.bovvver.vo.Email;
 import com.github.bovvver.vo.UserId;
-import com.github.bovvver.vo.UserStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,25 +21,22 @@ public class User {
     private final Email email;
     private final String firstName;
     private final String lastName;
-    private UserStatus status;
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     User(final UserId id,
          final Email email,
          final String firstName,
-         final String lastName,
-         final UserStatus status) {
+         final String lastName) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.status = status;
     }
 
     /**
      * Factory method — creates a new user with UNVERIFIED status and registers
-     * a {@link UserCreated} domain event to trigger downstream aggregate initialisation.
+     * a {@link UserCreated} domain event to trigger downstream aggregate initialization.
      *
      * @param id        unique identifier (from Keycloak)
      * @param email     validated email address
@@ -54,7 +50,7 @@ public class User {
             String firstName,
             String lastName
     ) {
-        User user = new User(id, email, firstName, lastName, UserStatus.UNVERIFIED);
+        User user = new User(id, email, firstName, lastName);
         user.domainEvents.add(new UserCreated(id, email, firstName, lastName));
         return user;
     }
@@ -85,9 +81,5 @@ public class User {
 
     public String getLastName() {
         return lastName;
-    }
-
-    public UserStatus getStatus() {
-        return status;
     }
 }
