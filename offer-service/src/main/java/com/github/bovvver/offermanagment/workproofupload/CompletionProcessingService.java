@@ -5,6 +5,7 @@ import com.github.bovvver.offermanagment.Offer;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferMapper;
 import com.github.bovvver.offermanagment.OfferRepository;
+import com.github.bovvver.offermanagment.outbox.OutboxService;
 import com.github.bovvver.shared.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ class CompletionProcessingService {
 
     private final CurrentUser currentUser;
     private final OfferRepository offerRepository;
+    private final OutboxService outboxService;
 
     OfferExecutionResponse sendCompletionRequest(final CompletionRequest request) {
 
@@ -38,6 +40,7 @@ class CompletionProcessingService {
         Offer offer = getOfferById(offerId);
         offer.acceptCompletion(currentUser.getId());
         Offer saved = OfferMapper.toDomain(offerRepository.save(OfferMapper.toDocument(offer)));
+        outboxService.passToOutbox(offer.pullEvents(), saved.getId().value(), "Offer");
 
         return new OfferCompletionResponse(
                 saved.getId().value(),

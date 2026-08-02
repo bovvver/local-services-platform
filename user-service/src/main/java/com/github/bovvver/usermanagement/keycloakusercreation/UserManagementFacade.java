@@ -28,7 +28,7 @@ public class UserManagementFacade {
     /**
      * Creates a new user from Keycloak registration data and publishes
      * a {@link com.github.bovvver.usermanagement.keycloakusercreation.UserCreated} domain event
-     * to trigger initialisation of downstream aggregates.
+     * to trigger initialization of downstream aggregates.
      *
      * @param command the command carrying Keycloak user data
      * @return the persisted {@link User} aggregate

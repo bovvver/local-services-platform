@@ -5,6 +5,8 @@ import com.github.bovvver.contracts.IntegrationEvent;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentMapper;
+import com.github.bovvver.offermanagment.events.OfferCompleted;
+import com.github.bovvver.offermanagment.events.OfferCompletedEventMapper;
 import com.github.bovvver.offermanagment.negotiationhandling.NegotiationFailureEventMapper;
 import com.github.bovvver.offermanagment.negotiationhandling.NegotiationStartedFailure;
 import com.github.bovvver.offermanagment.offercancellation.BookingCancelledEventMapper;
@@ -83,6 +85,7 @@ class OutboxChangeStreamListener {
                 case "BookingAcceptedFailure" -> BookingAcceptedEventMapper.toIntegrationEvent(objectMapper.readValue(payload, BookingAcceptedFailure.class));
                 case "OfferCancelledByAuthor" -> BookingCancelledEventMapper.authorToIntegrationEvent(objectMapper.readValue(payload, OfferCancelledByAuthor.class));
                 case "OfferCancelledByExecutor" -> BookingCancelledEventMapper.executorToIntegrationEvent(objectMapper.readValue(payload, OfferCancelledByExecutor.class));
+                case "OfferCompleted" -> OfferCompletedEventMapper.toIntegrationEvent(objectMapper.readValue(payload, OfferCompleted.class));
                 default -> {
                     log.warn("Unknown event type in outbox: {}", eventType);
                     yield null;

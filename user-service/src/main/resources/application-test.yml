@@ -4,6 +4,9 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: "http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT_HOST}/realms/local-services-platform"
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
 
 KEYCLOAK_HOST: localhost
 KEYCLOAK_PORT_HOST: 7080

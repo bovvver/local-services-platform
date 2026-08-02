@@ -37,6 +37,14 @@ public class Reputation {
         return new Reputation(userId,  Rating.of(0.0), 0, 0);
     }
 
+    public void incrementCancelledBookings() {
+        this.cancelledBookings++;
+    }
+
+    void incrementCompletedBookings() {
+        this.completedBookings++;
+    }
+
     public UserId getUserId() {
         return userId;
     }
