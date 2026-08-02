@@ -6,6 +6,7 @@ import com.github.bovvver.infrastructure.UnauthorizedParticipantException;
 import com.github.bovvver.offermanagment.events.DomainEvent;
 import com.github.bovvver.offermanagment.events.ExecutorAssigned;
 import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
+import com.github.bovvver.offermanagment.events.OfferCompleted;
 import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByAuthor;
 import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByExecutor;
 import com.github.bovvver.offermanagment.vo.*;
@@ -190,6 +191,7 @@ public class Offer {
             throw new OperationNotAllowedInCurrentStateException(this.status);
         }
         changeStatus(OfferStatus.COMPLETED);
+        addIntegrationEvent(new OfferCompleted(this.id.value(), this.executorId.value()));
     }
 
     public void cancel(final UserId userId) {
