@@ -13,14 +13,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -29,12 +26,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Import(TestSecurityConfig.class)
 public abstract class BaseIntegrationTest {
 
-    @Container
     @ServiceConnection
-    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+    protected static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
-    @Container
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka"));
+    protected static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka"));
+
+    static {
+        postgreSQLContainer.start();
+        kafka.start();
+    }
 
     @Autowired
     protected MockMvc mockMvc;
