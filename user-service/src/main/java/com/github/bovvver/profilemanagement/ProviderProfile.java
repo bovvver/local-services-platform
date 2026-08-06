@@ -17,14 +17,14 @@ public class ProviderProfile {
 
     private final ProviderProfileId id;
     private final UserId userId;
-    private String bio;
+    private Bio bio;
     private City city;
     private Country country;
     private final Set<ServiceCategory> categories;
 
     ProviderProfile(final ProviderProfileId id,
                     final UserId userId,
-                    final String bio,
+                    final Bio bio,
                     final City city,
                     final Country country,
                     final Set<ServiceCategory> categories) {
@@ -54,6 +54,14 @@ public class ProviderProfile {
         );
     }
 
+    void update(final Bio bio, final City city, final Country country, final Set<ServiceCategory> categories) {
+        this.bio = bio;
+        this.city = city;
+        this.country = country;
+        this.categories.clear();
+        this.categories.addAll(categories);
+    }
+
     public ProviderProfileId getId() {
         return id;
     }
@@ -62,7 +70,7 @@ public class ProviderProfile {
         return userId;
     }
 
-    public String getBio() {
+    public Bio getBio() {
         return bio;
     }
 
@@ -77,4 +85,6 @@ public class ProviderProfile {
     public Set<ServiceCategory> getCategories() {
         return Collections.unmodifiableSet(categories);
     }
+
+
 }
