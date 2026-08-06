@@ -28,7 +28,7 @@ class ProviderProfileMapperTest {
 
         assertThat(profile.getId().value()).isEqualTo(PROFILE_ID);
         assertThat(profile.getUserId().value()).isEqualTo(USER_ID);
-        assertThat(profile.getBio()).isEqualTo("Sample Bio");
+        assertThat(profile.getBio()).isEqualTo(Bio.of("Sample Bio"));
         assertThat(profile.getCity().value()).isEqualTo("New York");
         assertThat(profile.getCountry().code()).isEqualTo("US");
         assertThat(profile.getCategories()).containsExactly(ServiceCategory.CLEANING);
@@ -39,7 +39,7 @@ class ProviderProfileMapperTest {
         ProviderProfile profile = new ProviderProfile(
                 ProviderProfileId.of(PROFILE_ID),
                 UserId.of(USER_ID),
-                "Sample Bio",
+                Bio.of("Sample Bio"),
                 City.of("New York"),
                 Country.of("US"),
                 Set.of(ServiceCategory.CLEANING)

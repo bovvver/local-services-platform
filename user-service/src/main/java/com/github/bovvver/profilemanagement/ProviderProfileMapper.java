@@ -17,7 +17,7 @@ class ProviderProfileMapper {
         return new ProviderProfile(
                 ProviderProfileId.of(entity.getId()),
                 UserId.of(entity.getUserId()),
-                entity.getBio(),
+                Bio.of(entity.getBio()),
                 City.of(entity.getCity()),
                 Country.of(entity.getCountry()),
                 entity.getCategories()
@@ -34,7 +34,7 @@ class ProviderProfileMapper {
         return new ProviderProfileEntity(
                 profile.getId().value(),
                 profile.getUserId().value(),
-                profile.getBio(),
+                profile.getBio() == null ? null : profile.getBio().value(),
                 profile.getCity() == null ? null : profile.getCity().value(),
                 profile.getCountry() == null ? null : profile.getCountry().code(),
                 profile.getCategories()
