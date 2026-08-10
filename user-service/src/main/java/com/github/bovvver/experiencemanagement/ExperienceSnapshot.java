@@ -1,6 +1,7 @@
 package com.github.bovvver.experiencemanagement;
 
 import com.github.bovvver.vo.ExperienceLevel;
+import com.github.bovvver.vo.Rating;
 import com.github.bovvver.vo.Score;
 import com.github.bovvver.vo.UserId;
 
@@ -35,6 +36,14 @@ public class ExperienceSnapshot {
      */
     public static ExperienceSnapshot initialize(UserId userId) {
         return new ExperienceSnapshot(userId, ExperienceLevel.BEGINNER, Score.of(0));
+    }
+
+    void recalculateExperience(final Rating rating, final int completedBookings, final int cancelledBookings) {
+        double scoreValue = (completedBookings * 100.0) * (rating.value() / 5.0) - (cancelledBookings * 200.0);
+        int finalScore = Math.max(0, (int) Math.round(scoreValue));
+
+        this.score = Score.of(finalScore);
+        this.level = ExperienceLevel.fromScore(finalScore);
     }
 
     public UserId getUserId() {

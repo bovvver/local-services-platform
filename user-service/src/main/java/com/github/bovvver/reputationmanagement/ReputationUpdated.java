@@ -6,6 +6,8 @@ import com.github.bovvver.vo.UserId;
 
 public record ReputationUpdated(
         UserId userId,
-        Rating averageRating
+        Rating averageRating,
+        int completedBookings,
+        int cancelledBookings
 ) implements DomainEvent {
 }

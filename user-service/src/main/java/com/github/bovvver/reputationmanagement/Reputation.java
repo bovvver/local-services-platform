@@ -52,15 +52,17 @@ public class Reputation {
         double newAverage = (currentSum + newRating.value()) / totalRatings;
 
         averageRating = Rating.newAverage(newAverage);
-        domainEvents.add(new ReputationUpdated(userId, averageRating));
+        domainEvents.add(new ReputationUpdated(userId, averageRating, completedBookings, cancelledBookings));
     }
 
     public void incrementCancelledBookings() {
         this.cancelledBookings++;
+        domainEvents.add(new ReputationUpdated(userId, averageRating, completedBookings, cancelledBookings));
     }
 
     void incrementCompletedBookings() {
         this.completedBookings++;
+        domainEvents.add(new ReputationUpdated(userId, averageRating, completedBookings, cancelledBookings));
     }
 
     public List<DomainEvent> pullDomainEvents() {
