@@ -12,6 +12,7 @@ class ReputationMapper {
         return new Reputation(
                 UserId.of(entity.getUserId()),
                 Rating.of(entity.getAverageRating()),
+                entity.getTotalRatings(),
                 entity.getCompletedBookings(),
                 entity.getCancelledBookings()
         );
@@ -21,6 +22,7 @@ class ReputationMapper {
         return new ReputationEntity(
                 reputation.getUserId().value(),
                 reputation.getAverageRating().value(),
+                reputation.getTotalRatings(),
                 reputation.getCompletedBookings(),
                 reputation.getCancelledBookings()
         );

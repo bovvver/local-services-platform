@@ -2,6 +2,7 @@ package com.github.bovvver.config;
 
 import com.github.bovvver.contracts.BookingCancelledByExecutorIntegrationEvent;
 import com.github.bovvver.contracts.OfferCompletedIntegrationEvent;
+import com.github.bovvver.contracts.ReviewAddedIntegrationEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -36,6 +37,11 @@ class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, OfferCompletedIntegrationEvent> offerCompletedFactory() {
         return buildFactory(OfferCompletedIntegrationEvent.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ReviewAddedIntegrationEvent> reviewAddedFactory() {
+        return buildFactory(ReviewAddedIntegrationEvent.class);
     }
 
     // ───── Shared builders ─────
