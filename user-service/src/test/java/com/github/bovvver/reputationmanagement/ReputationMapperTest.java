@@ -17,6 +17,7 @@ class ReputationMapperTest {
         ReputationEntity entity = new ReputationEntity(
                 USER_ID,
                 4.8,
+                0,
                 15,
                 1
         );
@@ -34,6 +35,7 @@ class ReputationMapperTest {
         Reputation reputation = new Reputation(
                 UserId.of(USER_ID),
                 Rating.of(4.8),
+                0,
                 15,
                 1
         );

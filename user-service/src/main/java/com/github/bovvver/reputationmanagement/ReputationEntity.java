@@ -28,6 +28,9 @@ class ReputationEntity {
     @Column(name = "average_rating", nullable = false)
     private double averageRating;
 
+    @Column(name = "total_ratings", nullable = false)
+    private int totalRatings;
+
     @Column(name = "completed_bookings", nullable = false)
     private int completedBookings;
 

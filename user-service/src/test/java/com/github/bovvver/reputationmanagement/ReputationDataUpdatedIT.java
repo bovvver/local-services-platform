@@ -3,6 +3,7 @@ package com.github.bovvver.reputationmanagement;
 import com.github.bovvver.BaseIntegrationTest;
 import com.github.bovvver.contracts.BookingCancelledByExecutorIntegrationEvent;
 import com.github.bovvver.contracts.OfferCompletedIntegrationEvent;
+import com.github.bovvver.contracts.ReviewAddedIntegrationEvent;
 import com.github.bovvver.usermanagement.User;
 import com.github.bovvver.usermanagement.UserRepository;
 import com.github.bovvver.vo.Email;
@@ -83,6 +84,44 @@ class ReputationDataUpdatedIT extends BaseIntegrationTest {
         await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
             var entity = reputationReadRepository.findByUserId(userId);
             assertThat(entity.orElseThrow().getCompletedBookings()).isOne();
+        });
+    }
+
+    @Test
+    void shouldUpdateAverageRatingAndTotalRatingsOnReviewAddedEvent() {
+        UUID userId = UUID.randomUUID();
+        User user = User.create(UserId.of(userId), new Email("test@example.com"), "John", "Doe");
+        userRepository.save(user);
+
+        Reputation reputation = Reputation.initialize(UserId.of(userId));
+        reputationRepository.save(reputation);
+
+        ReviewAddedIntegrationEvent event1 = new ReviewAddedIntegrationEvent(
+                UUID.randomUUID(),
+                userId,
+                4.5
+        );
+
+        kafkaTemplate.send("review.added", userId.toString(), event1);
+
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var entity = reputationReadRepository.findByUserId(userId);
+            assertThat(entity.orElseThrow().getAverageRating()).isEqualTo(4.5);
+            assertThat(entity.orElseThrow().getTotalRatings()).isOne();
+        });
+
+        ReviewAddedIntegrationEvent event2 = new ReviewAddedIntegrationEvent(
+                UUID.randomUUID(),
+                userId,
+                3.5
+        );
+
+        kafkaTemplate.send("review.added", userId.toString(), event2);
+
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var entity = reputationReadRepository.findByUserId(userId);
+            assertThat(entity.orElseThrow().getAverageRating()).isEqualTo(4.0);
+            assertThat(entity.orElseThrow().getTotalRatings()).isEqualTo(2);
         });
     }
 }

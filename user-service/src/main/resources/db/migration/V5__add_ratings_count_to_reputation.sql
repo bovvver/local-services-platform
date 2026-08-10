@@ -1,0 +1,1 @@
+ALTER TABLE reputation ADD COLUMN total_ratings INTEGER NOT NULL DEFAULT 0;

@@ -59,6 +59,7 @@ class ReputationUserCreatedListenerTest {
                 USER_UUID,
                 5.0,
                 0,
+                0,
                 0
         );
 

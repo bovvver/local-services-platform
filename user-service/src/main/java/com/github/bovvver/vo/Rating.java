@@ -10,4 +10,8 @@ public record Rating(double value) {
     public static Rating of(double value) {
         return new Rating(value);
     }
+
+    public static Rating newAverage(double average) {
+        return Rating.of(Math.round(average * 100.0) / 100.0);
+    }
 }
