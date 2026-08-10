@@ -17,14 +17,13 @@ public enum ExperienceLevel {
      * the highest level whose minScore threshold is met.
      */
     public static ExperienceLevel fromScore(int score) {
-        ExperienceLevel matchingLevel = BEGINNER;
+        ExperienceLevel result = BEGINNER;
         for (ExperienceLevel level : values()) {
-            if (score >= level.minScore) {
-                matchingLevel = level;
-            } else {
+            if (score < level.minScore) {
                 break;
             }
+            result = level;
         }
-        return matchingLevel;
+        return result;
     }
 }
