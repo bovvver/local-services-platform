@@ -1,9 +1,10 @@
-package com.github.bovvver.offermanagment.workproofupload;
+package com.github.bovvver.offermanagment.review;
 
 import com.github.bovvver.infrastructure.OfferNotFoundException;
 import com.github.bovvver.offermanagment.ExecutionDetailsDocument;
 import com.github.bovvver.offermanagment.OfferDocument;
 import com.github.bovvver.offermanagment.OfferRepository;
+import com.github.bovvver.offermanagment.outbox.OutboxService;
 import com.github.bovvver.offermanagment.vo.Location;
 import com.github.bovvver.offermanagment.vo.OfferStatus;
 import com.github.bovvver.offermanagment.vo.ServiceCategory;
@@ -18,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CompletionProcessingServiceTest {
+class OfferReviewServiceTest {
 
     @Mock
     private CurrentUser currentUser;
@@ -38,23 +38,23 @@ class CompletionProcessingServiceTest {
     @Mock
     private OfferRepository offerRepository;
 
+    @Mock
+    private OutboxService outboxService;
+
     @InjectMocks
-    private CompletionProcessingService completionProcessingService;
+    private OfferReviewService offerReviewService;
 
     @Test
-    void shouldRequestCompletionAndReturnResponse() {
+    void shouldSubmitReviewAndReturnResponse() {
         UUID offerId = UUID.randomUUID();
         UUID authorId = UUID.randomUUID();
         UUID executorId = UUID.randomUUID();
-        String description = "Job done";
-        List<String> proofUrls = List.of("https://proofs.local/1", "https://proofs.local/2");
 
         ExecutionDetailsDocument executionDetails = new ExecutionDetailsDocument(
+                "Completed work",
                 null,
-                null,
-                null,
+                LocalDateTime.now(),
                 new HashSet<>()
-
         );
         OfferDocument offerDocument = new OfferDocument(
                 offerId,
@@ -63,43 +63,35 @@ class CompletionProcessingServiceTest {
                 executionDetails,
                 authorId,
                 executorId,
-                new Location(52.2297, 21.0122),
-                Set.of(ServiceCategory.HOME_SERVICES),
-                BigDecimal.valueOf(5000.0),
-                OfferStatus.IN_PROGRESS,
+                Location.of(0.0, 0.0),
+                Set.of(ServiceCategory.AUTOMOTIVE),
+                BigDecimal.valueOf(100.0),
+                OfferStatus.COMPLETED,
                 null,
-                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now(),
                 null
         );
 
-        CompletionRequest request = new CompletionRequest(description, proofUrls, offerId);
-
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offerDocument));
-        when(currentUser.getId()).thenReturn(UserId.of(executorId));
-        when(offerRepository.save(any(OfferDocument.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0, OfferDocument.class));
+        when(currentUser.getId()).thenReturn(UserId.of(authorId));
+        when(offerRepository.save(any(OfferDocument.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        OfferExecutionResponse response = completionProcessingService.sendCompletionRequest(request);
+        OfferReviewResponse response = offerReviewService.submitReview(offerId, 5);
 
         assertThat(response.offerId()).isEqualTo(offerId);
-        assertThat(response.status()).isEqualTo(OfferStatus.COMPLETED_REQUESTED);
-        assertThat(response.completionDescription()).isEqualTo(description);
-        assertThat(response.proofs()).hasSize(2);
-        assertThat(response.proofs().stream().map(WorkProof::url))
-                .containsExactlyInAnyOrderElementsOf(proofUrls);
-        assertThat(response.completionRequestedAt()).isNotNull();
+        assertThat(response.rating()).isEqualTo(5);
 
+        verify(offerRepository).findById(offerId);
         verify(offerRepository).save(any(OfferDocument.class));
+        verify(outboxService).passToOutbox(any(), any(), any());
     }
 
     @Test
-    void shouldThrowWhenOfferDoesNotExist() {
+    void shouldThrowWhenOfferNotFound() {
         UUID offerId = UUID.randomUUID();
-        CompletionRequest request = new CompletionRequest("Done", List.of("proof"), offerId);
-
         when(offerRepository.findById(offerId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> completionProcessingService.sendCompletionRequest(request))
+        assertThatThrownBy(() -> offerReviewService.submitReview(offerId, 5))
                 .isInstanceOf(OfferNotFoundException.class);
     }
 }

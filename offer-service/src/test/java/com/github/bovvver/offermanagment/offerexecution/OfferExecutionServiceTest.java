@@ -59,6 +59,7 @@ class OfferExecutionServiceTest {
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
                 null,
+                null,
                 null
         );
 

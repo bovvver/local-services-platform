@@ -1560,6 +1560,55 @@
             "description": "Forbidden scenario for cancellation. Expected HTTP 403 when caller is neither author nor executor."
           },
           "response": []
+        },
+        {
+          "name": "Submit Review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/offer-service/offers/{{offer_id}}/review",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "offer-service",
+                "offers",
+                "{{offer_id}}",
+                "review"
+              ]
+            },
+            "description": "Submit a rating (1-5 stars) for the executor of a completed offer.\n\nRequires JWT token.\n\nPath params:\n- offerId (UUID, required)\n\nBody:\n- rating (Integer, required, 1-5)\n\nExpected: HTTP 200 with review details."
+          },
+          "response": []
         }
       ],
       "description": "Offer Service endpoints (port 9000). Path via gateway: /offer-service/...\n\nAll endpoints require a JWT Bearer token."

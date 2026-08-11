@@ -93,6 +93,7 @@ class OfferCancellationServiceTest {
                 Set.of(ServiceCategory.AUTOMOTIVE),
                 BigDecimal.TEN,
                 OfferStatus.OPEN,
+                null,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );

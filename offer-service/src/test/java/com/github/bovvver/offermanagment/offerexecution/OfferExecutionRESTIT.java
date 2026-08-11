@@ -51,6 +51,7 @@ class OfferExecutionRESTIT extends BaseIntegrationTest {
                 BigDecimal.valueOf(1000.0),
                 OfferStatus.ASSIGNED,
                 null,
+                null,
                 null
         );
 

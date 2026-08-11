@@ -50,6 +50,7 @@ class OfferOwnershipRESTIT extends BaseIntegrationTest {
                 testOffer.getServiceCategories(),
                 testOffer.getSalary(),
                 testOffer.getStatus(),
+                null,
                 testOffer.getCreatedAt(),
                 testOffer.getUpdatedAt()
         );

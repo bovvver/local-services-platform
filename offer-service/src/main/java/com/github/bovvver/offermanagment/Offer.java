@@ -3,10 +3,7 @@ package com.github.bovvver.offermanagment;
 import com.github.bovvver.infrastructure.CompletionProofRequiredException;
 import com.github.bovvver.infrastructure.OperationNotAllowedInCurrentStateException;
 import com.github.bovvver.infrastructure.UnauthorizedParticipantException;
-import com.github.bovvver.offermanagment.events.DomainEvent;
-import com.github.bovvver.offermanagment.events.ExecutorAssigned;
-import com.github.bovvver.offermanagment.events.ExecutorAssignmentFailed;
-import com.github.bovvver.offermanagment.events.OfferCompleted;
+import com.github.bovvver.offermanagment.events.*;
 import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByAuthor;
 import com.github.bovvver.offermanagment.offercancellation.OfferCancelledByExecutor;
 import com.github.bovvver.offermanagment.vo.*;
@@ -35,6 +32,7 @@ public class Offer {
     private final Set<ServiceCategory> serviceCategories;
     private final Salary salary;
     private OfferStatus status;
+    private Rating rating;
     private final LocalDateTime createdAt;
     private final List<DomainEvent> domainEvents;
 
@@ -48,6 +46,7 @@ public class Offer {
           final Set<ServiceCategory> serviceCategories,
           final Salary salary,
           final OfferStatus status,
+          final Rating rating,
           final LocalDateTime createdAt,
           final List<DomainEvent> domainEvents
     ) {
@@ -61,6 +60,7 @@ public class Offer {
         this.serviceCategories = serviceCategories;
         this.salary = salary;
         this.status = status;
+        this.rating = rating;
         this.createdAt = createdAt;
         this.domainEvents = domainEvents;
     }
@@ -91,7 +91,7 @@ public class Offer {
 
         this(id, title, description, OfferExecutionDetails.empty(), authorId, null,
                 location, serviceCategories, salary,
-                OfferStatus.OPEN, LocalDateTime.now(),
+                OfferStatus.OPEN, null, LocalDateTime.now(),
                 new ArrayList<>());
     }
 
@@ -221,6 +221,20 @@ public class Offer {
         return copy;
     }
 
+    public void submitReview(final UserId authorId, Rating ratingValue) {
+        if (!isOwnedBy(authorId)) {
+            throw new UnauthorizedParticipantException();
+        }
+        if (this.status != OfferStatus.COMPLETED) {
+            throw new OperationNotAllowedInCurrentStateException(this.status);
+        }
+        if (this.rating != null) {
+            throw new IllegalStateException("Offer has already been reviewed");
+        }
+        this.rating = ratingValue;
+        addIntegrationEvent(new ReviewAdded(this.id.value(), this.executorId.value(), ratingValue.value()));
+    }
+
     private boolean isClosedForCancellation() {
         return isClosedForStatus(OfferStatus.OPEN, OfferStatus.IN_NEGOTIATION, OfferStatus.ASSIGNED);
     }
@@ -279,5 +293,9 @@ public class Offer {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Rating getRating() {
+        return rating;
     }
 }

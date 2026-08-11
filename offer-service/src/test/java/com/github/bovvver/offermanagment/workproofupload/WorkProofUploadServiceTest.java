@@ -73,6 +73,7 @@ class WorkProofUploadServiceTest {
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.OPEN,
+                null,
                 LocalDateTime.now().minusDays(1),
                 null
         );
@@ -116,6 +117,7 @@ class WorkProofUploadServiceTest {
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.COMPLETED_REQUESTED,
+                null,
                 LocalDateTime.now().minusDays(1),
                 null
         );
