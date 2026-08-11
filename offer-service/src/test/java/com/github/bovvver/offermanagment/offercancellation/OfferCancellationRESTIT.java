@@ -127,6 +127,7 @@ class OfferCancellationRESTIT extends BaseIntegrationTest {
                 BigDecimal.valueOf(1000.0),
                 status,
                 null,
+                null,
                 null
         );
     }

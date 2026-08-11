@@ -365,6 +365,83 @@ class OfferTest {
                 .isInstanceOf(UnauthorizedParticipantException.class);
     }
 
+    @Test
+    void shouldSubmitReviewSuccessfully() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+        offer.acceptCompletion(author);
+
+        offer.submitReview(author, Rating.of(5));
+
+        assertThat(offer.getRating()).isEqualTo(Rating.of(5));
+        var events = offer.pullEvents();
+        assertThat(events).hasSize(3);
+        assertThat(events.get(2)).isInstanceOf(com.github.bovvver.offermanagment.events.ReviewAdded.class);
+    }
+
+    @Test
+    void shouldThrowWhenRatingIsOutOfRange() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+        offer.acceptCompletion(author);
+
+        assertThatThrownBy(() -> offer.submitReview(author, Rating.of(0)))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> offer.submitReview(author, Rating.of(6)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldThrowWhenNonOwnerSubmitsReview() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+        offer.acceptCompletion(author);
+
+        assertThatThrownBy(() -> offer.submitReview(executor, Rating.of(5)))
+                .isInstanceOf(UnauthorizedParticipantException.class);
+    }
+
+    @Test
+    void shouldThrowWhenOfferIsNotCompleted() {
+        UserId author = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        assertThatThrownBy(() -> offer.submitReview(author, Rating.of(5)))
+                .isInstanceOf(OperationNotAllowedInCurrentStateException.class);
+    }
+
+    @Test
+    void shouldThrowWhenOfferIsAlreadyReviewed() {
+        UserId author = UserId.of(UUID.randomUUID());
+        UserId executor = UserId.of(UUID.randomUUID());
+        Offer offer = createValidOffer(author);
+
+        offer.accept(executor);
+        offer.startExecution(executor);
+        offer.changeStatus(OfferStatus.COMPLETED_REQUESTED);
+        offer.acceptCompletion(author);
+
+        offer.submitReview(author, Rating.of(5));
+
+        assertThatThrownBy(() -> offer.submitReview(author, Rating.of(4)))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
     private Offer createValidOffer(UserId authorId) {
         return Offer.create(
                 Title.of("Sample Title"),

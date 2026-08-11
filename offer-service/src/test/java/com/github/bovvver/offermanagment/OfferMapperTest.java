@@ -64,6 +64,7 @@ class OfferMapperTest {
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
                 null,
+                null,
                 null
         );
 
@@ -88,6 +89,7 @@ class OfferMapperTest {
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.ASSIGNED,
+                null,
                 null,
                 null
         );
@@ -123,6 +125,7 @@ class OfferMapperTest {
                 Set.of(ServiceCategory.HOME_SERVICES),
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.IN_PROGRESS,
+                null,
                 null,
                 null
         );

@@ -58,3 +58,4 @@ messaging:
     BookingCancelledByAuthorIntegrationEvent: booking.cancelled.by-author
     BookingCancelledByExecutorIntegrationEvent: booking.cancelled.by-executor
     OfferCompletedIntegrationEvent: offer.completed
+    ReviewAddedIntegrationEvent: review.added

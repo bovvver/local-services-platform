@@ -94,6 +94,7 @@ public class OfferOwnershipServiceTest {
                 new BigDecimal("1000.0"),
                 null,
                 null,
+                null,
                 null
         );
     }

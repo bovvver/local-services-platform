@@ -55,6 +55,8 @@ public class OfferDocument {
 
     private OfferStatus status;
 
+    private Integer rating;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -84,6 +86,6 @@ public class OfferDocument {
                   BigDecimal salary) {
         this(UUID.randomUUID(), title, description, new ExecutionDetailsDocument(null, null, null, new HashSet<>()), authorId, null,
                 location, serviceCategories, salary,
-                OfferStatus.OPEN, null, null);
+                OfferStatus.OPEN, null, null, null);
     }
 }

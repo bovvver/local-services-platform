@@ -64,6 +64,7 @@ class NegotiationHandlingServiceTest {
                 BigDecimal.valueOf(5000.0),
                 OfferStatus.OPEN,
                 null,
+                null,
                 null
         );
 

@@ -37,6 +37,7 @@ public class OfferMapper {
                 document.getServiceCategories(),
                 new Salary(document.getSalary()),
                 document.getStatus(),
+                document.getRating() == null ? null : Rating.of(document.getRating()),
                 document.getCreatedAt(),
                 new ArrayList<>()
         );
@@ -63,6 +64,7 @@ public class OfferMapper {
                 offer.getServiceCategories(),
                 offer.getSalary().value(),
                 offer.getStatus(),
+                offer.getRating() == null ? null : offer.getRating().value(),
                 offer.getCreatedAt(),
                 null    // managed by MongoDB
         );
