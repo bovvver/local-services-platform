@@ -5,7 +5,5 @@ package com.github.bovvver.vo;
  */
 public enum BadgeType {
     TOP_RATED,
-    HIGHLY_RECOMMENDED,
-    FAST_RESPONDER,
     RELIABLE
 }

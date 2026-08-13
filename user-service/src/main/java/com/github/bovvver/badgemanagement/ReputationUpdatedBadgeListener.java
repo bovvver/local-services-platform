@@ -1,4 +1,4 @@
-package com.github.bovvver.experiencemanagement;
+package com.github.bovvver.badgemanagement;
 
 import com.github.bovvver.reputationmanagement.ReputationUpdated;
 import lombok.RequiredArgsConstructor;
@@ -12,18 +12,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-class ReputationUpdatedListener {
+class ReputationUpdatedBadgeListener {
 
-    private final ExperienceModificationService experienceModificationService;
+    private final BadgeAssignmentService badgeAssignmentService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(ReputationUpdated event) {
-        experienceModificationService.recalculateExperience(
-                event.userId(),
-                event.averageRating(),
-                event.completedBookings(),
-                event.cancelledBookings()
-        );
+        badgeAssignmentService.addBadges(event);
     }
 }

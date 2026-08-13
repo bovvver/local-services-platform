@@ -43,18 +43,6 @@ public class Badge {
         return new Badge(BadgeId.generate(), userId, type, LocalDateTime.now(), null);
     }
 
-    /**
-     * Factory — awards a badge with an explicit expiry to a user.
-     *
-     * @param userId    the recipient user's identifier
-     * @param type      the badge type to award
-     * @param expiresAt the expiry date, or null for permanent badges
-     * @return a newly awarded badge
-     */
-    public static Badge awardWithExpiry(UserId userId, BadgeType type, LocalDateTime expiresAt) {
-        return new Badge(BadgeId.generate(), userId, type, LocalDateTime.now(), expiresAt);
-    }
-
     public BadgeId getId() {
         return id;
     }
