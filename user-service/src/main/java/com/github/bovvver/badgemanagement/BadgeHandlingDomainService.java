@@ -1,40 +1,34 @@
 package com.github.bovvver.badgemanagement;
 
 import com.github.bovvver.reputationmanagement.ReputationUpdated;
+import com.github.bovvver.vo.BadgeType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-@Service
+@Component
 @RequiredArgsConstructor
 class BadgeHandlingDomainService {
 
-    private final BadgeReadRepository badgeReadRepository;
-    private final BadgeRepository badgeWriteRepository;
     private final List<BadgeRule> rules;
 
-    List<Badge> handleReputationBadges(ReputationUpdated event) {
-        List<Badge> badges = new ArrayList<>();
+    public BadgeEvaluationResult handleReputationBadges(ReputationUpdated event, List<BadgeType> currentBadgeTypes) {
+        List<BadgeType> toAward = new ArrayList<>();
+        List<BadgeType> toRevoke = new ArrayList<>();
 
         for (BadgeRule rule : rules) {
-            badges.addAll(syncBadge(event, rule));
-        }
-        return badges;
-    }
+            boolean shouldHave = rule.shouldHaveBadge(event);
+            boolean hasAlready = currentBadgeTypes.contains(rule.getType());
 
-    private List<Badge> syncBadge(final ReputationUpdated event, final BadgeRule rule) {
-        boolean shouldHaveBadge = rule.shouldHaveBadge(event);
-        boolean hasBadge = badgeReadRepository.existsByUserIdAndBadgeType(event.userId().value(), rule.getType());
+            if (shouldHave && !hasAlready) {
+                toAward.add(rule.getType());
+            } else if (!shouldHave && hasAlready) {
+                toRevoke.add(rule.getType());
+            }
+        }
 
-        if (shouldHaveBadge && !hasBadge) {
-            return List.of(Badge.award(event.userId(), rule.getType()));
-        }
-        if (!shouldHaveBadge && hasBadge) {
-            badgeWriteRepository.deleteByUserIdAndType(event.userId(), rule.getType());
-        }
-        return Collections.emptyList();
+        return new BadgeEvaluationResult(toAward, toRevoke);
     }
 }

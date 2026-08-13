@@ -2,7 +2,9 @@ package com.github.bovvver.badgemanagement;
 
 import com.github.bovvver.reputationmanagement.ReputationUpdated;
 import com.github.bovvver.vo.BadgeType;
+import org.springframework.stereotype.Component;
 
+@Component
 class TopRatedBadgeRule implements BadgeRule {
 
     @Override
