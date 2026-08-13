@@ -14,13 +14,13 @@ import java.util.UUID;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ReputationUpdatedListenerTest {
+class ReputationUpdatedExperienceListenerTest {
 
     @Mock
     private ExperienceModificationService experienceModificationService;
 
     @InjectMocks
-    private ReputationUpdatedListener listener;
+    private ReputationUpdatedExperienceListener listener;
 
     @Test
     void shouldCallRecalculateExperienceWhenReputationUpdatedEventReceived() {
