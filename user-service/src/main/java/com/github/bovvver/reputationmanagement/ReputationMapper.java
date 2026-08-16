@@ -1,6 +1,8 @@
 package com.github.bovvver.reputationmanagement;
 
+import com.github.bovvver.vo.ExperienceLevel;
 import com.github.bovvver.vo.Rating;
+import com.github.bovvver.vo.Score;
 import com.github.bovvver.vo.UserId;
 
 /**
@@ -14,7 +16,9 @@ class ReputationMapper {
                 Rating.of(entity.getAverageRating()),
                 entity.getTotalRatings(),
                 entity.getCompletedBookings(),
-                entity.getCancelledBookings()
+                entity.getCancelledBookings(),
+                entity.getExperienceLevel(),
+                Score.of(entity.getExperienceScore())
         );
     }
 
@@ -24,7 +28,9 @@ class ReputationMapper {
                 reputation.getAverageRating().value(),
                 reputation.getTotalRatings(),
                 reputation.getCompletedBookings(),
-                reputation.getCancelledBookings()
+                reputation.getCancelledBookings(),
+                reputation.getExperienceLevel(),
+                reputation.getExperienceScore().value()
         );
     }
 }

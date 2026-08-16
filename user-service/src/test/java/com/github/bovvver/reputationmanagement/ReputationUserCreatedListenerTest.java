@@ -2,6 +2,7 @@ package com.github.bovvver.reputationmanagement;
 
 import com.github.bovvver.usermanagement.keycloakusercreation.UserCreated;
 import com.github.bovvver.vo.Email;
+import com.github.bovvver.vo.ExperienceLevel;
 import com.github.bovvver.vo.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,6 +61,8 @@ class ReputationUserCreatedListenerTest {
                 5.0,
                 0,
                 0,
+                0,
+                ExperienceLevel.BEGINNER,
                 0
         );
 

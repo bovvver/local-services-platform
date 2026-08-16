@@ -1,9 +1,11 @@
-package com.github.bovvver.verificationmanagement.upload;
+package com.github.bovvver.usermanagement.verification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
 import com.github.bovvver.shared.CurrentUser;
-import com.github.bovvver.verificationmanagement.*;
+import com.github.bovvver.usermanagement.User;
+import com.github.bovvver.usermanagement.UserRepository;
+import com.github.bovvver.vo.Email;
 import com.github.bovvver.vo.UserId;
 import com.github.bovvver.vo.VerificationStatus;
 import io.minio.MinioClient;
@@ -35,10 +37,7 @@ class VerificationProofRESTIT extends BaseIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private VerificationRepository verificationRepository;
-
-    @Autowired
-    private VerificationReadRepository verificationReadRepository;
+    private UserRepository userRepository;
 
     @MockitoBean
     private MinioClient minioClient;
@@ -50,25 +49,20 @@ class VerificationProofRESTIT extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute("TRUNCATE TABLE verification CASCADE");
         jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
     }
 
     private void createTestUserAndVerification(VerificationStatus status, String proofUrl) {
-        jdbcTemplate.update(
-                "INSERT INTO users (id, email, first_name, last_name) VALUES (?, ?, ?, ?)",
-                USER_UUID, "test@example.com", "John", "Doe"
-        );
-        Verification verification = Verification.initialize(UserId.of(USER_UUID));
+        User user = User.create(UserId.of(USER_UUID), new Email("test@example.com"), "John", "Doe");
         if (proofUrl != null) {
-            verification.addVerificationProof(VerificationProof.of(proofUrl));
+            user.addVerificationProof(VerificationProof.of(proofUrl));
         }
         if (status == VerificationStatus.VERIFIED) {
-            verification.verify();
+            user.verify();
         } else if (status == VerificationStatus.REJECTED) {
-            verification.reject();
+            user.reject();
         }
-        verificationRepository.save(verification);
+        userRepository.save(user);
     }
 
     @Test
@@ -117,9 +111,9 @@ class VerificationProofRESTIT extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(USER_UUID.toString()));
 
-        VerificationEntity updated = verificationReadRepository.findByUserId(USER_UUID).orElseThrow();
-        assertThat(updated.getProofUrl()).isEqualTo("http://example.com/proof");
-        assertThat(updated.getProofUploadedAt()).isNotNull();
+        User updated = userRepository.findById(UserId.of(USER_UUID)).orElseThrow();
+        assertThat(updated.getVerificationProof().url()).isEqualTo("http://example.com/proof");
+        assertThat(updated.getVerificationProof().uploadedAt()).isNotNull();
     }
 
     @Test
@@ -131,7 +125,7 @@ class VerificationProofRESTIT extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        VerificationEntity updated = verificationReadRepository.findByUserId(USER_UUID).orElseThrow();
+        User updated = userRepository.findById(UserId.of(USER_UUID)).orElseThrow();
         assertThat(updated.getIdentityStatus()).isEqualTo(VerificationStatus.VERIFIED);
     }
 
@@ -144,7 +138,7 @@ class VerificationProofRESTIT extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        VerificationEntity updated = verificationReadRepository.findByUserId(USER_UUID).orElseThrow();
+        User updated = userRepository.findById(UserId.of(USER_UUID)).orElseThrow();
         assertThat(updated.getIdentityStatus()).isEqualTo(VerificationStatus.REJECTED);
     }
 }

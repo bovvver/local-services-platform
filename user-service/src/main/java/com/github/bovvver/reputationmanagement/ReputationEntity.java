@@ -1,7 +1,10 @@
 package com.github.bovvver.reputationmanagement;
 
+import com.github.bovvver.vo.ExperienceLevel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -36,4 +39,11 @@ class ReputationEntity {
 
     @Column(name = "cancelled_bookings", nullable = false)
     private int cancelledBookings;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "experience_level", nullable = false, length = 20)
+    private ExperienceLevel experienceLevel;
+
+    @Column(name = "experience_score", nullable = false)
+    private int experienceScore;
 }

@@ -4,8 +4,6 @@ import com.github.bovvver.BaseIntegrationTest;
 import com.github.bovvver.contracts.BookingCancelledByExecutorIntegrationEvent;
 import com.github.bovvver.contracts.OfferCompletedIntegrationEvent;
 import com.github.bovvver.contracts.ReviewAddedIntegrationEvent;
-import com.github.bovvver.experiencemanagement.ExperienceSnapshot;
-import com.github.bovvver.experiencemanagement.ExperienceSnapshotRepository;
 import com.github.bovvver.usermanagement.User;
 import com.github.bovvver.usermanagement.UserRepository;
 import com.github.bovvver.vo.Email;
@@ -37,15 +35,11 @@ class ReputationDataUpdatedIT extends BaseIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ExperienceSnapshotRepository experienceSnapshotRepository;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void tearDown() {
         jdbcTemplate.update("DELETE FROM badges");
-        jdbcTemplate.update("DELETE FROM experience_snapshot");
         jdbcTemplate.update("DELETE FROM reputation");
         jdbcTemplate.update("DELETE FROM users");
     }
@@ -58,8 +52,6 @@ class ReputationDataUpdatedIT extends BaseIntegrationTest {
 
         Reputation reputation = Reputation.initialize(UserId.of(userId));
         reputationRepository.save(reputation);
-
-        experienceSnapshotRepository.save(ExperienceSnapshot.initialize(UserId.of(userId)));
 
         BookingCancelledByExecutorIntegrationEvent event = new BookingCancelledByExecutorIntegrationEvent(
                 UUID.randomUUID(),
@@ -83,8 +75,6 @@ class ReputationDataUpdatedIT extends BaseIntegrationTest {
         Reputation reputation = Reputation.initialize(UserId.of(userId));
         reputationRepository.save(reputation);
 
-        experienceSnapshotRepository.save(ExperienceSnapshot.initialize(UserId.of(userId)));
-
         OfferCompletedIntegrationEvent event = new OfferCompletedIntegrationEvent(
                 UUID.randomUUID(),
                 userId
@@ -106,8 +96,6 @@ class ReputationDataUpdatedIT extends BaseIntegrationTest {
 
         Reputation reputation = Reputation.initialize(UserId.of(userId));
         reputationRepository.save(reputation);
-
-        experienceSnapshotRepository.save(ExperienceSnapshot.initialize(UserId.of(userId)));
 
         ReviewAddedIntegrationEvent event1 = new ReviewAddedIntegrationEvent(
                 UUID.randomUUID(),

@@ -1,10 +1,10 @@
-package com.github.bovvver.verificationmanagement.upload;
+package com.github.bovvver.usermanagement.verification;
 
 import com.github.bovvver.infrastructure.AlreadyVerifiedException;
 import com.github.bovvver.infrastructure.URLGenerationFailedException;
 import com.github.bovvver.shared.CurrentUser;
-import com.github.bovvver.verificationmanagement.VerificationEntity;
-import com.github.bovvver.verificationmanagement.VerificationReadRepository;
+import com.github.bovvver.usermanagement.User;
+import com.github.bovvver.usermanagement.UserRepository;
 import com.github.bovvver.vo.VerificationStatus;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.Http;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-class VerificationProofUploadService {
+public class VerificationProofUploadService {
 
     private static final int URL_EXPIRY_MINUTES = 5;
     private static final String OBJECT_KEY_TEMPLATE = "verification/%s/%s-%s";
@@ -29,9 +29,9 @@ class VerificationProofUploadService {
 
     private final CurrentUser currentUser;
     private final MinioClient minioClient;
-    private final VerificationReadRepository verificationReadRepository;
+    private final UserRepository userRepository;
 
-    PresignedUploadUrlResponse getPresignedUploadURL(final PresignedUploadUrlRequest request) {
+    public PresignedUploadUrlResponse getPresignedUploadURL(final PresignedUploadUrlRequest request) {
         if (isVerified()) {
             throw new AlreadyVerifiedException();
         }
@@ -40,9 +40,10 @@ class VerificationProofUploadService {
         return new PresignedUploadUrlResponse(uploadUrl, objectKey);
     }
 
-    PresignedGetUrlResponse getPresignedGetURLs(final UUID userId) {
-        Set<String> proofUrls = verificationReadRepository.findByUserId(userId)
-                .map(VerificationEntity::getProofUrl)
+    public PresignedGetUrlResponse getPresignedGetURLs(final UUID userId) {
+        Set<String> proofUrls = userRepository.findById(com.github.bovvver.vo.UserId.of(userId))
+                .map(User::getVerificationProof)
+                .map(VerificationProof::url)
                 .filter(url -> !url.isBlank())
                 .map(Set::of)
                 .orElse(Set.of());
@@ -68,10 +69,9 @@ class VerificationProofUploadService {
     }
 
     private boolean isVerified() {
-        return verificationReadRepository.existsByUserIdAndIdentityStatus(
-                currentUser.getId().value(),
-                VerificationStatus.VERIFIED
-        );
+        return userRepository.findById(currentUser.getId())
+                .map(user -> user.getIdentityStatus() == VerificationStatus.VERIFIED)
+                .orElse(false);
     }
 
     private String getObjectKey(PresignedUploadUrlRequest request) {

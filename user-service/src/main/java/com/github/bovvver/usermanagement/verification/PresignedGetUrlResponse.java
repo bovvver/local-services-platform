@@ -1,4 +1,4 @@
-package com.github.bovvver.verificationmanagement.upload;
+package com.github.bovvver.usermanagement.verification;
 
 import java.util.List;
 
