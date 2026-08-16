@@ -1,10 +1,10 @@
-package com.github.bovvver.verificationmanagement.upload;
+package com.github.bovvver.usermanagement.verification;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-record PresignedUploadUrlRequest(
+public record PresignedUploadUrlRequest(
         @NotBlank
         @Size(max = 255)
         String fileName,

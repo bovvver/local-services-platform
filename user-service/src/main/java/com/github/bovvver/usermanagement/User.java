@@ -1,19 +1,19 @@
 package com.github.bovvver.usermanagement;
 
 import com.github.bovvver.event.DomainEvent;
+import com.github.bovvver.infrastructure.AlreadyVerifiedException;
+import com.github.bovvver.infrastructure.EmptyVerificationDataException;
 import com.github.bovvver.usermanagement.keycloakusercreation.UserCreated;
+import com.github.bovvver.usermanagement.verification.VerificationProof;
 import com.github.bovvver.vo.Email;
 import com.github.bovvver.vo.UserId;
+import com.github.bovvver.vo.VerificationStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * User aggregate — responsible for identity and account lifecycle only.
- *
- * <p>Fields such as City, Country, ExperienceLevel, ServiceCategories, AwardTags,
- * OfferIds, and BookingIds have been extracted to dedicated aggregates
- * (ProviderProfile, ExperienceSnapshot, Badge, etc.).</p>
+ * User aggregate — responsible for identity, account lifecycle, and verification status.
  */
 public class User {
 
@@ -21,21 +21,27 @@ public class User {
     private final Email email;
     private final String firstName;
     private final String lastName;
+    private VerificationStatus identityStatus;
+    private VerificationProof verificationProof;
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     User(final UserId id,
          final Email email,
          final String firstName,
-         final String lastName) {
+         final String lastName,
+         final VerificationStatus identityStatus,
+         final VerificationProof verificationProof) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.identityStatus = identityStatus;
+        this.verificationProof = verificationProof;
     }
 
     /**
-     * Factory method — creates a new user with UNVERIFIED status and registers
+     * Factory method — creates a new user with PENDING status and registers
      * a {@link UserCreated} domain event to trigger downstream aggregate initialization.
      *
      * @param id        unique identifier (from Keycloak)
@@ -50,9 +56,40 @@ public class User {
             String firstName,
             String lastName
     ) {
-        User user = new User(id, email, firstName, lastName);
+        User user = new User(id, email, firstName, lastName, VerificationStatus.PENDING, null);
         user.domainEvents.add(new UserCreated(id, email, firstName, lastName));
         return user;
+    }
+
+    public void addVerificationProof(VerificationProof proof) {
+        ensureNotVerified();
+        if (proof == null || proof.url() == null || proof.uploadedAt() == null) {
+            throw new EmptyVerificationDataException();
+        }
+        this.verificationProof = proof;
+    }
+
+    public void verify() {
+        ensureNotVerified();
+        if (verificationProof == null || verificationProof.url() == null || verificationProof.url().isBlank()) {
+            throw new EmptyVerificationDataException();
+        }
+        this.identityStatus = VerificationStatus.VERIFIED;
+    }
+
+    public void reject() {
+        ensureNotVerified();
+        this.identityStatus = VerificationStatus.REJECTED;
+    }
+
+    public boolean isVerified() {
+        return identityStatus == VerificationStatus.VERIFIED;
+    }
+
+    private void ensureNotVerified() {
+        if (isVerified()) {
+            throw new AlreadyVerifiedException();
+        }
     }
 
     /**
@@ -81,5 +118,13 @@ public class User {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public VerificationStatus getIdentityStatus() {
+        return identityStatus;
+    }
+
+    public VerificationProof getVerificationProof() {
+        return verificationProof;
     }
 }

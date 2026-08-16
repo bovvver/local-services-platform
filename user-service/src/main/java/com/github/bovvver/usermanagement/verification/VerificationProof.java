@@ -1,4 +1,4 @@
-package com.github.bovvver.verificationmanagement;
+package com.github.bovvver.usermanagement.verification;
 
 import java.time.LocalDateTime;
 
