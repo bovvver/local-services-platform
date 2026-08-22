@@ -2,6 +2,7 @@ package com.github.bovvver.profilemanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.bovvver.BaseIntegrationTest;
+import com.github.bovvver.TestSecurityConfig;
 import com.github.bovvver.usermanagement.User;
 import com.github.bovvver.usermanagement.UserRepository;
 import com.github.bovvver.vo.Email;
@@ -25,6 +26,8 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
 
     private static final String UPDATE_PROFILE_ENDPOINT = "/update/profile";
 
+    private static final UUID TEST_USER_ID = TestSecurityConfig.TEST_USER_ID;
+
     @Autowired
     private ProviderProfileRepository providerProfileRepository;
 
@@ -46,18 +49,17 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
         jdbcTemplate.update("DELETE FROM users");
     }
 
-    @Test
-    void shouldUpdateProfileSuccessfully() throws Exception {
-        UUID userId = UUID.randomUUID();
-        // Create user first to satisfy foreign key constraint
+    private void createTestUser(UUID userId) {
         User user = User.create(UserId.of(userId), new Email("test@example.com"), "John", "Doe");
         userRepository.save(user);
-
-        // Pre-create the provider profile
         providerProfileRepository.save(ProviderProfile.createFor(UserId.of(userId)));
+    }
+
+    @Test
+    void shouldUpdateProfileSuccessfully() throws Exception {
+        createTestUser(TEST_USER_ID);
 
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "Experienced local plumber.",
                 "Warsaw",
                 "PL",
@@ -68,14 +70,13 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(userId.toString()))
+                .andExpect(jsonPath("$.userId").value(TEST_USER_ID.toString()))
                 .andExpect(jsonPath("$.bio").value("Experienced local plumber."))
                 .andExpect(jsonPath("$.city").value("Warsaw"))
                 .andExpect(jsonPath("$.country").value("PL"))
                 .andExpect(jsonPath("$.categories[0]").value("CLEANING"));
 
-        // Verify that database state was updated
-        ProviderProfileEntity updatedEntity = providerProfileReadRepository.findByUserId(userId).orElseThrow();
+        ProviderProfileEntity updatedEntity = providerProfileReadRepository.findByUserId(TEST_USER_ID).orElseThrow();
         assertThat(updatedEntity.getBio()).isEqualTo("Experienced local plumber.");
         assertThat(updatedEntity.getCity()).isEqualTo("Warsaw");
         assertThat(updatedEntity.getCountry()).isEqualTo("PL");
@@ -84,14 +85,9 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldFailWhenBioIsBlank() throws Exception {
-        UUID userId = UUID.randomUUID();
-        User user = User.create(UserId.of(userId), new Email("test@example.com"), "John", "Doe");
-        userRepository.save(user);
-
-        providerProfileRepository.save(ProviderProfile.createFor(UserId.of(userId)));
+        createTestUser(TEST_USER_ID);
 
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "   ", // blank bio
                 "Warsaw",
                 "PL",
@@ -106,14 +102,9 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
 
     @Test
     void shouldFailWhenBioExceedsMaxLength() throws Exception {
-        UUID userId = UUID.randomUUID();
-        User user = User.create(UserId.of(userId), new Email("test@example.com"), "John", "Doe");
-        userRepository.save(user);
-
-        providerProfileRepository.save(ProviderProfile.createFor(UserId.of(userId)));
+        createTestUser(TEST_USER_ID);
 
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "A".repeat(1001), // exceeds 1000 limit
                 "Warsaw",
                 "PL",
@@ -127,9 +118,10 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldFailWhenUserIdIsNull() throws Exception {
+    void shouldFailWhenProfileDoesNotExist() throws Exception {
+        // Do NOT create a user/profile row — CurrentUser will return TEST_USER_ID
+        // but there is no matching profile, so the service throws UserNotFoundException.
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                null,
                 "Bio",
                 "Warsaw",
                 "PL",
@@ -139,6 +131,6 @@ class ProfileModificationRESTIT extends BaseIntegrationTest {
         mockMvc.perform(post(UPDATE_PROFILE_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 }
