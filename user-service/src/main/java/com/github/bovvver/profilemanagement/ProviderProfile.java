@@ -10,8 +10,8 @@ import java.util.Set;
  * ProviderProfile aggregate — business profile of a service provider.
  *
  * <p>Always references a {@link UserId} but never holds a direct reference to the
- * {@code User} aggregate. Exactly one profile exists per user and is created
- * automatically after the {@code UserCreated} event is processed.</p>
+ * {@code User} aggregate. Exactly one profile exists per user, created atomically
+ * alongside the user during registration.</p>
  */
 public class ProviderProfile {
 
@@ -38,7 +38,7 @@ public class ProviderProfile {
 
     /**
      * Factory — creates a blank profile for the given user.
-     * Called when a {@code UserCreated} event is consumed.
+     * Called directly from the registration facade inside the user creation transaction.
      *
      * @param userId the owning user's identifier
      * @return a newly created, empty {@code ProviderProfile}

@@ -372,6 +372,330 @@
             "description": "Updates the profile details (bio, city, country, service categories) of the service provider.\n\nRequires JWT token.\n\nFields:\n- userId (UUID, required)\n- bio (String, max 1000)\n- city (String, max 100)\n- country (String, 2-character ISO code)\n- categories (List of ServiceCategory strings)\n\nExpected: HTTP 200 with updated profile data."
           },
           "response": []
+        },
+        {
+          "name": "Update Profile – clear all optional fields",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"bio\": null,\n  \"city\": null,\n  \"country\": null,\n  \"categories\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/update/profile",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "update", "profile"]
+            },
+            "description": "Clears all optional profile fields. Expected: 200 OK with null bio/city/country and empty categories."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile – bio too long (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"bio\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\n  \"city\": \"Warsaw\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/update/profile",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "update", "profile"]
+            },
+            "description": "Bio field exceeds 1000 characters. Expected: 400 Bad Request – 'Bio cannot exceed 1000 characters'."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile – country code not 2 chars (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"country\": \"POL\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/update/profile",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "update", "profile"]
+            },
+            "description": "Country code has 3 characters instead of 2. Expected: 400 Bad Request – 'Country code must be 2 characters'."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile – unknown userId (404)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000000\",\n  \"bio\": \"test\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/update/profile",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "update", "profile"]
+            },
+            "description": "UserId does not exist in the database. Expected: 404 Not Found."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile – null userId (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": null,\n  \"bio\": \"test\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/update/profile",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "update", "profile"]
+            },
+            "description": "UserId is null. Expected: 400 Bad Request (@NotNull violation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User – invalid email (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Keycloak-API-Key", "value": "{{keycloak_api_key}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keycloakUserId\": \"550e8400-e29b-41d4-a716-446655440099\",\n  \"email\": \"not-an-email\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/keycloak/auth/create",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "keycloak", "auth", "create"]
+            },
+            "description": "Email is not a valid email address. Expected: 400 Bad Request. No rows created in DB."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User – null userId (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Keycloak-API-Key", "value": "{{keycloak_api_key}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keycloakUserId\": null,\n  \"email\": \"john@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/keycloak/auth/create",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "keycloak", "auth", "create"]
+            },
+            "description": "Keycloak userId is null. Expected: 400 Bad Request. No rows created in DB."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Get Upload URL – already verified (409)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"id-card.png\",\n  \"contentType\": \"image/png\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/presigned-upload",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "presigned-upload"]
+            },
+            "description": "Pre-condition: the JWT user must already be VERIFIED (identity_status = VERIFIED in DB).\nExpected: 409 Conflict (AlreadyVerifiedException)."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Get Upload URL – invalid MIME type (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"passport.png\",\n  \"contentType\": \"not_a_mime_type\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/presigned-upload",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "presigned-upload"]
+            },
+            "description": "contentType is not a valid MIME type. Expected: 400 Bad Request – 'contentType must be a valid MIME type'."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Get Upload URL – blank fileName (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"\",\n  \"contentType\": \"image/png\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/presigned-upload",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "presigned-upload"]
+            },
+            "description": "fileName is blank. Expected: 400 Bad Request (@NotBlank violation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Submit – empty proofUrls (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proofUrls\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "verify"]
+            },
+            "description": "proofUrls is empty. Expected: 400 Bad Request (@NotEmpty violation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Submit – blank entry in proofUrls (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proofUrls\": [\"\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "verify"]
+            },
+            "description": "proofUrls contains a blank string entry. Expected: 400 Bad Request (@NotBlank violation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Proof – Submit – more than 10 proofUrls (400)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proofUrls\": [\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\",\"h\",\"i\",\"j\",\"k\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "verify"]
+            },
+            "description": "proofUrls has 11 entries (max is 10). Expected: 400 Bad Request (@Size violation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification – Verify User – already verified (409)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify/{{user_id}}",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "verify", "{{user_id}}"]
+            },
+            "description": "Pre-condition: user is already VERIFIED.\nExpected: 409 Conflict (AlreadyVerifiedException).\nRequires VERIFIER role."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification – Verify User – unknown userId (404)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/verify/00000000-0000-0000-0000-000000000000",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "verify", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "UserId does not exist. Expected: 404 Not Found.\nRequires VERIFIER role."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification – Reject User – already verified (409)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/reject/{{user_id}}",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "reject", "{{user_id}}"]
+            },
+            "description": "Pre-condition: user is already VERIFIED.\nExpected: 409 Conflict (AlreadyVerifiedException).\nRequires VERIFIER role."
+          },
+          "response": []
+        },
+        {
+          "name": "Verification – Reject User – unknown userId (404)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/user-service/files/reject/00000000-0000-0000-0000-000000000000",
+              "host": ["{{gateway_url}}"],
+              "path": ["user-service", "files", "reject", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "UserId does not exist. Expected: 404 Not Found.\nRequires VERIFIER role."
+          },
+          "response": []
         }
       ],
       "description": "User Service endpoints (port 8080). Path via gateway: /user-service/..."
