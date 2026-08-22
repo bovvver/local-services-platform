@@ -1,16 +1,11 @@
 package com.github.bovvver.usermanagement;
 
-import com.github.bovvver.event.DomainEvent;
 import com.github.bovvver.infrastructure.AlreadyVerifiedException;
 import com.github.bovvver.infrastructure.EmptyVerificationDataException;
-import com.github.bovvver.usermanagement.keycloakusercreation.UserCreated;
 import com.github.bovvver.usermanagement.verification.VerificationProof;
 import com.github.bovvver.vo.Email;
 import com.github.bovvver.vo.UserId;
 import com.github.bovvver.vo.VerificationStatus;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User aggregate — responsible for identity, account lifecycle, and verification status.
@@ -23,8 +18,6 @@ public class User {
     private final String lastName;
     private VerificationStatus identityStatus;
     private VerificationProof verificationProof;
-
-    private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     User(final UserId id,
          final Email email,
@@ -41,14 +34,13 @@ public class User {
     }
 
     /**
-     * Factory method — creates a new user with PENDING status and registers
-     * a {@link UserCreated} domain event to trigger downstream aggregate initialization.
+     * Factory method — creates a new user with PENDING status
      *
      * @param id        unique identifier (from Keycloak)
      * @param email     validated email address
      * @param firstName first name
      * @param lastName  last name
-     * @return newly constructed {@code User} with a pending domain event
+     * @return newly constructed {@code User}
      */
     public static User create(
             UserId id,
@@ -56,9 +48,7 @@ public class User {
             String firstName,
             String lastName
     ) {
-        User user = new User(id, email, firstName, lastName, VerificationStatus.PENDING, null);
-        user.domainEvents.add(new UserCreated(id, email, firstName, lastName));
-        return user;
+        return new User(id, email, firstName, lastName, VerificationStatus.PENDING, null);
     }
 
     public void addVerificationProof(VerificationProof proof) {
@@ -90,18 +80,6 @@ public class User {
         if (isVerified()) {
             throw new AlreadyVerifiedException();
         }
-    }
-
-    /**
-     * Drains and returns all pending domain events. Called by the facade after
-     * persisting the aggregate so events can be published via {@link com.github.bovvver.event.DomainEventPublisher}.
-     *
-     * @return snapshot of pending events; list is cleared after call
-     */
-    public List<DomainEvent> pullDomainEvents() {
-        List<DomainEvent> events = List.copyOf(domainEvents);
-        domainEvents.clear();
-        return events;
     }
 
     public UserId getId() {

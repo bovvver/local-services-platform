@@ -3,7 +3,8 @@
 -- =============================================================================
 -- Drops legacy element-collection tables and columns from V1.
 -- Creates new aggregate tables: provider_profiles, provider_categories,
--- verification_requests, reputation, badges, experience_snapshot.
+-- verification_requests (superseded by V3), reputation, badges, experience_snapshot
+-- (superseded by V6).
 -- =============================================================================
 
 -- ── 1. Drop legacy element-collection tables (no longer needed) ──────────────

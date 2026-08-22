@@ -1,6 +1,9 @@
 package com.github.bovvver.usermanagement.keycloakusercreation;
 
-import com.github.bovvver.event.DomainEventPublisher;
+import com.github.bovvver.profilemanagement.ProviderProfile;
+import com.github.bovvver.profilemanagement.ProviderProfileRepository;
+import com.github.bovvver.reputationmanagement.Reputation;
+import com.github.bovvver.reputationmanagement.ReputationRepository;
 import com.github.bovvver.usermanagement.User;
 import com.github.bovvver.usermanagement.UserRepository;
 import com.github.bovvver.vo.Email;
@@ -27,7 +30,10 @@ class UserManagementFacadeTest {
     private UserRepository userRepository;
 
     @Mock
-    private DomainEventPublisher domainEventPublisher;
+    private ProviderProfileRepository providerProfileRepository;
+
+    @Mock
+    private ReputationRepository reputationRepository;
 
     @InjectMocks
     private UserManagementFacade userManagementFacade;
@@ -43,6 +49,8 @@ class UserManagementFacadeTest {
         );
 
         when(userRepository.save(any(User.class))).thenReturn(user);
+        when(providerProfileRepository.save(any(ProviderProfile.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(reputationRepository.save(any(Reputation.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User result = userManagementFacade.createUserFromKeycloak(command);
 
@@ -52,7 +60,8 @@ class UserManagementFacadeTest {
         assertThat(result.getFirstName()).isEqualTo("John");
         assertThat(result.getLastName()).isEqualTo("Doe");
         verify(userRepository).save(any(User.class));
-        verify(domainEventPublisher).publish(anyList());
+        verify(providerProfileRepository).save(any(ProviderProfile.class));
+        verify(reputationRepository).save(any(Reputation.class));
     }
 
     @Test
@@ -66,7 +75,6 @@ class UserManagementFacadeTest {
 
         assertThrows(IllegalArgumentException.class, () -> userManagementFacade.createUserFromKeycloak(command));
         verifyNoInteractions(userRepository);
-        verifyNoInteractions(domainEventPublisher);
     }
 
     @Test
@@ -80,6 +88,5 @@ class UserManagementFacadeTest {
 
         assertThrows(IllegalArgumentException.class, () -> userManagementFacade.createUserFromKeycloak(command));
         verifyNoInteractions(userRepository);
-        verifyNoInteractions(domainEventPublisher);
     }
 }
