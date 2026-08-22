@@ -1,7 +1,9 @@
 package com.github.bovvver.profilemanagement;
 
 import com.github.bovvver.infrastructure.UserNotFoundException;
+import com.github.bovvver.shared.CurrentUser;
 import com.github.bovvver.vo.ServiceCategory;
+import com.github.bovvver.vo.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +23,9 @@ import static org.mockito.Mockito.*;
 class ProfileModificationServiceTest {
 
     @Mock
+    private CurrentUser currentUser;
+
+    @Mock
     private ProviderProfileReadRepository providerProfileReadRepository;
 
     @Mock
@@ -32,8 +37,9 @@ class ProfileModificationServiceTest {
     @Test
     void shouldUpdateProfileSuccessfully() {
         UUID userId = UUID.randomUUID();
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "Experienced local plumber.",
                 "Warsaw",
                 "PL",
@@ -66,8 +72,9 @@ class ProfileModificationServiceTest {
     @Test
     void shouldThrowExceptionWhenProfileNotFound() {
         UUID userId = UUID.randomUUID();
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "Bio",
                 "Warsaw",
                 "PL",
@@ -86,8 +93,9 @@ class ProfileModificationServiceTest {
     @Test
     void shouldThrowExceptionWhenBioIsBlank() {
         UUID userId = UUID.randomUUID();
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "   ",
                 "Warsaw",
                 "PL",
@@ -115,8 +123,9 @@ class ProfileModificationServiceTest {
     @Test
     void shouldThrowExceptionWhenBioExceedsMaxLength() {
         UUID userId = UUID.randomUUID();
+        when(currentUser.getId()).thenReturn(UserId.of(userId));
+
         ProfileUpdateRequest request = new ProfileUpdateRequest(
-                userId,
                 "A".repeat(1001),
                 "Warsaw",
                 "PL",
